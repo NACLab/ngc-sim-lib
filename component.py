@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import warnings
-from core import utils
+import utils
 
 
 class _VerboseDict(dict):

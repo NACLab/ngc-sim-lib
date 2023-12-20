@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from core.utils import check_attributes
+from utils import check_attributes
 
 class Step(ABC):
     def __init__(self, *args, required_calls=None, **kwargs):

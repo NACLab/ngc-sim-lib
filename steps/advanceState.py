@@ -1,4 +1,4 @@
-from core.steps.step import Step
+from steps.step import Step
 
 
 class AdvanceState(Step):

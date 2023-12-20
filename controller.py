@@ -1,4 +1,4 @@
-from core.utils import load_attribute, check_attributes
+from utils import load_attribute, check_attributes
 import json
 
 

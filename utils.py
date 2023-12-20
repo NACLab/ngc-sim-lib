@@ -63,11 +63,11 @@ def load_attribute(attribute_name, module_path=None, match_case=False, absolute_
 
 
 ###### Preload Modules
-def preload():
+def preload(module_path):
     import json
     from types import SimpleNamespace
 
-    with open('json_files/preloaded_modules.json', 'r') as file:
+    with open(module_path, 'r') as file:
         modules = json.load(file, object_hook=lambda d: SimpleNamespace(**d))
 
     for module in modules:
@@ -81,5 +81,3 @@ def preload():
             if hasattr(attribute, "keywords"):
                 for keyword in attribute.keywords:
                     _Loaded_Attributes[keyword] = atr
-
-preload()
