@@ -43,6 +43,18 @@ def load_module(module_path, match_case=False, absolute_path=False):
     _Loaded_Modules[module_path] = mod
     return mod
 
+def load_from_path(path, absolute_path=False, match_case=False):
+    if absolute_path is True:
+        module_name = '.'.join(path.split('.')[:-1])
+        class_name = path.split('.')[-1]
+        match_case = True
+    else:
+        module_name = path
+        class_name = path
+
+    return load_attribute(module_path=module_name, attribute_name=class_name,
+                          match_case=match_case, absolute_path=absolute_path)
+
 
 def load_attribute(attribute_name, module_path=None, match_case=False, absolute_path=False):
     if attribute_name in _Loaded_Attributes.keys():

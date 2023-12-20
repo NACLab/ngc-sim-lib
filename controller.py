@@ -1,6 +1,5 @@
-from utils import load_attribute, check_attributes
-import json
-
+from utils import load_attribute, check_attributes, load_from_path
+import json, uuid
 
 class Controller:
     def __init__(self):
@@ -11,10 +10,6 @@ class Controller:
     def runCycle(self, **kwargs):
         for step in self.steps:
             step(**kwargs)
-
-    def add_component(self, component):
-        check_attributes(component, ["name", "verify_connections"], fatal=True)
-        self.components[component.name] = component
 
     def verify_cycle(self):
         for component in self.components.keys():
@@ -31,20 +26,21 @@ class Controller:
             for cable in cables:
                 self.connect(**cable)
 
-    def add_step(self, step_type, *args, match_case=False, absolute_path=False, **kwargs):
-        if absolute_path is True:
-            module_name = '.'.join(step_type.split('.')[:-1])
-            class_name = step_type.split('.')[-1]
-            match_case = True
-        else:
-            module_name = step_type
-            class_name = step_type
-
-        Step = load_attribute(module_path=module_name, attribute_name=class_name,
-                              match_case=match_case, absolute_path=absolute_path)
-
+    def add_step(self, step_type, *args, match_case=False, absolute_path=False, components=None, **kwargs):
+        Step = load_from_path(path=step_type, match_case=match_case, absolute_path=absolute_path)
         if not callable(Step):
             raise RuntimeError("The object named \"" + Step.__name__ + "\" is not callable. Please make sure "
                                                                        "the object is callable and returns a "
                                                                        "callable object")
-        self.steps.append(Step(*args, **kwargs))
+        if components is not None:
+            components = [self.components[name] for name in components]
+        self.steps.append(Step(*components, *args, **kwargs))
+
+    def add_component(self, component_type, *args, match_case=False, absolute_path=False, **kwargs):
+        Component_class = load_from_path(path=component_type, match_case=match_case, absolute_path=absolute_path)
+
+        component = Component_class(*args, **kwargs)
+        check_attributes(component, ["name", "verify_connections"], fatal=True)
+        self.components[component.name] = component
+
+
