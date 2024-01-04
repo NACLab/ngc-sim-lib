@@ -17,7 +17,7 @@ class _VerboseDict(dict):
     def __setitem__(self, key, value):
         if self.check_set and key not in self.keys():
             warnings.warn("Adding key \"" + str(key) + "\" to " + self.name,
-                          stacklevel=4)  # DEBUGGING.stack_level_warning)
+                          stacklevel=6)  # DEBUGGING.stack_level_warning)
         super().__setitem__(key, value)
 
     def __getitem__(self, item):

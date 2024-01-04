@@ -26,6 +26,18 @@ class Controller:
             for cable in cables:
                 self.connect(**cable)
 
+    def make_components(self, path_to_components_file):
+        with open(path_to_components_file, 'r') as file:
+            components = json.load(file)
+            for component in components:
+                self.add_component(**component)
+
+    def make_steps(self, path_to_steps_file):
+        with open(path_to_steps_file, 'r') as file:
+            steps = json.load(file)
+            for step in steps:
+                self.add_step(**step)
+
     def add_step(self, step_type, *args, match_case=False, absolute_path=False, components=None, **kwargs):
         Step = load_from_path(path=step_type, match_case=match_case, absolute_path=absolute_path)
         if not callable(Step):

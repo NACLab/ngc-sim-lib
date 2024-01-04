@@ -13,7 +13,6 @@ def check_attributes(obj, required, fatal=False):
             if not fatal:
                 return False
             raise AttributeError(str(obj.name) + " is missing the required attribute of " + atr)
-
     return True
 
 
@@ -93,3 +92,5 @@ def preload(module_path):
             if hasattr(attribute, "keywords"):
                 for keyword in attribute.keywords:
                     _Loaded_Attributes[keyword] = atr
+
+# preload(module_path="json_files/preloaded_modules.json")
