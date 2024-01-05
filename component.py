@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import warnings
-import utils
+import NGC_Learn_Core.utils as utils
 
 
 class _VerboseDict(dict):
@@ -64,11 +64,11 @@ class _ComponentMetaData:
 
 
 class Component(ABC):
-    def __init__(self, name):
+    def __init__(self, name, useVerboseDict=False, **kwargs):
         # Component Data
         self.name = name
 
-        self.compartments = _VerboseDict(name=self.name)
+        self.compartments = _VerboseDict(name=self.name) if useVerboseDict else {}
         self.bundle_rules = {}
         self.sources = []
 
@@ -105,7 +105,6 @@ class Component(ABC):
         self.pre_gather()
         for val, dest_comp, bundle in self.process_incoming():
             self.bundle_rules[bundle](self, val, dest_comp)
-
 
     ##Abstract Methods
     @abstractmethod

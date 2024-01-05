@@ -1,5 +1,5 @@
-from steps.step import Step
-
+from NGC_Learn_Core.steps.step import Step
+import warnings
 
 class Reset(Step):
     def __init__(self, *args, reset_name=None, **kwargs):
@@ -13,5 +13,7 @@ class Reset(Step):
         if should_reset:
             for component in self.components:
                 self.components[component].reset()
+        else:
+            warnings.warn("Reset, " + str(self.reset_name) + " is missing from cycle keywords", stacklevel=6)
 
 

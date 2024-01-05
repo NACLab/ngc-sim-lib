@@ -1,4 +1,4 @@
-from utils import load_attribute, check_attributes, load_from_path
+from NGC_Learn_Core.utils import load_attribute, check_attributes, load_from_path
 import json, uuid
 
 class Controller:
@@ -54,5 +54,4 @@ class Controller:
         component = Component_class(*args, **kwargs)
         check_attributes(component, ["name", "verify_connections"], fatal=True)
         self.components[component.name] = component
-
-
+        return component

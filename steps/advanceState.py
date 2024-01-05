@@ -1,4 +1,4 @@
-from steps.step import Step
+from NGC_Learn_Core.steps.step import Step
 
 
 class AdvanceState(Step):
@@ -8,4 +8,4 @@ class AdvanceState(Step):
     def __call__(self, **kwargs):
         for component in self.components:
             self.components[component].gather()
-            self.components[component].advance_state()
+            self.components[component].advance_state(**kwargs)
