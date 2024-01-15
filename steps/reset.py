@@ -9,11 +9,12 @@ class Reset(Step):
         self.reset_name = reset_name
 
     def __call__(self, *args, **kwargs):
-        should_reset = kwargs.get(self.reset_name, False)
+        should_reset = kwargs.get(self.reset_name, None)
         if should_reset:
             for component in self.components:
                 self.components[component].reset()
-        else:
+
+        if should_reset is None:
             warnings.warn("Reset, " + str(self.reset_name) + " is missing from cycle keywords", stacklevel=6)
 
 
