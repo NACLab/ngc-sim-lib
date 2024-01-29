@@ -88,9 +88,10 @@ def preload(module_path):
         for attribute in module.attributes:
             atr = getattr(mod, attribute.name)
             _Loaded_Attributes[attribute.name] = atr
+
             _Loaded_Attributes[".".join([module.absolute_path, attribute.name])] = atr
             if hasattr(attribute, "keywords"):
                 for keyword in attribute.keywords:
                     _Loaded_Attributes[keyword] = atr
 
-# preload(module_path="json_files/preloaded_modules.json")
+preload(module_path="json_files/preloaded_modules.json")

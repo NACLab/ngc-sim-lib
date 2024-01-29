@@ -13,7 +13,6 @@ class Reset(Step):
         if should_reset:
             for component in self.components:
                 self.components[component].reset()
-
         if should_reset is None:
             warnings.warn("Reset, " + str(self.reset_name) + " is missing from cycle keywords", stacklevel=6)
 

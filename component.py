@@ -118,3 +118,7 @@ class Component(ABC):
     @abstractmethod
     def reset(self, **kwargs):
         pass
+
+    @abstractmethod
+    def save(self, directory, **kwargs):
+        pass
