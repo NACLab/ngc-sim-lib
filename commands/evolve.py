@@ -1,9 +1,9 @@
-from NGC_Learn_Core.steps.step import Step
+from NGC_Learn_Core.commands import Command
 
 
-class Evolve(Step):
+class Evolve(Command):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, required_calls=['evolve'], **kwargs)
+        super().__init__(*args, required_calls=['evolve'])
 
     def __call__(self, frozen=False, *args, **kwargs):
         if not frozen:

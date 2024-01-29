@@ -3,20 +3,13 @@
   description: "A list of all steps of the cycle",
   type: "array",
   items: {
-    description: "The one required value for creating a step, and then all other keyword arguments needed for to build the step",
+    description: "The command name being run",
     type: "object",
-    required: ["step_type"],
+    required: ["command_name"],
     properties: {
-      step_type: {
+      command_name: {
         type: "string"
-      },
-      components: {
-        type: "array",
-        items: {
-          description: "The names of the components needed",
-          type: "string"
-        }
-      },
+      }
     }
   }
 }

@@ -16,9 +16,12 @@ class Controller:
             "connections": []
         }
 
+    def __getitem__(self, item):
+        return self.__getattribute__(item)
+
     def runCycle(self, **kwargs):
         for step in self.steps:
-            step(**kwargs)
+            self[step](**kwargs)
 
     def verify_cycle(self):
         for component in self.components.keys():
@@ -60,22 +63,11 @@ class Controller:
             for command in commands:
                 self.add_command(**command)
 
-    def add_step(self, step_type, match_case=False, absolute_path=False, components=None, **kwargs):
-        Step = load_from_path(path=step_type, match_case=match_case, absolute_path=absolute_path)
-        if not callable(Step):
-            raise RuntimeError("The object named \"" + Step.__name__ + "\" is not callable. Please make sure "
-                                                                       "the object is callable and returns a "
-                                                                       "callable object")
-        componentObjs = None
-        if components is not None:
-            componentObjs = [self.components[name] for name in components]
-        self.steps.append(Step(*componentObjs, **kwargs))
-
-        self._json_objects['steps'].append({"step_type": step_type,
-                                            "match_case": match_case,
-                                            "absolute_path": absolute_path,
-                                            "components": components,
-                                            } | kwargs)
+    def add_step(self, command_name):
+        if command_name not in self.commands.keys():
+            raise RuntimeError(str(command_name) + " is not a registered command")
+        self.steps.append(command_name)
+        self._json_objects['steps'].append({"command_name": command_name})
 
     def add_component(self, component_type, match_case=False, absolute_path=False, **kwargs):
         Component_class = load_from_path(path=component_type, match_case=match_case, absolute_path=absolute_path)
@@ -111,6 +103,7 @@ class Controller:
 
         command = Command_class(*componentObjs, **kwargs)
         self.commands[command_name] = command
+        self.__setattr__(command_name, command)
         self._json_objects['commands'].append({"command_type": command_type,
                                             "command_name": command_name,
                                             "match_case": match_case,
@@ -137,6 +130,7 @@ class Controller:
 
         path = directory + "/" + str(model_name)
         os.mkdir(path)
+        os.mkdir(path + "/custom")
 
         with open(path + "/commands.json", 'w') as fp:
             json.dump(self._json_objects['commands'], fp, indent=4)
@@ -150,10 +144,10 @@ class Controller:
         with open(path + "/connections.json", 'w') as fp:
             json.dump(self._json_objects['connections'], fp, indent=4)
 
-        return path
+        return path, path + "/custom"
 
     def load_from_dir(self, directory):
-        self.make_components(directory + "/components.json", directory + "/matrices")
+        self.make_components(directory + "/components.json", directory + "/custom")
         self.make_connections(directory + "/connections.json")
-        self.make_steps(directory + "/steps.json")
         self.make_commands(directory + "/commands.json")
+        self.make_steps(directory + "/steps.json")
