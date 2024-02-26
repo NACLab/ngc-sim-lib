@@ -1,6 +1,7 @@
-from NGC_Learn_Core.utils import load_attribute, check_attributes, load_from_path
-import json, uuid, os
+import warnings
 
+from NGC_Learn_Core.utils import load_attribute, check_attributes, load_from_path, make_unique_path
+import json, uuid, os
 
 class Controller:
     def __init__(self):
@@ -119,17 +120,7 @@ class Controller:
         command(*args, **kwargs)
 
     def save_to_json(self, directory, model_name=None):
-        uid = uuid.uuid4()
-        if model_name is None:
-            print("Model will be saved to generated name \"" + str(uid) + "\"")
-            model_name = uid
-
-        elif os.path.isdir(directory + "/" + model_name):
-            print("Model already exists, current model will be saved to generated name \"" + str(uid) + "\"")
-            model_name = uid
-
-        path = directory + "/" + str(model_name)
-        os.mkdir(path)
+        path = make_unique_path(directory, model_name)
         os.mkdir(path + "/custom")
 
         with open(path + "/commands.json", 'w') as fp:
@@ -143,6 +134,11 @@ class Controller:
 
         with open(path + "/connections.json", 'w') as fp:
             json.dump(self._json_objects['connections'], fp, indent=4)
+
+        if check_attributes(self, ['save']):
+            self.save(path + "/custom")
+        else:
+            warnings.warn("Controller doesn't have a save command registered. No custom saving happened")
 
         return path, path + "/custom"
 

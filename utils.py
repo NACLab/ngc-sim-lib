@@ -1,4 +1,4 @@
-import sys
+import sys, uuid, os
 from importlib import import_module
 
 _Loaded_Attributes = {}
@@ -72,6 +72,26 @@ def load_attribute(attribute_name, module_path=None, match_case=False, absolute_
     _Loaded_Attributes[attribute_name] = attr
     return attr
 
+def make_unique_path(directory, root_name=None):
+    """
+    This block of code will make a uniquely named directory inside the specified output folder.
+    If the root name already exists it will append a UID to the root name to not overwrite data
+    :param directory: The root directory to save models to
+    :param root_name: (Default None) The root name for the model to be saved to, if none it will just use the UID
+    :return: path to created directory
+    """
+    uid = uuid.uuid4()
+    if root_name is None:
+        root_name = str(uid)
+        print("generated path will be named \"" + str(root_name) + "\"")
+
+    elif os.path.isdir(directory + "/" + root_name):
+        root_name += "_" + str(uid)
+        print("root path already exists, generated path will be named \"" + str(root_name) + "\"")
+
+    path = directory + "/" + str(root_name)
+    os.mkdir(path)
+    return path
 
 ###### Preload Modules
 def preload(module_path):
@@ -93,5 +113,6 @@ def preload(module_path):
             if hasattr(attribute, "keywords"):
                 for keyword in attribute.keywords:
                     _Loaded_Attributes[keyword] = atr
+
 
 preload(module_path="json_files/preloaded_modules.json")
