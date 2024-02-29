@@ -10,18 +10,16 @@ class Reset(Command):
 
     def __call__(self, *args, **kwargs):
         if self.reset_name in kwargs.keys():
-            val = kwargs.get(self.reset_name, None)
+            flag_val = kwargs.get(self.reset_name, None)
         elif len(args) > 0:
-            val = args[0]
+            flag_val = args[0]
         else:
-            val = None
+            flag_val = None
 
-        if val:
+        if flag_val: # flag should be True to trigger this
             for component in self.components:
                 self.components[component].reset()
 
-        elif val is None:
+        elif flag_val is None:
             warnings.warn("Reset, " + str(self.reset_name) + " is missing from keyword arguments and no "
                                                              "positional arguments were provided", stacklevel=6)
-
-
