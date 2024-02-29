@@ -130,6 +130,13 @@ class Controller:
             json.dump(self._json_objects['steps'], fp, indent=4)
 
         with open(path + "/components.json", 'w') as fp:
+            ####################################################################
+            ## remove any JAX keys from dictionary as they are not serializable
+            for i in range(len(self._json_objects['components'])):
+                if self._json_objects['components'][i].get("key") != None:
+                    del self._json_objects['components'][i]["key"]
+            #print(self._json_objects['components'])
+            ####################################################################
             json.dump(self._json_objects['components'], fp, indent=4)
 
         with open(path + "/connections.json", 'w') as fp:
