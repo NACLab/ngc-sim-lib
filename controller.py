@@ -1,7 +1,8 @@
 import warnings
 
-from NGC_Learn_Core.utils import load_attribute, check_attributes, load_from_path, make_unique_path
+from NGC_Learn_Core.utils import load_attribute, check_attributes, load_from_path, make_unique_path, check_serializable
 import json, uuid, os
+
 
 class Controller:
     def __init__(self):
@@ -84,10 +85,13 @@ class Controller:
         check_attributes(component, ["name", "verify_connections"], fatal=True)
         self.components[component.name] = component
 
-        self._json_objects['components'].append({"component_type": component_type,
-                                                 "match_case": match_case,
-                                                 "absolute_path": absolute_path,
-                                                 } | kwargs)
+        obj = {"component_type": component_type, "match_case": match_case, "absolute_path": absolute_path} | kwargs
+        bad_keys = check_serializable(obj)
+        for key in bad_keys:
+            del obj[key]
+            print("Failed to serialize \"" + str(key) + "\" in " + component.name)
+
+        self._json_objects['components'].append(obj)
 
         return component
 
@@ -97,7 +101,7 @@ class Controller:
         if not callable(Command_class):
             raise RuntimeError("The object named \"" + Command_class.__name__ + "\" is not callable. Please make sure "
                                                                                 "the object is callable and returns a "
-                                                                                  "callable object")
+                                                                                "callable object")
         if components is not None:
             componentObjs = [self.components[name] for name in components]
         else:
@@ -106,12 +110,15 @@ class Controller:
         command = Command_class(*componentObjs, controller=self, command_name=command_name, **kwargs)
         self.commands[command_name] = command
         self.__setattr__(command_name, command)
-        self._json_objects['commands'].append({"command_type": command_type,
-                                            "command_name": command_name,
-                                            "match_case": match_case,
-                                            "absolute_path": absolute_path,
-                                            "components": components,
-                                            } | kwargs)
+
+        obj = {"command_type": command_type, "command_name": command_name, "match_case": match_case,
+               "absolute_path": absolute_path, "components": components} | kwargs
+        bad_keys = check_serializable(obj)
+        for key in bad_keys:
+            del obj[key]
+            print("Failed to serialize \"" + str(key) + "\" in " + command_name)
+
+        self._json_objects['commands'].append(obj)
         return command
 
     def runCommand(self, command_name, *args, **kwargs):
@@ -131,13 +138,13 @@ class Controller:
             json.dump(self._json_objects['steps'], fp, indent=4)
 
         with open(path + "/components.json", 'w') as fp:
-            ####################################################################
-            ## remove any JAX keys from dictionary as they are not serializable
-            for i in range(len(self._json_objects['components'])):
-                if self._json_objects['components'][i].get("key") != None:
-                    del self._json_objects['components'][i]["key"]
-            #print(self._json_objects['components'])
-            ####################################################################
+            # ####################################################################
+            # ## remove any JAX keys from dictionary as they are not serializable
+            # for i in range(len(self._json_objects['components'])):
+            #     if self._json_objects['components'][i].get("key") != None:
+            #         del self._json_objects['components'][i]["key"]
+            # # print(self._json_objects['components'])
+            # ####################################################################
             json.dump(self._json_objects['components'], fp, indent=4)
 
         with open(path + "/connections.json", 'w') as fp:

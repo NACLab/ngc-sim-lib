@@ -1,6 +1,7 @@
-import sys, uuid, os
+import sys, uuid, os, json, argparse
 import warnings
 from importlib import import_module
+from types import SimpleNamespace
 
 _Loaded_Attributes = {}
 _Loaded_Modules = {}
@@ -97,10 +98,19 @@ def make_unique_path(directory, root_name=None):
     os.mkdir(path)
     return path
 
+def check_serializable(dict):
+    bad_keys = []
+    for key in dict.keys():
+        try:
+            json.dumps(dict[key])
+        except:
+            bad_keys.append(key)
+    return bad_keys
+
+
 ###### Preload Modules
 def preload():
-    import json, os, argparse
-    from types import SimpleNamespace
+
 
     parser = argparse.ArgumentParser(description='Build and run a model using ngclean')
     parser.add_argument("--modules", type=str, help='location of modules.json file')
