@@ -2,7 +2,7 @@ from NGC_Learn_Core.commands.command import Command
 import warnings
 
 class Clamp(Command):
-    def __init__(self, *args, compartment=None, clamp_name=None):
+    def __init__(self, *args, compartment=None, clamp_name=None, **kwargs):
         super().__init__(*args, required_calls=['clamp'])
         if compartment is None:
             raise RuntimeError("A clamp command requires a \'compartment\' to clamp to for construction")

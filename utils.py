@@ -13,7 +13,10 @@ def check_attributes(obj, required, fatal=False):
         if not hasattr(obj, atr):
             if not fatal:
                 return False
-            raise AttributeError(str(obj.name) + " is missing the required attribute of " + atr)
+            if hasattr(obj, "name"):
+                raise AttributeError(str(obj.name) + " is missing the required attribute of " + atr)
+            else:
+                raise AttributeError("Checked object is missing the required attribute of " + atr)
     return True
 
 

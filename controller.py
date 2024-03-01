@@ -24,7 +24,7 @@ class Controller:
         for step in self.steps:
             self[step](**kwargs)
 
-    def verify_cycle(self):
+    def verify_connections(self):
         for component in self.components.keys():
             self.components[component].verify_connections()
 
@@ -98,11 +98,12 @@ class Controller:
             raise RuntimeError("The object named \"" + Command_class.__name__ + "\" is not callable. Please make sure "
                                                                                 "the object is callable and returns a "
                                                                                   "callable object")
-        componentObjs = None
         if components is not None:
             componentObjs = [self.components[name] for name in components]
+        else:
+            componentObjs = []
 
-        command = Command_class(*componentObjs, **kwargs)
+        command = Command_class(*componentObjs, controller=self, command_name=command_name, **kwargs)
         self.commands[command_name] = command
         self.__setattr__(command_name, command)
         self._json_objects['commands'].append({"command_type": command_type,
