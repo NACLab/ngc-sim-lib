@@ -107,7 +107,7 @@ class Controller:
         else:
             componentObjs = []
 
-        command = Command_class(*componentObjs, controller=self, command_name=command_name, **kwargs)
+        command = Command_class(components=componentObjs, controller=self, command_name=command_name, **kwargs)
         self.commands[command_name] = command
         self.__setattr__(command_name, command)
 

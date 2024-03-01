@@ -2,8 +2,8 @@ from NGC_Learn_Core.commands import Command
 
 
 class AdvanceState(Command):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, required_calls=['advance_state', 'gather'])
+    def __init__(self, components=None, **kwargs):
+        super().__init__(components=components, required_calls=['advance_state', 'gather'])
 
     def __call__(self, **kwargs):
         for component in self.components:

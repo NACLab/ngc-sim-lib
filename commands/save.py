@@ -2,8 +2,8 @@ from NGC_Learn_Core.commands import Command
 import warnings
 
 class Save(Command):
-    def __init__(self, *args, directory_flag=None, **kwargs):
-        super().__init__(*args, required_calls=['save'])
+    def __init__(self, components=None, directory_flag=None, **kwargs):
+        super().__init__(components=components, required_calls=['save'])
         if directory_flag is None:
             raise RuntimeError("A model step requires a \'directory_flag\' to bind to for construction")
         self.directory_flag = directory_flag

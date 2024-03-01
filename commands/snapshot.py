@@ -3,12 +3,8 @@ from NGC_Learn_Core.utils import check_attributes
 import warnings
 
 class Snapshot(Command):
-    def __init__(self, *args, attribute=None, **kwargs):
-        super().__init__(*args)
-
-        for component in self.components:
-            check_attributes(self.components[component], [attribute], fatal=True)
-
+    def __init__(self, components=None, attribute=None, **kwargs):
+        super().__init__(components=components, required_calls=[attribute])
         self.attribute = attribute
 
 
@@ -16,6 +12,8 @@ class Snapshot(Command):
         vals = []
         for component in self.components:
             vals.append(getattr(self.components[component], self.attribute))
-        return vals
+
+        return vals if len(vals) > 1 else vals[0]
+
 
 

@@ -2,8 +2,8 @@ from NGC_Learn_Core.commands import Command
 
 
 class Evolve(Command):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, required_calls=['evolve'])
+    def __init__(self, components=None, **kwargs):
+        super().__init__(components=components, required_calls=['evolve'])
 
     def __call__(self, frozen=False, *args, **kwargs):
         if not frozen:

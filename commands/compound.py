@@ -3,8 +3,8 @@ from NGC_Learn_Core.utils import check_attributes
 import warnings
 
 class Compound(Command):
-    def __init__(self, *args, command_name=None, command_list=None, controller=None, **kwargs):
-        super().__init__(*args)
+    def __init__(self, components=None, command_name=None, command_list=None, controller=None, **kwargs):
+        super().__init__(components=components)
         if controller is None:
             raise RuntimeError("The controller is needed to build a compound command (This should be passed in by default)")
         if command_list is None or len(command_list) == 0:

@@ -2,8 +2,8 @@ from NGC_Learn_Core.commands import Command
 import warnings
 
 class Reset(Command):
-    def __init__(self, *args, reset_name=None, **kwargs):
-        super().__init__(*args, required_calls=['reset'])
+    def __init__(self, components=None, reset_name=None, **kwargs):
+        super().__init__(components=components, required_calls=['reset'])
         if reset_name is None:
             raise RuntimeError("A reset command requires a \'reset_name\' to bind to for construction")
         self.reset_name = reset_name

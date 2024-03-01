@@ -2,8 +2,8 @@ from NGC_Learn_Core.commands import Command
 import warnings
 
 class Track(Command):
-    def __init__(self, *args, compartment=None, tracker=None, **kwargs):
-        super().__init__(*args)
+    def __init__(self, components=None, compartment=None, tracker=None, **kwargs):
+        super().__init__(components=components)
         if compartment is None:
             raise RuntimeError("A track command requires a \'compartment\' to clamp to for construction")
         if tracker is None:
