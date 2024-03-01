@@ -1,4 +1,5 @@
 import sys, uuid, os
+import warnings
 from importlib import import_module
 
 _Loaded_Attributes = {}
@@ -94,9 +95,25 @@ def make_unique_path(directory, root_name=None):
     return path
 
 ###### Preload Modules
-def preload(module_path):
-    import json
+def preload():
+    import json, os, argparse
     from types import SimpleNamespace
+
+    parser = argparse.ArgumentParser(description='Build and run a model using ngclean')
+    parser.add_argument("--modules", type=str, help='location of modules.json file')
+
+    args = parser.parse_args()
+    try:
+        module_path = args.modules
+    except:
+        module_path = None
+
+    if module_path is None:
+        module_path = "json_files/modules.json"
+
+    if not os.path.isfile(module_path):
+        warnings.warn("Missing file to preload modules from. Attempted to locate file at \"" + str(module_path) + "\"" )
+        return
 
     with open(module_path, 'r') as file:
         modules = json.load(file, object_hook=lambda d: SimpleNamespace(**d))
@@ -115,4 +132,4 @@ def preload(module_path):
                     _Loaded_Attributes[keyword] = atr
 
 
-preload(module_path="json_files/preloaded_modules.json")
+preload()
