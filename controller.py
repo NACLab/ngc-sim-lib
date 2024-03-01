@@ -95,15 +95,15 @@ class Controller:
 
         return component
 
-    def add_command(self, command_type, command_name, match_case=False, absolute_path=False, components=None,
+    def add_command(self, command_type, command_name, match_case=False, absolute_path=False, component_names=None,
                     **kwargs):
         Command_class = load_from_path(path=command_type, match_case=match_case, absolute_path=absolute_path)
         if not callable(Command_class):
             raise RuntimeError("The object named \"" + Command_class.__name__ + "\" is not callable. Please make sure "
                                                                                 "the object is callable and returns a "
                                                                                 "callable object")
-        if components is not None:
-            componentObjs = [self.components[name] for name in components]
+        if component_names is not None:
+            componentObjs = [self.components[name] for name in component_names]
         else:
             componentObjs = []
 
@@ -112,7 +112,7 @@ class Controller:
         self.__setattr__(command_name, command)
 
         obj = {"command_type": command_type, "command_name": command_name, "match_case": match_case,
-               "absolute_path": absolute_path, "components": components} | kwargs
+               "absolute_path": absolute_path, "component_names": component_names} | kwargs
         bad_keys = check_serializable(obj)
         for key in bad_keys:
             del obj[key]
