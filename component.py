@@ -3,6 +3,7 @@ import warnings
 import NGC_Learn_Core.utils as utils
 
 
+
 class _VerboseDict(dict):
     def __init__(self, seq=None, name=None, **kwargs):
         seq = {} if seq is None else seq
@@ -75,7 +76,6 @@ class Component(ABC):
         # Meta Data
         self.metadata = _ComponentMetaData(name=self.name)
 
-        self.create_bundle(None, 'overwrite')
     ##Intialization Methods
 
     def create_outgoing_connection(self, source_compartment):
@@ -84,11 +84,21 @@ class Component(ABC):
 
     def create_incoming_connection(self, source, target_compartment, bundle=None):
         self.metadata.add_incoming_connection(target_compartment)
+        if bundle not in self.bundle_rules.keys():
+            self.create_bundle(bundle, bundle)
         self.sources.append((source, target_compartment, bundle))
 
     def create_bundle(self, bundle_name, bundle_rule_name):
-        rule = utils.load_attribute(bundle_rule_name)
-        self.bundle_rules[bundle_name] = rule
+        if bundle_name is not None:
+            rule = utils.load_attribute(bundle_rule_name)
+            self.bundle_rules[bundle_name] = rule
+        else:
+            try:
+                rule = utils.load_attribute(bundle_rule_name)
+            except:
+                from .bundle_rules import overwrite
+                rule = overwrite
+            self.bundle_rules[bundle_name] = rule
 
     ## Runtime Methods
     def clamp(self, compartment, value):
