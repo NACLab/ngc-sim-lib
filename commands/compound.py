@@ -1,5 +1,5 @@
-from NGC_Learn_Core.commands import Command
-from NGC_Learn_Core.utils import check_attributes
+from ngclib.commands import Command
+from ngclib.utils import check_attributes
 import warnings
 
 class Compound(Command):

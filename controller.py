@@ -1,6 +1,6 @@
 import warnings
 
-from NGC_Learn_Core.utils import load_attribute, check_attributes, load_from_path, make_unique_path, check_serializable
+from ngclib.utils import load_attribute, check_attributes, load_from_path, make_unique_path, check_serializable
 import json, uuid, os
 
 

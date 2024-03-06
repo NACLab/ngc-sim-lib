@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import warnings
-import NGC_Learn_Core.utils as utils
+import ngclib.utils as utils
 
 
 class _VerboseDict(dict):

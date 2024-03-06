@@ -1,4 +1,4 @@
-from NGC_Learn_Core.commands import Command
+from ngclib.commands import Command
 import warnings
 
 class Track(Command):

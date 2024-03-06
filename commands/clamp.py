@@ -1,4 +1,4 @@
-from NGC_Learn_Core.commands.command import Command
+from ngclib.commands.command import Command
 import warnings
 
 class Clamp(Command):
