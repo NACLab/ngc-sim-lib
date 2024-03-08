@@ -6,7 +6,7 @@ the controller tries to load a component or command class it will be unable to f
 file in the `json_schemes` folder for more details on how to create the modules.json file.
 """
 import sys, uuid, os, json
-
+from importlib import import_module
 
 ## Globally tracking all the modules, and attributes have been dnamically loaded
 _Loaded_Attributes = {}

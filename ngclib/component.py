@@ -211,7 +211,7 @@ class Component(ABC):
     @abstractmethod
     def verify_connections(self):
         """
-        An abstract method that generally uses component metadata to verify that there are the correct nuber of
+        An abstract method that generally uses component metadata to verify that there are the correct number of
         connections. This should error if it fails the verification.
         """
         pass
