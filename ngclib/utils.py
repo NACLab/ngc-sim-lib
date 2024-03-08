@@ -6,9 +6,11 @@ the controller tries to load a component or command class it will be unable to f
 file in the `json_schemes` folder for more details on how to create the modules.json file.
 """
 import sys, uuid, os, json, argparse
+from sys import argv
 import warnings
 from importlib import import_module
 from types import SimpleNamespace
+from pathlib import Path
 
 ## Globally tracking all the modules, and attributes have been dnamically loaded
 _Loaded_Attributes = {}
@@ -176,5 +178,5 @@ def preload():
                 for keyword in attribute.keywords:
                     _Loaded_Attributes[keyword] = atr
 
-
-preload()
+if not Path(argv[0]).name == "sphinx-build" or Path(argv[0]).name == "build.py":
+    preload()
