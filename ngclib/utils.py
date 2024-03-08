@@ -5,12 +5,8 @@ or passed as --modules="json_files/modules.json") to load all the modules for dy
 the controller tries to load a component or command class it will be unable to find it. Please see the `modules.schema`
 file in the `json_schemes` folder for more details on how to create the modules.json file.
 """
-import sys, uuid, os, json, argparse
-from sys import argv
-import warnings
-from importlib import import_module
-from types import SimpleNamespace
-from pathlib import Path
+import sys, uuid, os, json
+
 
 ## Globally tracking all the modules, and attributes have been dnamically loaded
 _Loaded_Attributes = {}
@@ -140,43 +136,3 @@ def check_serializable(dict):
         except:
             bad_keys.append(key)
     return bad_keys
-
-
-###### Preload Modules
-def preload():
-
-
-    parser = argparse.ArgumentParser(description='Build and run a model using ngclean')
-    parser.add_argument("--modules", type=str, help='location of modules.json file')
-
-    args = parser.parse_args()
-    try:
-        module_path = args.modules
-    except:
-        module_path = None
-
-    if module_path is None:
-        module_path = "json_files/modules.json"
-
-    if not os.path.isfile(module_path):
-        warnings.warn("Missing file to preload modules from. Attempted to locate file at \"" + str(module_path) + "\"" )
-        return
-
-    with open(module_path, 'r') as file:
-        modules = json.load(file, object_hook=lambda d: SimpleNamespace(**d))
-
-    for module in modules:
-        mod = import_module(module.absolute_path)
-        _Loaded_Modules[module.absolute_path] = mod
-
-        for attribute in module.attributes:
-            atr = getattr(mod, attribute.name)
-            _Loaded_Attributes[attribute.name] = atr
-
-            _Loaded_Attributes[".".join([module.absolute_path, attribute.name])] = atr
-            if hasattr(attribute, "keywords"):
-                for keyword in attribute.keywords:
-                    _Loaded_Attributes[keyword] = atr
-
-if not Path(argv[0]).name == "sphinx-build" or Path(argv[0]).name == "build.py":
-    preload()
