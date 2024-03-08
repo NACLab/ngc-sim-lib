@@ -105,7 +105,7 @@ class Component(ABC):
     The use of this abstract base class for components is completely optional. There is no part of ngclearn that
     requires its use; however, starting here will provide a good foundation and help avoid errors produced from missing
     attributes. That being said this is not an exhaustive base class. There are some commands such as `Evolve` that
-    requires an additional function called `evolve` to be present on the component.
+    requires an additional method called `evolve` to be present on the component.
     """
 
     def __init__(self, name, useVerboseDict=False, **kwargs):
@@ -147,9 +147,9 @@ class Component(ABC):
         Binds callback function to a specific local compartment.
 
         :param source: The defined callback function generally produced by `create_outgoing_connection`
-        :param target_compartment:
-        :param bundle:
-        :return:
+        :param target_compartment: The local compartment the value should be stored in
+        :param bundle: The bundle or input rule to be used to put the data into the compartment, this is overwriting the
+        value by default, but rules like appending and adding are also provided in `bundle_rules.py`
         """
         self.metadata.add_incoming_connection(target_compartment)
         if bundle not in self.bundle_rules.keys():
@@ -157,6 +157,11 @@ class Component(ABC):
         self.sources.append((source, target_compartment, bundle))
 
     def create_bundle(self, bundle_name, bundle_rule_name):
+        """
+        This tracks the all the bundle rules that the component will need while gathering information
+        :param bundle_name: the local name of the bundle name
+        :param bundle_rule_name: the rule name or keyword defined in `modules.json`
+        """
         if bundle_name is not None:
             rule = utils.load_attribute(bundle_rule_name)
             self.bundle_rules[bundle_name] = rule
@@ -170,16 +175,34 @@ class Component(ABC):
 
     ## Runtime Methods
     def clamp(self, compartment, value):
+        """
+        Sets a value of a compartment to the provided value
+        :param compartment: Targeted compartment
+        :param value: Provided Value
+        """
         self.compartments[compartment] = value
 
     def process_incoming(self):
+        """
+        Calls each callback function and yields results from all connections
+        :return: yields tuples of the form (value, target_compartment, bundle)
+        """
         for (source, target_compartment, bundle) in self.sources:
             yield source(), target_compartment, bundle
 
     def pre_gather(self):
+        """
+        Optionally implemented method that is called before all the connections are processed. An example use case for
+        this method is that if a compartment should be reset before multiple cables under the additive bundle rule
+        are processed.
+        """
         pass
 
     def gather(self):
+        """
+        The method that does all the processing of incoming value including calling pre_gather, and using the correct
+        bundle rule.
+        """
         self.pre_gather()
         for val, dest_comp, bundle in self.process_incoming():
             self.bundle_rules[bundle](self, val, dest_comp)
@@ -187,16 +210,31 @@ class Component(ABC):
     ##Abstract Methods
     @abstractmethod
     def verify_connections(self):
+        """
+        An abstract method that generally uses component metadata to verify that there are the correct nuber of
+        connections. This should error if it fails the verification.
+        """
         pass
 
     @abstractmethod
     def advance_state(self, **kwargs):
+        """
+        An abstract method to advance the state of the component to the next one
+        """
         pass
 
     @abstractmethod
     def reset(self, **kwargs):
+        """
+        An abstract method that should be implemented to models can be returned to their original state.
+        """
         pass
 
     @abstractmethod
     def save(self, directory, **kwargs):
+        """
+        An abstract method to save component specific state to the provided directory
+        :param directory:  the directory to save the state to
+        """
         pass
+

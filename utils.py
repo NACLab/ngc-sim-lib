@@ -1,13 +1,29 @@
+"""
+The utilities file for ngclib supports the foundation of how ngclearn does its dynamic loading of attributes and
+modules. When the file is imported it will automatically search for a file (default `json_files/modules.json`,
+or passed as --modules="json_files/modules.json") to load all the modules for dynamic loading. Without this file when
+the controller tries to load a component or command class it will be unable to find it. Please see the `modules.schema`
+file in the `json_schemes` folder for more details on how to create the modules.json file.
+"""
 import sys, uuid, os, json, argparse
 import warnings
 from importlib import import_module
 from types import SimpleNamespace
 
+## Globally tracking all the modules, and attributes have been dnamically loaded
 _Loaded_Attributes = {}
 _Loaded_Modules = {}
 
 
 def check_attributes(obj, required, fatal=False):
+    """
+    This function will verify that a provided object has the requested attributes.
+
+    :param obj: Object that should have the attributes
+    :param required: A list of required attributes by string name
+    :param fatal: If true an Attribute error will be thrown (default False)
+    :return: Boolean only returns if not fatal, if the object has the required attributes
+    """
     if required is None:
         return True
     for atr in required:
@@ -22,13 +38,26 @@ def check_attributes(obj, required, fatal=False):
 
 
 def load_module(module_path, match_case=False, absolute_path=False):
+    """
+    Trys to load a module from the provided path.
+    :param module_path: Module path, supports compound modules such as `ngclib.commands`
+    :param match_case: If true the module must case match exactly (default false)
+    :param absolute_path: If true tries to import exactly what is passed to module path (default false)
+    :return: the module that has been loaded
+    """
+    #Return if we have already loaded this module
     if module_path in _Loaded_Modules.keys():
         return _Loaded_Modules[module_path]
+    #Unkown module
     module_name = None
-    if not absolute_path:
+    if absolute_path:
+        module_name = module_path
+    else:
+        #Extract the final module from the module_path
         final_mod = module_path.split('.')[-1]
         final_mod = final_mod if match_case else final_mod.lower()
 
+        #Try to match the final module to any currently loaded module
         for module in sys.modules:
             last_mod = module.split('.')[-1]
             last_mod = last_mod if match_case else last_mod.lower()
@@ -36,12 +65,10 @@ def load_module(module_path, match_case=False, absolute_path=False):
                 print("Loading module from " + module)
                 module_name = module
                 break
+
+        #Will only be None if no imported modules match the import name
         if module_name is None:
             raise RuntimeError("Failed to find dynamic import for \"" + module_path + "\"")
-
-
-    else:
-        module_name = module_path
 
     mod = import_module(module_name)
     _Loaded_Modules[module_path] = mod
@@ -56,6 +83,8 @@ def load_from_path(path, absolute_path=False, match_case=False):
         module_name = path
         class_name = path
 
+    if module_name is None:
+        raise RuntimeError("Bad module")
     return load_attribute(module_path=module_name, attribute_name=class_name,
                           match_case=match_case, absolute_path=absolute_path)
 
@@ -64,6 +93,9 @@ def load_attribute(attribute_name, module_path=None, match_case=False, absolute_
     if attribute_name in _Loaded_Attributes.keys():
         return _Loaded_Attributes[attribute_name]
 
+    if attribute_name is None:
+        raise RuntimeError()
+    print(attribute_name)
     mod = load_module(attribute_name if module_path is None else module_path, match_case=match_case, absolute_path=absolute_path)
 
     attribute_name = attribute_name if match_case else attribute_name[0].upper() + attribute_name[1:]
