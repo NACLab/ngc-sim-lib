@@ -6,9 +6,9 @@ the controller tries to load a component or command class it will be unable to f
 file in the `json_schemes` folder for more details on how to create the modules.json file.
 """
 import sys, uuid, os, json
+from importlib import import_module
 
-
-## Globally tracking all the modules, and attributes have been dnamically loaded
+## Globally tracking all the modules, and attributes have been dynamically loaded
 _Loaded_Attributes = {}
 _Loaded_Modules = {}
 
@@ -72,7 +72,16 @@ def load_module(module_path, match_case=False, absolute_path=False):
     _Loaded_Modules[module_path] = mod
     return mod
 
-def load_from_path(path, absolute_path=False, match_case=False):
+def load_from_path(path, match_case=False, absolute_path=False):
+    """
+    Loads an attribute/module from a specified path. If not using the absolute path the module name and attribute
+    names will be assumed to be the same.
+
+    :param path: path to attribute/module to load, will try to find the attribute/module if not already loaded
+    :param match_case: If true the module must case match exactly (default false)
+    :param absolute_path: If true tries to import exactly what is passed to module path (default false)
+    :return: The attribute at the path
+    """
     if absolute_path is True:
         module_name = '.'.join(path.split('.')[:-1])
         class_name = path.split('.')[-1]
@@ -81,19 +90,26 @@ def load_from_path(path, absolute_path=False, match_case=False):
         module_name = path
         class_name = path
 
-    if module_name is None:
-        raise RuntimeError("Bad module")
     return load_attribute(module_path=module_name, attribute_name=class_name,
                           match_case=match_case, absolute_path=absolute_path)
 
 
 def load_attribute(attribute_name, module_path=None, match_case=False, absolute_path=False):
+    """
+    Loads a specific attribute from a specified module
+
+    :param attribute_name: name of the attribute to load
+    :param module_path: module to load the attribute from, will use the attribute name if None (default None)
+    :param match_case: If true the module must case match exactly (default false)
+    :param absolute_path: If true tries to import exactly what is passed to module path (default false)
+    :return: the loaded attribute
+    """
     if attribute_name in _Loaded_Attributes.keys():
         return _Loaded_Attributes[attribute_name]
 
     if attribute_name is None:
         raise RuntimeError()
-    print(attribute_name)
+
     mod = load_module(attribute_name if module_path is None else module_path, match_case=match_case, absolute_path=absolute_path)
 
     attribute_name = attribute_name if match_case else attribute_name[0].upper() + attribute_name[1:]
@@ -129,6 +145,11 @@ def make_unique_path(directory, root_name=None):
     return path
 
 def check_serializable(dict):
+    """
+    Verifies that all the values of a dictionary are serializable
+    :param dict: dictionary to check
+    :return: list of all the keys that are not serializable
+    """
     bad_keys = []
     for key in dict.keys():
         try:
