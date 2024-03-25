@@ -23,5 +23,5 @@ class Command(ABC):
                 self.components[comp.name] = comp
 
     @abstractmethod
-    def __call__(self, **kwargs):
+    def __call__(self, *args, **kwargs):
         pass

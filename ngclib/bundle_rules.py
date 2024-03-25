@@ -13,8 +13,8 @@ modify anything of the component other than destination compartment and as a war
 name possibly will result in runtime errors as there are not required compartments for bundle rules.
 
 
-def BUNDLE_RULE_NAME(component, value, destination_compartment)
-    ## Logic for processing input value
+def BUNDLE_RULE_NAME(component, value, destination_compartment):
+    ## Logic for processing transmitted value
     ## Syntax for referencing destination compartment -> component.compartments[destination_compartment]
 
 """
