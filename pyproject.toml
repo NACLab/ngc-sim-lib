@@ -6,6 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "ngclib"
 version = "0.0.0"
 
+[tool.setuptools.packages.find]
+exclude = ["tutorials"]
+
+
+
 
 
 

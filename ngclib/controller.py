@@ -1,5 +1,5 @@
 from ngclib.utils import check_attributes, load_from_path, make_unique_path, check_serializable
-import json, os, warnings
+import json, os, warnings, inspect
 
 
 class Controller:
@@ -136,8 +136,19 @@ class Controller:
         :return: The created component (Component is also automatically added to the controller)
         """
         Component_class = load_from_path(path=component_type, match_case=match_case, absolute_path=absolute_path)
-        count = Component_class.__init__.__code__.co_argcount - 1
-        named_args = Component_class.__init__.__code__.co_varnames[1:count]
+
+        if inspect.isclass(Component_class):
+            call = Component_class.__init__
+        elif inspect.isfunction(Component_class):
+            call = Component_class
+        else:
+            raise RuntimeError("Given component type " + str(component_type)
+                               + " is not callable")
+
+
+
+        count = call.__code__.co_argcount - 1
+        named_args = call.__code__.co_varnames[1:count]
         try:
             component = Component_class(**kwargs)
         except TypeError as E:
@@ -193,8 +204,16 @@ class Controller:
         else:
             componentObjs = []
 
-        count = Command_class.__init__.__code__.co_argcount - 1
-        named_args = Command_class.__init__.__code__.co_varnames[1:count]
+        if inspect.isclass(Command_class):
+            call = Command_class.__init__
+        elif inspect.isfunction(Command_class):
+            call = Command_class
+        else:
+            raise RuntimeError("Given command type " + str(command_type)
+                               + " is not callable")
+
+        count = call.__code__.co_argcount - 1
+        named_args = call.__code__.co_varnames[1:count]
         try:
             command = Command_class(components=componentObjs, controller=self, command_name=command_name, **kwargs)
         except TypeError as E:
