@@ -1,5 +1,5 @@
 from ngclib.commands import Command
-
+from ngclib.utils import extract_args
 
 class Evolve(Command):
     """
@@ -19,14 +19,13 @@ class Evolve(Command):
         self.frozen_flag = frozen_flag
 
     def __call__(self, *args, **kwargs):
-        if self.frozen_flag in kwargs.keys():
-            val = kwargs.get(self.frozen_flag, None)
-        elif len(args) > 0:
-            val = args[0]
-        else:
-            val = False
+        vals = {}
+        try:
+            vals = extract_args([self.frozen_flag], *args, **kwargs)
+        except RuntimeError:
+            vals[self.frozen_flag] = False
 
-        if not val:
+        if not vals[self.frozen_flag]:
             for component in self.components:
                 self.components[component].gather()
                 self.components[component].evolve(**kwargs)

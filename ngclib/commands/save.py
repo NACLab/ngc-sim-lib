@@ -1,4 +1,5 @@
 from ngclib.commands import Command
+from ngclib.utils import extract_args
 import warnings
 
 class Save(Command):
@@ -23,19 +24,15 @@ class Save(Command):
         self.directory_flag = directory_flag
 
     def __call__(self, *args, **kwargs):
-        if self.directory_flag in kwargs.keys():
-            val = kwargs.get(self.directory_flag, None)
-        elif len(args) > 0:
-            val = args[0]
-        else:
-            val = None
-
-
-        if val is None:
+        try:
+            vals = extract_args([self.directory_flag], *args, **kwargs)
+        except RuntimeError:
             warnings.warn("Save, " + str(self.directory_flag) + " is missing from keyword arguments and no "
                                                                 "positional arguments were provided", stacklevel=6)
-        else:
+            return
+
+        if vals[self.directory_flag]:
             for component in self.components:
-                self.components[component].save(val)
+                self.components[component].save(vals[self.directory_flag])
 
 

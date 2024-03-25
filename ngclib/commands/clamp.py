@@ -1,5 +1,5 @@
 from ngclib.commands.command import Command
-import warnings
+from ngclib.utils import extract_args
 
 class Clamp(Command):
     """
@@ -26,14 +26,12 @@ class Clamp(Command):
         self.compartment = compartment
 
     def __call__(self, *args, **kwargs):
-        if self.clamp_name in kwargs.keys():
-            val = kwargs.get(self.clamp_name, None)
-        elif len(args) > 0:
-            val = args[0]
-        else:
+        try:
+            vals = extract_args([self.clamp_name], *args, **kwargs)
+        except RuntimeError:
             raise RuntimeError("Clamp, " + str(self.clamp_name) + " is missing from keyword arguments or a positional "
                                                                   "arguments can be provided")
 
         for component in self.components:
-            self.components[component].clamp(self.compartment, val)
+            self.components[component].clamp(self.compartment, vals[self.clamp_name])
 

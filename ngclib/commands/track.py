@@ -1,4 +1,5 @@
 from ngclib.commands import Command
+from ngclib.utils import extract_args
 import warnings
 
 class Track(Command):
@@ -27,20 +28,15 @@ class Track(Command):
 
 
     def __call__(self, *args, **kwargs):
-        if self.tracker in kwargs.keys():
-            val = kwargs.get(self.tracker, None)
-        elif len(args) > 0:
-            val = args[0]
-        else:
-            val = None
-
-        if val is None:
+        try:
+            vals = extract_args([self.tracker], *args, **kwargs)
+        except RuntimeError:
             warnings.warn("Tracker, " + str(self.tracker) + " is missing from keyword arguments and no "
-                                                            "positional arguments were provided", stacklevel=6)
-        else:
-            vals = []
-            for component in self.components:
-                vals.append(self.components[component].compartments[self.compartment])
+                                                                "positional arguments were provided", stacklevel=6)
+            return
 
-            val.append(vals)
+        v = []
+        for component in self.components:
+            v.append(self.components[component].compartments[self.compartment])
+        vals[self.tracker].append(v)
 

@@ -1,4 +1,5 @@
 from ngclib.commands import Command
+from ngclib.utils import extract_args
 import warnings
 
 class Reset(Command):
@@ -20,17 +21,15 @@ class Reset(Command):
         self.reset_name = reset_name
 
     def __call__(self, *args, **kwargs):
-        if self.reset_name in kwargs.keys():
-            val = kwargs.get(self.reset_name, None)
-        elif len(args) > 0:
-            val = args[0]
-        else:
-            val = None
+        try:
+            vals = extract_args([self.reset_name], *args, **kwargs)
+        except RuntimeError:
+            warnings.warn("Reset, " + str(self.reset_name) + " is missing from keyword arguments and no "
+                                                             "positional arguments were provided", stacklevel=6)
+            return
 
-        if val:
+        if vals[self.reset_name]:
             for component in self.components:
                 self.components[component].reset()
 
-        elif val is None:
-            warnings.warn("Reset, " + str(self.reset_name) + " is missing from keyword arguments and no "
-                                                             "positional arguments were provided", stacklevel=6)
+
