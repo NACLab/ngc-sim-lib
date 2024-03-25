@@ -8,6 +8,10 @@ from pathlib import Path
 from sys import argv
 from importlib import import_module
 
+from pkg_resources import get_distribution
+
+__version__ = get_distribution('ngclib').version ## set software version
+
 ###### Preload Modules
 def preload():
     parser = argparse.ArgumentParser(description='Build and run a model using ngclean')
