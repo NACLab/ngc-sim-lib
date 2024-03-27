@@ -26,7 +26,7 @@ class Track(Command):
 
             command_name: the name of the command on the controller
         """
-        super().__init__(components=components)
+        super().__init__(components=components, command_name=command_name)
         if compartment is None:
             raise RuntimeError(self.name + " requires a \'compartment\' to clamp to for construction")
         if tracker is None:

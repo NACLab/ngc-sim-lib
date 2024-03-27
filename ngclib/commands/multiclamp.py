@@ -22,7 +22,8 @@ class Multiclamp(Command):
 
             command_name: the name of the command on the controller
         """
-        super().__init__(components=components, required_calls=['clamp'])
+        super().__init__(components=components, command_name=command_name,
+                         required_calls=['clamp'])
         if clamp_name is None:
             raise RuntimeError(self.name + " requires a \'clamp_name\' to bind to for construction")
 
