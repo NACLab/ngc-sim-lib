@@ -206,7 +206,7 @@ class Component(ABC):
 
         Returns:
             a callback function that takes no parameters and returns the state
-            of the specified compartment
+                of the specified compartment
         """
         self.metadata.add_outgoing_connection(source_compartment)
         return lambda: self.compartments[source_compartment]
