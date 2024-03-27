@@ -1,4 +1,4 @@
-# ngc-lib: Support Library for ngc-learn
+# NGC-Lib: Support Library for NGC-Learn
 
 <b>ngc-lib</b> is the support library and central dependency for
 <i><a href="https://github.com/NACLab/ngc-learn/">ngc-learn</a></i>, a library
