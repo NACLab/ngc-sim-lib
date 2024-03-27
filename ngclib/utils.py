@@ -1,9 +1,12 @@
 """
-The utilities file for ngclib supports the foundation of how ngclearn does its dynamic loading of attributes and
-modules. When the file is imported it will automatically search for a file (default `json_files/modules.json`,
-or passed as --modules="json_files/modules.json") to load all the modules for dynamic loading. Without this file when
-the controller tries to load a component or command class it will be unable to find it. Please see the `modules.schema`
-file in the `json_schemes` folder for more details on how to create the modules.json file.
+The utilities file for ngclib supports the foundation of how ngclearn does its
+dynamic loading of attributes and modules. When the file is imported, it will
+automatically search for a file (default `json_files/modules.json`, or pass a
+default --modules="json_files/modules.json") to load all the modules for dynamic
+loading. Without this file, when the controller goes on to try to load a component
+or command class, it will be unable to do so/find them. Please see the `modules.schema`
+file in the `json_schemes` folder for more details on how to create the
+modules.json file.
 """
 import sys, uuid, os, json
 from importlib import import_module
@@ -17,10 +20,15 @@ def check_attributes(obj, required, fatal=False):
     """
     This function will verify that a provided object has the requested attributes.
 
-    :param obj: Object that should have the attributes
-    :param required: A list of required attributes by string name
-    :param fatal: If true an Attribute error will be thrown (default False)
-    :return: Boolean only returns if not fatal, if the object has the required attributes
+    Args:
+        obj: Object that should have the attributes
+
+        required: A list of required attributes by string name
+
+        fatal: If true an Attribute error will be thrown (default False)
+
+    Returns:
+        Boolean only returns if not fatal, if the object has the required attributes
     """
     if required is None:
         return True
@@ -38,10 +46,17 @@ def check_attributes(obj, required, fatal=False):
 def load_module(module_path, match_case=False, absolute_path=False):
     """
     Trys to load a module from the provided path.
-    :param module_path: Module path, supports compound modules such as `ngclib.commands`
-    :param match_case: If true the module must case match exactly (default false)
-    :param absolute_path: If true tries to import exactly what is passed to module path (default false)
-    :return: the module that has been loaded
+
+    Args:
+        module_path: Module path, supports compound modules such as `ngclib.commands`
+
+        match_case: If true the module must case match exactly (default false)
+
+        absolute_path: If true tries to import exactly what is passed to module
+            path (default false)
+
+    Returns:
+        the module that has been loaded
     """
     #Return if we have already loaded this module
     if module_path in _Loaded_Modules.keys():
@@ -77,10 +92,15 @@ def load_from_path(path, match_case=False, absolute_path=False):
     Loads an attribute/module from a specified path. If not using the absolute path the module name and attribute
     names will be assumed to be the same.
 
-    :param path: path to attribute/module to load, will try to find the attribute/module if not already loaded
-    :param match_case: If true the module must case match exactly (default false)
-    :param absolute_path: If true tries to import exactly what is passed to module path (default false)
-    :return: The attribute at the path
+    Args:
+        path: path to attribute/module to load, will try to find the attribute/module if not already loaded
+
+        match_case: If true the module must case match exactly (default false)
+
+        absolute_path: If true tries to import exactly what is passed to module path (default false)
+
+    Returns:
+        The attribute at the path
     """
     if absolute_path is True:
         module_name = '.'.join(path.split('.')[:-1])
@@ -98,11 +118,19 @@ def load_attribute(attribute_name, module_path=None, match_case=False, absolute_
     """
     Loads a specific attribute from a specified module
 
-    :param attribute_name: name of the attribute to load
-    :param module_path: module to load the attribute from, will use the attribute name if None (default None)
-    :param match_case: If true the module must case match exactly (default false)
-    :param absolute_path: If true tries to import exactly what is passed to module path (default false)
-    :return: the loaded attribute
+    Args:
+        attribute_name: name of the attribute to load
+
+        module_path: module to load the attribute from, will use the attribute
+            name if None (default None)
+
+        match_case: If true the module must case match exactly (default false)
+
+        absolute_path: If true tries to import exactly what is passed to module
+            path (default false)
+
+    Returns:
+        the loaded attribute
     """
     if attribute_name in _Loaded_Attributes.keys():
         return _Loaded_Attributes[attribute_name]
@@ -127,9 +155,15 @@ def make_unique_path(directory, root_name=None):
     """
     This block of code will make a uniquely named directory inside the specified output folder.
     If the root name already exists it will append a UID to the root name to not overwrite data
-    :param directory: The root directory to save models to
-    :param root_name: (Default None) The root name for the model to be saved to, if none it will just use the UID
-    :return: path to created directory
+
+    Args:
+        directory: The root directory to save models to
+
+        root_name: (Default None) The root name for the model to be saved to,
+            if none it will just use the UID
+
+    Returns:
+        path to created directory
     """
     uid = uuid.uuid4()
     if root_name is None:
@@ -148,8 +182,12 @@ def make_unique_path(directory, root_name=None):
 def check_serializable(dict):
     """
     Verifies that all the values of a dictionary are serializable
-    :param dict: dictionary to check
-    :return: list of all the keys that are not serializable
+
+    Args:
+        dict: dictionary to check
+
+    Returns:
+        list of all the keys that are not serializable
     """
     bad_keys = []
     for key in dict.keys():
@@ -165,11 +203,18 @@ def extract_args(keywords=None, *args, **kwargs):
     Extracts the given keywords from the provided args and kwargs. This method first finds all the matching keywords
     then for each missing keyword it takes the next value in args and assigns it. It will throw and error if there are
     not enough kwargs and args to satisfy all provided keywords
-    :param keywords: a list of keywords to extract
-    :param args: the positional arguments to use as a fallback over keyword arguments
-    :param kwargs: the keyword arguments to first try to extract from
-    :return: a dictionary for where each keyword is a key, and the value is assigned argument. Will throw a RuntimeError
-    if it fails to match and argument to each keyword.
+
+    Args:
+        keywords: a list of keywords to extract
+
+        args: the positional arguments to use as a fallback over keyword arguments
+
+        kwargs: the keyword arguments to first try to extract from
+
+    Returns:
+        a dictionary for where each keyword is a key, and the value is assigned
+        argument. Will throw a RuntimeError if it fails to match and argument
+        to each keyword.
     """
     if keywords is None:
         return None
@@ -190,4 +235,3 @@ def extract_args(keywords=None, *args, **kwargs):
             a[key] = args[idx]
 
     return a
-
