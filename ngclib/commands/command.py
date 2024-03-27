@@ -4,18 +4,23 @@ from ngclib.utils import check_attributes
 
 class Command(ABC):
     """
-    The base class for all commands found in ngclib. At its core all a command is, is a method to be called by the
-    controller that affects components in the model in some way. When a command is made a preprocessing step is run to
-    verify that all the needed attributes are present on each component. This does not ensure types or values, just that
-    they do or do not exist.
+    The base class for all commands found in ngclib. At its core, a command is
+    essentially a method to be called by the controller that affects the
+    components in a simulated complex system / model in some way. When a command
+    is made, a preprocessing step is run to verify that all of the needed
+    attributes are present on each component. Note that this step does not
+    ensure types or values, just that they do or do not exist.
     """
     def __init__(self, components=None, command_name=None, required_calls=None):
         """
-        Required Calls on Components: ['name']
+        Required calls on Components: ['name']
 
-        :param components: A list of components to run the command on
-        :param required_calls: a list of required attributes for all components
-        :param command_name: the name of the command on the controller
+        Args:
+            components: a list of components to run the command on
+
+            required_calls: a list of required attributes for all components
+
+            command_name: the name of the command on the controller
         """
         self.name = str(command_name)
         self.components = {}

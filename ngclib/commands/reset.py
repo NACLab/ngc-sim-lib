@@ -4,18 +4,22 @@ import warnings
 
 class Reset(Command):
     """
-    In every model there is a need to reset it back to some intial state. As such many components that maintain a state
-    have a reset method implemented on them. The reset command will go through the list of components and reset them
-    each of them.
+    In every model/system, there is a need to reset components back to some
+    intial state value(s). As such, many components that maintain a state have a
+    reset method implemented within them. The reset command will go through
+    the list of components and trigger the reset within each of them.
     """
     def __init__(self, components=None, reset_name=None, command_name=None,
                  **kwargs):
         """
-        Required Calls on Components: ['reset', 'name']
+        Required calls on Components: ['reset', 'name']
 
-        :param components: a list of components to reset
-        :param reset_name: the keyword for the flag on if the reset should happen
-        :param command_name: the name of the command on the controller
+        Args:
+            components: a list of components to reset
+
+            reset_name: the keyword for the flag on if the reset should happen
+
+            command_name: the name of the command on the controller
         """
         super().__init__(components=components, command_name=command_name,
                          required_calls=['reset'])
@@ -34,5 +38,3 @@ class Reset(Command):
         if vals[self.reset_name]:
             for component in self.components:
                 self.components[component].reset()
-
-
