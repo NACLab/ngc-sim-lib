@@ -1,15 +1,20 @@
-# ngc-lib
+# ngc-lib: Support Library for ngc-learn
 
-<b>ngc-lib</b> is a pure Python library for conducting general (abstract)
-simulation of complex adaptive systems composed of dynamical components.
-
-This is specifically the central library dependency for
+<b>ngc-lib</b> is the support library and central dependency for
 <i><a href="https://github.com/NACLab/ngc-learn/">ngc-learn</a></i>, a library
 designed for computational neuroscience and cognitive neuroscience research.
-This package is is distributed under the 3-Clause BSD license.
+While ngc-learn contains the JAX-implemented routines and any supporting C
+code, ngc-lib is a pure Python package, primarily meant for providing the
+machinery, routines, and utilities that facilitate the general (abstract)
+simulation of complex adaptive systems made up of dynamical components. For
+information, including anything related to usage instructions and details,
+please refer to the ngc-learn README:
+https://github.com/NACLab/ngc-learn/.
 
-It is currently maintained by the
-<a href="https://www.cs.rit.edu/~ago/nac_lab.html">Neural Adaptive Computing (NAC) laboratory</a>.
+This package is is distributed under the 3-Clause BSD license. It is currently
+maintained by the
+<a href="https://www.cs.rit.edu/~ago/nac_lab.html">Neural Adaptive Computing
+(NAC) laboratory</a>.
 
 ## <b>Installation:</b>
 
@@ -23,7 +28,7 @@ following bash command:
 <pre>
 $ pip install .
 </pre>
-or, if you are doing development, then do an editable install via: 
+or, if you are doing development, then do an editable install via:
 <pre>
 $ pip install --editable . # OR pip install -e .
 </pre>
