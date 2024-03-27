@@ -213,8 +213,8 @@ def extract_args(keywords=None, *args, **kwargs):
 
     Returns:
         a dictionary for where each keyword is a key, and the value is assigned
-        argument. Will throw a RuntimeError if it fails to match and argument
-        to each keyword.
+            argument. Will throw a RuntimeError if it fails to match and argument
+            to each keyword.
     """
     if keywords is None:
         return None
