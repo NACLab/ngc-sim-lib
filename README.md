@@ -11,6 +11,22 @@ This package is is distributed under the 3-Clause BSD license.
 It is currently maintained by the
 <a href="https://www.cs.rit.edu/~ago/nac_lab.html">Neural Adaptive Computing (NAC) laboratory</a>.
 
+## <b>Installation:</b>
+
+<i>Setup:</i> Ensure that you have installed the following base dependencies in
+your system. Note that this library was developed and tested on
+Ubuntu 22.04.3 LTS. ngc-lib requires: `Python (>=3.10)`.
+
+Once you have ensured that the appropriate Python is installed, you can then
+have the <code>ngclib</code> package installed on your system using the
+following bash command:
+<pre>
+$ pip install .
+</pre>
+or, if you are doing development, then do an editable install via: 
+<pre>
+$ pip install --editable . # OR pip install -e .
+</pre>
 
 **Version:**<br>
 0.2.0 <!-- -Alpha -->
