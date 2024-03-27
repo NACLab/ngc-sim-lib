@@ -13,7 +13,7 @@ It is currently maintained by the
 
 ## <b>Copyright:</b>
 
-Copyright (C) 2021 The Neural Adaptive Computing Laboratory - All Rights Reserved<br>
+Copyright (C) 2023 The Neural Adaptive Computing Laboratory - All Rights Reserved<br>
 You may use, distribute and modify this code under the
 terms of the BSD 3-clause license.
 
