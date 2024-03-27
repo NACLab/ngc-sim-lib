@@ -9,7 +9,7 @@ class _VerboseDict(dict):
     more specific warnings and errors.
     Specifically each verbose dictionary logs when new keys are added to it,
     and when a key is asked for that is not present in the dictionary, it will
-    throw a runtime error that includes the name (retrived from an ngclib
+    throw a runtime error that includes the name (retrieved from an ngclib
     component) to make debugging/tracing easier.
 
     Args:
@@ -20,15 +20,16 @@ class _VerboseDict(dict):
         kwargs: the keyword arguments to first try to extract from
     """
 
-    def __init__(self, seq=None, name=None, **kwargs):
+    def __init__(self, seq=None, name=None, verboseDict_showSet=False, **kwargs):
         seq = {} if seq is None else seq
         name = 'unnamed' if name is None else str(name)
 
         super().__init__(seq, **kwargs)
         self.name = name
+        self.showSet = verboseDict_showSet
 
     def __setitem__(self, key, value):
-        if key not in self.keys():
+        if self.showSet and key not in self.keys():
             warnings.warn("Adding key \"" + str(key) + "\" to " + self.name)
         super().__setitem__(key, value)
 
@@ -49,7 +50,7 @@ class _ComponentMetadata:
         name: the string name of this component metadata object
     """
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         self.component_name = name
         self._incoming_connections = {}
         self._outgoing_connections = {}
@@ -186,12 +187,12 @@ class Component(ABC):
         # Component Data
         self.name = name
 
-        self.compartments = _VerboseDict(name=self.name) if useVerboseDict else {}
+        self.compartments = _VerboseDict(name=self.name, **kwargs) if useVerboseDict else {}
         self.bundle_rules = {}
         self.sources = []
 
         # Meta Data
-        self.metadata = _ComponentMetadata(name=self.name)
+        self.metadata = _ComponentMetadata(name=self.name, **kwargs)
 
     ##Intialization Methods
     def create_outgoing_connection(self, source_compartment):
