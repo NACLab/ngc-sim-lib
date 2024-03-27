@@ -8,13 +8,16 @@ class Evolve(Command):
     evolve function of every component.
 
     """
-    def __init__(self, components=None, frozen_flag=None, **kwargs):
+    def __init__(self, components=None, frozen_flag=None, command_name=None,
+                 **kwargs):
         """
         Required Calls on Components: ['evolve', 'gather', 'name']
         :param components: The list of components to evolve
         :param frozen_flag: the keyword for the flag to freeze this evolve step
+        :param command_name: the name of the command on the controller
         """
-        super().__init__(components=components, required_calls=['evolve'])
+        super().__init__(components=components, command_name=command_name,
+                         required_calls=['evolve'])
 
         self.frozen_flag = frozen_flag
 

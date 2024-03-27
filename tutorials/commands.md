@@ -115,5 +115,5 @@ use `args` if there are no keyword arguments. (Keywords will still work)
 
 When commands are constructed via a controller they are also provided the 
 keyword arguments `controller`, and `command_name`. It is not recommended to 
-use these unless really needed to achieve the desired functionality. (The 
-only use of these is the compound command)
+use these for logic just for error messages, unless really needed to achieve 
+the desired functionality.

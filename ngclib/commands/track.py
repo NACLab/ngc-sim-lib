@@ -9,19 +9,21 @@ class Track(Command):
     provided object. This provided object is expected to have a `.append` method implemented. Each element appended to
     this object will be values of the compartment for each provided component, in the same order they were provided in.
     """
-    def __init__(self, components=None, compartment=None, tracker=None, **kwargs):
+    def __init__(self, components=None, compartment=None, tracker=None,
+                 command_name=None, **kwargs):
         """
         Required Calls on Components: ['name']
 
         :param components: a list of components to track values from
         :param compartment: the compartment to extract information from
         :param tracker: the keyword for which the tracking object will be passed in by
+        :param command_name: the name of the command on the controller
         """
         super().__init__(components=components)
         if compartment is None:
-            raise RuntimeError("A track command requires a \'compartment\' to clamp to for construction")
+            raise RuntimeError(self.name + " requires a \'compartment\' to clamp to for construction")
         if tracker is None:
-            raise RuntimeError("A track command requires a \'tracker\' to bind to for construction")
+            raise RuntimeError(self.name + " requires a \'tracker\' to bind to for construction")
 
         self.tracker = tracker
         self.compartment = compartment
@@ -31,7 +33,7 @@ class Track(Command):
         try:
             vals = extract_args([self.tracker], *args, **kwargs)
         except RuntimeError:
-            warnings.warn("Tracker, " + str(self.tracker) + " is missing from keyword arguments and no "
+            warnings.warn(self.name + ", " + str(self.tracker) + " is missing from keyword arguments and no "
                                                                 "positional arguments were provided", stacklevel=6)
             return
 

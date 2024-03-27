@@ -9,13 +9,15 @@ class Command(ABC):
     verify that all the needed attributes are present on each component. This does not ensure types or values, just that
     they do or do not exist.
     """
-    def __init__(self, components=None, required_calls=None):
+    def __init__(self, components=None, command_name=None, required_calls=None):
         """
         Required Calls on Components: ['name']
 
         :param components: A list of components to run the command on
         :param required_calls: a list of required attributes for all components
+        :param command_name: the name of the command on the controller
         """
+        self.name = str(command_name)
         self.components = {}
         required_calls = ['name'] if required_calls is None else required_calls + ['name']
         for comp in components:

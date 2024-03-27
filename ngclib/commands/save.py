@@ -11,23 +11,26 @@ class Save(Command):
     method on all components provided to the command. This custom save method will be responsible for all custom values
     to be saved and where to save them inside of a provided directory.
     """
-    def __init__(self, components=None, directory_flag=None, **kwargs):
+    def __init__(self, components=None, directory_flag=None, command_name=None,
+                 **kwargs):
         """
         Required Calls on Components: ['save', 'name']
 
         :param components: a list of components to call the save function on
         :param directory_flag: keyword for flag for the directory to save to
+        :param command_name: the name of the command on the controller
         """
-        super().__init__(components=components, required_calls=['save'])
+        super().__init__(components=components, command_name=command_name,
+                         required_calls=['save'])
         if directory_flag is None:
-            raise RuntimeError("A model step requires a \'directory_flag\' to bind to for construction")
+            raise RuntimeError(self.name + " requires a \'directory_flag\' to bind to for construction")
         self.directory_flag = directory_flag
 
     def __call__(self, *args, **kwargs):
         try:
             vals = extract_args([self.directory_flag], *args, **kwargs)
         except RuntimeError:
-            warnings.warn("Save, " + str(self.directory_flag) + " is missing from keyword arguments and no "
+            warnings.warn(self.name + ", " + str(self.directory_flag) + " is missing from keyword arguments and no "
                                                                 "positional arguments were provided", stacklevel=6)
             return
 

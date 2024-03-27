@@ -11,14 +11,17 @@ class Snapshot(Command):
     would be incorrect to clamp the output of this command into another component, if that is the intended goal see
     `connect` in the controller.
     """
-    def __init__(self, components=None, attribute=None, **kwargs):
+    def __init__(self, components=None, attribute=None, command_name=None,
+                 **kwargs):
         """
         Required Calls on Components: ['name'], and the passed in attribute
 
         :param components: the component extract the values of
         :param attribute: a single attribute to return
+        :param command_name: the name of the command on the controller
         """
-        super().__init__(components=components, required_calls=[attribute])
+        super().__init__(components=components, command_name=command_name,
+                         required_calls=[attribute])
         self.attribute = attribute
 
 
