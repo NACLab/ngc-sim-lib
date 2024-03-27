@@ -12,7 +12,7 @@ class Clamp(Command):
     """
     def __init__(self, components=None, compartment=None, clamp_name=None, **kwargs):
         """
-        Required Calls on Components: ['clamp', 'name']
+        Required calls on Components: ['clamp', 'name']
 
         Args:
             components: a list of components to call clamp on
