@@ -4,17 +4,21 @@ from ngclib.utils import extract_args, check_attributes
 
 class Multiclamp(Command):
     """
-    There are times when a model will have many clamp calls as there is a need to clamp many different values in a model
-    at the same time. As a solution to this ngclib provides the multiclamp command. This command is used to set a wide
-    range of value to all compartments with the same name across all provided compartments.
+    There are times when a model will have many clamp calls as there might be a
+    need to clamp many different values to a model at the same time. As a
+    solution to this, ngclib provides the `multiclamp` command. This command is
+    used to set a wide range of values to all compartments with the same name
+    across all provided compartments.
     """
 
     def __init__(self, components=None, clamp_name=None, **kwargs):
         """
-        Required Calls on Components: ['clamp', 'name']
+        Required calls on Components: ['clamp', 'name']
 
-        :param components: a list of components to call clamp on
-        :param clamp_name: a keyword to bind the input for this command do
+        Args:
+            components: a list of components to call clamp on
+
+            clamp_name: a keyword to bind the input for this command do
         """
         super().__init__(components=components, required_calls=['clamp'])
         if clamp_name is None:
