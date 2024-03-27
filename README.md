@@ -11,6 +11,15 @@ This package is is distributed under the 3-Clause BSD license.
 It is currently maintained by the
 <a href="https://www.cs.rit.edu/~ago/nac_lab.html">Neural Adaptive Computing (NAC) laboratory</a>.
 
+
+**Version:**<br>
+0.2.0 <!-- -Alpha -->
+
+Authors:
+William Gebhardt, Alexander G. Ororbia II<br>
+Neural Adaptive Computing (NAC) Laboratory<br>
+Rochester Institute of Technology, Department of Computer Science
+
 ## <b>Copyright:</b>
 
 Copyright (C) 2023 The Neural Adaptive Computing Laboratory - All Rights Reserved<br>
