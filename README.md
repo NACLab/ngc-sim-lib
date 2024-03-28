@@ -1,13 +1,13 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue.svg)](https://www.python.org/downloads)[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 [![DOI](https://zenodo.org/badge/734040498.svg)](https://zenodo.org/doi/10.5281/zenodo.10888210)
 
-# NGC-Lib: Support Library for NGC-Learn
+# NGC-Sim-Lib: Support Library for NGC-Learn
 
-<b>ngc-lib</b> is the support library and central dependency for
+<b>ngc-sim-lib</b> is the support library and central dependency for
 <i><a href="https://github.com/NACLab/ngc-learn/">ngc-learn</a></i>, a library
 designed for computational neuroscience and cognitive neuroscience research.
 While ngc-learn contains the JAX-implemented routines and any supporting C
-code, ngc-lib is a pure Python package, primarily meant for providing the
+code, ngc-sim-lib is a pure Python package, primarily meant for providing the
 machinery, routines, and utilities that facilitate the general (abstract)
 simulation of complex adaptive systems made up of dynamical components. For
 information, including anything related to usage instructions and details,
@@ -23,7 +23,7 @@ maintained by the
 
 <i>Setup:</i> Ensure that you have installed the following base dependencies in
 your system. Note that this library was developed and tested on
-Ubuntu 22.04.3 LTS. ngc-lib requires: `Python (>=3.10)`.
+Ubuntu 22.04.3 LTS. ngc-sim-lib requires: `Python (>=3.10)`.
 
 Once you have ensured that the appropriate Python is installed, you can then
 have the <code>ngclib</code> package installed on your system using the
