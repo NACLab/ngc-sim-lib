@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ngclib.utils import check_attributes
+from ngcsimlib.utils import check_attributes
 
 
 class Command(ABC):

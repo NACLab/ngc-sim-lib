@@ -1,5 +1,5 @@
-from ngclib.commands.command import Command
-from ngclib.utils import extract_args, check_attributes
+from ngcsimlib.commands.command import Command
+from ngcsimlib.utils import extract_args, check_attributes
 
 
 class Multiclamp(Command):

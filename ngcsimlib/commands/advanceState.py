@@ -1,4 +1,4 @@
-from ngclib.commands import Command
+from ngcsimlib.commands import Command
 
 
 class AdvanceState(Command):

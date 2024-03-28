@@ -1,5 +1,5 @@
-from ngclib.commands.command import Command
-from ngclib.utils import extract_args
+from ngcsimlib.commands.command import Command
+from ngcsimlib.utils import extract_args
 
 
 class Clamp(Command):

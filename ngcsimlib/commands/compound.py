@@ -1,5 +1,5 @@
-from ngclib.commands import Command
-from ngclib.utils import check_attributes
+from ngcsimlib.commands import Command
+from ngcsimlib.utils import check_attributes
 import warnings
 
 class Compound(Command):
