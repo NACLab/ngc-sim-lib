@@ -2,6 +2,6 @@
 .idea
 dist/
 build
-ngclib.egg-info
+ngcsimlib.egg-info
 
 __pycache__
