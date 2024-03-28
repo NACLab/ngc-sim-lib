@@ -14,7 +14,7 @@ __version__ = get_distribution('ngclib').version ## set software version
 
 ###### Preload Modules
 def preload():
-    parser = argparse.ArgumentParser(description='Build and run a model using ngclean')
+    parser = argparse.ArgumentParser(description='Build and run a model using ngclearn')
     parser.add_argument("--modules", type=str, help='location of modules.json file')
 
     args = parser.parse_args()
