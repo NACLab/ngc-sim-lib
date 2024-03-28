@@ -14,7 +14,7 @@ information, including anything related to usage instructions and details,
 please refer to the ngc-learn README:
 https://github.com/NACLab/ngc-learn/.
 
-This package is is distributed under the 3-Clause BSD license. It is currently
+This package is distributed under the 3-Clause BSD license. It is currently
 maintained by the
 <a href="https://www.cs.rit.edu/~ago/nac_lab.html">Neural Adaptive Computing
 (NAC) laboratory</a>.
