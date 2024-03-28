@@ -5,7 +5,7 @@ import warnings
 class Track(Command):
     """
     When running a model or complex system, there is often a need to track a
-    compartment value over time, usually for visualization. To do this, ngclib
+    compartment value over time, usually for visualization. To do this, ngcsimlib
     provides a track utility command. This command stores the values of a
     compartment from a set of components into a provided object. This provided
     object is expected to have an `.append` method implemented and each element

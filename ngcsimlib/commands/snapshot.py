@@ -3,7 +3,7 @@ from ngcsimlib.commands import Command
 class Snapshot(Command):
     """
     Sometimes when running through a model, there is a need to extract a value
-    from a compartment to the run loop. As such, ngclib provides the snapshot
+    from a compartment to the run loop. As such, ngcsimlib provides the snapshot
     command. This command will extract a given attribute from all components
     provided to the command. This command returns a single value if only one
     component is given, otherwise it will return a list where each value

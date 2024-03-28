@@ -5,11 +5,11 @@ import warnings
 class Save(Command):
     """
     When training models, there is often a need to snapshot the model and save
-    it to disk. The base controller in ngclib is able to save all of the
+    it to disk. The base controller in ngcsimlib is able to save all of the
     commands, components, connections, and steps to a file in order to rebuild
     the model at a later time. However, there is a good chance that the model
     will contain components that have parts that need saving beyond the parameters
-    passed in to initialize the component. ngclib solves this by providing a
+    passed in to initialize the component. ngcsimlib solves this by providing a
     save command; this command will call a custom save method on all components
     provided to the command. This custom save method will be responsible for all
     custom values to be saved and determining where to save them inside of a

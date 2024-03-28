@@ -9,7 +9,7 @@ class _VerboseDict(dict):
     more specific warnings and errors.
     Specifically each verbose dictionary logs when new keys are added to it,
     and when a key is asked for that is not present in the dictionary, it will
-    throw a runtime error that includes the name (retrieved from an ngclib
+    throw a runtime error that includes the name (retrieved from an ngcsimlib
     component) to make debugging/tracing easier.
 
     Args:

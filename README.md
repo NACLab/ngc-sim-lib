@@ -26,7 +26,7 @@ your system. Note that this library was developed and tested on
 Ubuntu 22.04.3 LTS. ngc-sim-lib requires: `Python (>=3.10)`.
 
 Once you have ensured that the appropriate Python is installed, you can then
-have the <code>ngclib</code> package installed on your system using the
+have the <code>ngcsimlib</code> package installed on your system using the
 following bash command:
 <pre>
 $ pip install .

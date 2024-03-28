@@ -4,7 +4,7 @@ from ngcsimlib.utils import check_attributes
 
 class Command(ABC):
     """
-    The base class for all commands found in ngclib. At its core, a command is
+    The base class for all commands found in ngcsimlib. At its core, a command is
     essentially a method to be called by the controller that affects the
     components in a simulated complex system / model in some way. When a command
     is made, a preprocessing step is run to verify that all of the needed

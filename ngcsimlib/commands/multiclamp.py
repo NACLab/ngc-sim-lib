@@ -6,7 +6,7 @@ class Multiclamp(Command):
     """
     There are times when a model will have many clamp calls as there might be a
     need to clamp many different values to a model at the same time. As a
-    solution to this, ngclib provides the `multiclamp` command. This command is
+    solution to this, ngcsimlib provides the `multiclamp` command. This command is
     used to set a wide range of values to all compartments with the same name
     across all provided compartments.
     """
