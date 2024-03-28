@@ -235,3 +235,32 @@ def extract_args(keywords=None, *args, **kwargs):
             a[key] = args[idx]
 
     return a
+
+
+def find_compartment(values, componentClass, compartmentName):
+    """
+    Offers a utility to search for a compartment in a component. Will automatically
+    search for "providedName" + "CompartmentName" as a method on the provided component.
+    If that exists it will return the value of that method as the compartment name
+    to use inplace of the provided one.
+    :param values: The dictionary representing the compartments
+    :param componentClass: The class for the component
+    :param compartmentName: The compartment name to look for
+    :return: a tuple, the first value is a boolean representing if the provided
+    compartmentName is either a valid name or a property of the component.
+    the second value is either the presumed associated compartment or None if it
+    could not match one.
+    """
+    if compartmentName in values.keys():
+        return True, compartmentName
+
+    if not isinstance(getattr(componentClass, compartmentName, None), property):
+        return False, None
+
+    nameGetter = getattr(componentClass, compartmentName + "CompartmentName", None)
+
+    if nameGetter is None:
+        return True, None
+
+    return True, nameGetter()
+

@@ -41,32 +41,33 @@ class _VerboseDict(dict):
     def __getitem__(self, item):
         if item in self.mapping.keys():
             return super().__getitem__(self.mapping[item])
+        
+        if item in self.keys():
+            return super().__getitem__(item)
+        
+        successful, cname = utils.find_compartment(self, self.componentClass, item)
 
-        if item not in self.keys():
-            if not isinstance(getattr(self.componentClass, item, None), property):
-                raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                                   "\nAvailable compartments " + str(self.keys()))
+        if not successful:
+            raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
+                               "\nAvailable compartments " + str(self.keys()))
 
-            nameGetter = getattr(self.componentClass, item + "CompartmentName", None)
 
-            if nameGetter is None:
-                raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                                   "\n\"" + str(item) + "\" is a property of " + self.name +
-                                   ", but unable to find key for requested compartment based on property name"
-                                   "\nAvailable compartments " + str(self.keys()))
+        if cname is None:
+            raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
+                               "\n\"" + str(item) + "\" is a property of " + self.name +
+                               ", but unable to find key for requested compartment based on property name"
+                               "\nAvailable compartments " + str(self.keys()))
 
-            else:
-                expectedName = nameGetter()
-                if not self.autoMap:
-                    raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                                       "\nThe correct compartment for \"" + str(item) + "\" is " + str(expectedName) +
-                                       "\nAll available compartments " + str(self.keys()))
-                warnings.warn("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                               "\nThe correct compartment for \"" + str(item) + "\" is " + str(expectedName) +
-                               "\nMapping \"" + str(item) + "\" to \"" + str(expectedName) + "\"")
-                self.mapping[item] = expectedName
-                return super().__getitem__(self.mapping[item])
-        return super().__getitem__(item)
+        if not self.autoMap:
+            raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
+                               "\nThe correct compartment for \"" + str(item) + "\" is " + str(cname) +
+                               "\nAll available compartments " + str(self.keys()))
+        warnings.warn("Failed to find compartment \"" + str(item) + "\" in " + self.name +
+                       "\nThe correct compartment for \"" + str(item) + "\" is " + str(cname) +
+                       "\nMapping \"" + str(item) + "\" to \"" + str(cname) + "\"")
+        self.mapping[item] = cname
+        return super().__getitem__(self.mapping[item])
+
 
 
 class _ComponentMetadata:
