@@ -20,8 +20,3 @@ license = {text = "BSD-3-Clause License"}
 Homepage = "https://github.com/NACLab/ngc-sim-lib"
 "Lab Page" = "https://www.cs.rit.edu/~ago/nac_lab.html"
 
-[tool.setuptools.packages.find]
-exclude = ["tutorials"]
-
-
-
