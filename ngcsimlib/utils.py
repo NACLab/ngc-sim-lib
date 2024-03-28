@@ -1,5 +1,5 @@
 """
-The utilities file for ngclib supports the foundation of how ngclearn does its
+The utilities file for ngcsimlib supports the foundation of how ngclearn does its
 dynamic loading of attributes and modules. When the file is imported, it will
 automatically search for a file (default `json_files/modules.json`, or pass a
 default --modules="json_files/modules.json") to load all the modules for dynamic
@@ -48,7 +48,7 @@ def load_module(module_path, match_case=False, absolute_path=False):
     Trys to load a module from the provided path.
 
     Args:
-        module_path: Module path, supports compound modules such as `ngclib.commands`
+        module_path: Module path, supports compound modules such as `ngcsimlib.commands`
 
         match_case: If true the module must case match exactly (default false)
 

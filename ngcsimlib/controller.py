@@ -168,7 +168,7 @@ class Controller:
             component_type: A string that is linked to the component class to be
                 created. If the class was loaded with the modules.json file this
                 can be the keywords defined in that file. Otherwise, it will have
-                to be dynamically loaded using the functions found in ngclib.utils.
+                to be dynamically loaded using the functions found in ngcsimlib.utils.
 
             match_case: A boolean that represents if the exact case should be
                 matched when dynamically loading the component class (Default: False)
@@ -235,7 +235,7 @@ class Controller:
                 created. If the class was loaded with the modules.json file this
                 can be the keywords defined in that file. Otherwise, it will
                 have to be dynamically loaded using the functions found
-                in ngclib.utils.
+                in ngcsimlib.utils.
 
             command_name: A string that is the name of the command, this is the
                 keyword that will be called elsewhere to execute this command.
