@@ -20,13 +20,18 @@ class _VerboseDict(dict):
         kwargs: the keyword arguments to first try to extract from
     """
 
-    def __init__(self, seq=None, name=None, verboseDict_showSet=False, **kwargs):
+    def __init__(self, seq=None, name=None, verboseDict_showSet=False, verboseDict_autoMap=False,
+                 componentClass=None, **kwargs):
         seq = {} if seq is None else seq
         name = 'unnamed' if name is None else str(name)
 
         super().__init__(seq, **kwargs)
         self.name = name
+        self.componentClass = componentClass
+
         self.showSet = verboseDict_showSet
+        self.autoMap = verboseDict_autoMap
+        self.mapping = {}
 
     def __setitem__(self, key, value):
         if self.showSet and key not in self.keys():
@@ -34,9 +39,33 @@ class _VerboseDict(dict):
         super().__setitem__(key, value)
 
     def __getitem__(self, item):
+        if item in self.mapping.keys():
+            return super().__getitem__(self.mapping[item])
+
         if item not in self.keys():
-            raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                               "\nAvailable compartments " + str(self.keys()))
+            if not isinstance(getattr(self.componentClass, item, None), property):
+                raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
+                                   "\nAvailable compartments " + str(self.keys()))
+
+            nameGetter = getattr(self.componentClass, item + "CompartmentName", None)
+
+            if nameGetter is None:
+                raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
+                                   "\n\"" + str(item) + "\" is a property of " + self.name +
+                                   ", but unable to find key for requested compartment based on property name"
+                                   "\nAvailable compartments " + str(self.keys()))
+
+            else:
+                expectedName = nameGetter()
+                if not self.autoMap:
+                    raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
+                                       "\nThe correct compartment for \"" + str(item) + "\" is " + str(expectedName) +
+                                       "\nAll available compartments " + str(self.keys()))
+                warnings.warn("Failed to find compartment \"" + str(item) + "\" in " + self.name +
+                               "\nThe correct compartment for \"" + str(item) + "\" is " + str(expectedName) +
+                               "\nMapping \"" + str(item) + "\" to \"" + str(expectedName) + "\"")
+                self.mapping[item] = expectedName
+                return super().__getitem__(self.mapping[item])
         return super().__getitem__(item)
 
 
@@ -187,7 +216,7 @@ class Component(ABC):
         # Component Data
         self.name = name
 
-        self.compartments = _VerboseDict(name=self.name, **kwargs) if useVerboseDict else {}
+        self.compartments = _VerboseDict(name=self.name, componentClass=self.__class__, **kwargs) if useVerboseDict else {}
         self.bundle_rules = {}
         self.sources = []
 
