@@ -17,7 +17,8 @@ def preload():
     parser = argparse.ArgumentParser(description='Build and run a model using ngclearn')
     parser.add_argument("--modules", type=str, help='location of modules.json file')
 
-    args = parser.parse_args()
+    ## ngc-sim-lib only cares about --modules argument
+    args, unknown = parser.parse_known_args() #args = parser.parse_args()
     try:
         module_path = args.modules
     except:
