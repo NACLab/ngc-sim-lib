@@ -8,4 +8,4 @@ from .save import Save
 from .compound import Compound
 from .snapshot import Snapshot
 from .multiclamp import Multiclamp
-
+from .seed import Seed
