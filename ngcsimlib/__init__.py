@@ -10,7 +10,8 @@ from importlib import import_module
 
 from pkg_resources import get_distribution
 
-__version__ = get_distribution('ngcsimlib').version ## set software version
+__version__ = get_distribution('ngcsimlib').version  ## set software version
+
 
 ###### Preload Modules
 def preload():
@@ -18,7 +19,7 @@ def preload():
     parser.add_argument("--modules", type=str, help='location of modules.json file')
 
     ## ngc-sim-lib only cares about --modules argument
-    args, unknown = parser.parse_known_args() #args = parser.parse_args()
+    args, unknown = parser.parse_known_args()  # args = parser.parse_args()
     try:
         module_path = args.modules
     except:
@@ -28,7 +29,9 @@ def preload():
         module_path = "json_files/modules.json"
 
     if not os.path.isfile(module_path):
-        warnings.warn("Missing file to preload modules from. Attempted to locate file at \"" + str(module_path) + "\"" )
+        warnings.warn("\nMissing file to preload modules from. Attempted to locate file at \"" + str(module_path) +
+                      "\". No modules will be preloaded. "
+    "\nSee https://ngc-learn.readthedocs.io/en/latest/tutorials/model_basics/json_modules.html for additional information")
         return
 
     with open(module_path, 'r') as file:
@@ -47,6 +50,7 @@ def preload():
                 for keyword in attribute.keywords:
                     utils._Loaded_Attributes[keyword] = atr
 
+
 if not Path(argv[0]).name == "sphinx-build" or Path(argv[0]).name == "build.py":
-    if "readthedocs" not in argv[0]: ## prevent readthedocs execution of preload
+    if "readthedocs" not in argv[0]:  ## prevent readthedocs execution of preload
         preload()
