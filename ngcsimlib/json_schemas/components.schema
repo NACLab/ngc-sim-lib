@@ -1,18 +1,32 @@
 {
-  title: "Components",
-  description: "A list of all components",
-  type: "array",
-  items: {
-    description: "The two required values for creating a components, and then all other keyword arguments needed for to build the components",
-    type: "object",
-    required: ["component_type", "name"],
-    properties: {
-      component_type: {
-        type: "string"
-      },
-      name: {
-        type: "string"
-      },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Components",
+  "description": "A collection of components for the model, and the hyperparameters needed to build them",
+  "type": "object",
+  "properties": {
+    "hyperparameters": {
+      "description": "A mapping of parameter keys to values. To use these simply put the key of the value parameter in for the value and it will automatically be picked up",
+      "type": "object"
+    },
+    "components":   {
+      "description": "A list of all components",
+      "type": "array",
+      "items": {
+        "description": "The two required values for creating a components, and then all other keyword arguments needed for to build the components",
+        "type": "object",
+        "required": [
+          "component_type",
+          "name"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+        }
+      }
     }
   }
 }

@@ -115,9 +115,21 @@ class Controller:
                 used. (Default: None)
         """
         with open(path_to_components_file, 'r') as file:
-            components = json.load(file)
+            componentsConfig = json.load(file)
+
+            parameterMap = {}
+            components = componentsConfig["components"]
+            if "hyperparameters" in componentsConfig.keys():
+                for component in components:
+                    for pKey, pValue in componentsConfig["hyperparameters"].items():
+                        for cKey, cValue in component.items():
+                            if pKey == cValue:
+                                component[cKey] = pValue
+                                parameterMap[cKey] = pKey
+
             for component in components:
-                self.add_component(**component, directory=custom_file_dir)
+                self.add_component(**component, directory=custom_file_dir,
+                                   parameterMap=parameterMap)
 
     def make_steps(self, path_to_steps_file):
         """
@@ -197,13 +209,11 @@ class Controller:
             raise RuntimeError("Given component type " + str(component_type)
                                + " is not callable")
 
-
-
-        count = call.__code__.co_argcount - 1
-        named_args = call.__code__.co_varnames[1:count]
         try:
             component = Component_class(**kwargs)
         except TypeError as E:
+            count = call.__code__.co_argcount - 1
+            named_args = call.__code__.co_varnames[1:count]
             print(E)
             raise RuntimeError(str(E) + "\nProvided keyword arguments:\t" + str(list(kwargs.keys())) +
                                "\nRequired keyword arguments:\t" + str(list(named_args)))
@@ -216,6 +226,9 @@ class Controller:
         for key in bad_keys:
             del obj[key]
             print("Failed to serialize \"" + str(key) + "\" in " + component.name)
+
+        if "directory" in obj.keys():
+            del obj["directory"]
 
         self._json_objects['components'].append(obj)
 
@@ -347,7 +360,45 @@ class Controller:
             json.dump(self._json_objects['steps'], fp, indent=4)
 
         with open(path + "/components.json", 'w') as fp:
-            json.dump(self._json_objects['components'], fp, indent=4)
+            hyperparameters = {}
+
+            for idx, component in enumerate(self._json_objects['components']):
+                if component.get('parameterMap', None) is not None:
+                    for cKey, pKey in component['parameterMap'].items():
+                        pVal = component[cKey]
+                        if pKey not in hyperparameters.keys():
+                            hyperparameters[pKey] = []
+                        hyperparameters[pKey].append((idx, cKey, pVal))
+
+            hp = {}
+            for param in hyperparameters.keys():
+                matched = True
+                hp[param] = None
+                for _, _, pVal in hyperparameters[param]:
+                    if hp[param] is None:
+                        hp[param] = pVal
+                    elif hp[param] != pVal:
+                        del hp[param]
+                        matched = False
+                        break
+
+                for idx, cKey, _ in hyperparameters[param]:
+                    if matched:
+                        self._json_objects['components'][idx][cKey] = param
+
+                    else:
+                        warnings.warn("Unable to extract hyperparameter " + str(param) +
+                                      " as it is mismatched between components. Parameter will not be extracted")
+
+            for component in self._json_objects['components']:
+                if "parameterMap" in component.keys():
+                    del component["parameterMap"]
+
+            obj = {"components": self._json_objects['components']}
+            if len(hp.keys()) != 0:
+                obj["hyperparameters"] = hp
+
+            json.dump(obj, fp, indent=4)
 
         with open(path + "/connections.json", 'w') as fp:
             json.dump(self._json_objects['connections'], fp, indent=4)
