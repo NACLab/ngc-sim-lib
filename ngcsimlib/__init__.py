@@ -29,7 +29,11 @@ def preload():
         module_path = None
 
     if module_path is None:
-        module_path = GlobalConfig.get_config("modules").get("module_path", "json_files/modules.json")
+        module_config = GlobalConfig.get_config("modules")
+        if module_config is None:
+            module_path = "json_files/modules.json"
+        else:
+            module_path = module_config.get("module_path", "json_files/modules.json")
 
     if not os.path.isfile(module_path):
         warnings.warn("\nMissing file to preload modules from. Attempted to locate file at \"" + str(module_path) +
@@ -83,7 +87,7 @@ def configure():
 if not Path(argv[0]).name == "sphinx-build" or Path(argv[0]).name == "build.py":
     if "readthedocs" not in argv[0]:  ## prevent readthedocs execution of preload
         configure()
+        logger.init_logging()
 
         preload()
-        logger.init_logging()
 

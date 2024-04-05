@@ -19,7 +19,7 @@ _ngclogger = logging.getLogger("ngclogger")
 
 
 def init_logging():
-    loggingConfig = GlobalConfig.get_config("loggingConfig")
+    loggingConfig = GlobalConfig.get_config("logging")
     if loggingConfig is None:
         loggingConfig = {"logging_file": None,
                          "logging_level": logging.WARNING,
@@ -28,7 +28,6 @@ def init_logging():
     if isinstance(loggingConfig.get("logging_level", None), str):
         loggingConfig["logging_level"] = \
             logging.getLevelName(loggingConfig.get("logging_level", "").upper())
-
 
     logging_level = loggingConfig.get("logging_level", logging.WARNING)
     _ngclogger.setLevel(logging_level)
