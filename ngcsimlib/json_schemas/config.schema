@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Config",
+  "description": "The location of all global configuration settings, such as modules or logging",
+  "type": "object",
+  "properties": {
+    "logging": {
+      "description": "Configuration for the logger",
+      "type": "object",
+      "properties": {
+        "logging_level": {
+          "description": "The logging level, uses the same levels as python's built in logger. Supports strings and numbers. (Default: WARNING)",
+          "type": ["string", "number"]
+        },
+        "hide_console": {
+          "description": "Should log message appear in the console (default: False)",
+          "type": "boolean"
+        },
+        "logging_file": {
+          "description": "If defined, logger will write to the provided file by appending. (default: None)",
+          "type": "string"
+        }
+      }
+    },
+    "modules": {
+      "description": "Configuration for preloading modules",
+      "type": "object",
+      "properties": {
+        "module_path": {
+          "description": "The path to the modules.json file, (default json_files/modules.json)",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
