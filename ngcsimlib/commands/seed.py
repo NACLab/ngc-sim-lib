@@ -1,6 +1,6 @@
 from ngcsimlib.commands.command import Command
 from ngcsimlib.utils import extract_args
-
+from ngcsimlib.logger import error
 
 class Seed(Command):
     """
@@ -27,8 +27,7 @@ class Seed(Command):
         super().__init__(components=components, command_name=command_name,
                          required_calls=['seed'])
         if seed_name is None:
-            raise RuntimeError(
-                self.name + " requires a \'seed_name\' to bind to for construction")
+            error(self.name, "requires a \'seed_name\' to bind to for construction")
 
         self.seed_name = seed_name
 
@@ -36,9 +35,8 @@ class Seed(Command):
         try:
             vals = extract_args([self.seed_name], *args, **kwargs)
         except RuntimeError:
-            raise RuntimeError(self.name + ", " + str(
-                self.seed_name) + " is missing from keyword arguments or a positional "
-                                   "arguments can be provided")
+            error(self.name, ",", self.seed_name,
+                  "is missing from keyword arguments or a positional arguments can be provided")
 
         for component in self.components:
             self.components[component].seed(vals[self.seed_name])

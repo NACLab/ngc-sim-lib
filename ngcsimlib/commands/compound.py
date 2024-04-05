@@ -1,6 +1,6 @@
 from ngcsimlib.commands import Command
 from ngcsimlib.utils import check_attributes
-import warnings
+from ngcsimlib.logger import warn, error
 
 class Compound(Command):
     """
@@ -25,9 +25,9 @@ class Compound(Command):
         """
         super().__init__(components=components, command_name=command_name)
         if controller is None:
-            raise RuntimeError("The controller is needed to build a compound command (This should be passed in by default)")
+            error("The controller is needed to build a compound command (This should be passed in by default)")
         if command_list is None or len(command_list) == 0:
-            warnings.warn("The command list for command " + self.name + " is None or empty")
+            warn("The command list for command", self.name, "is None or empty")
 
         self.command_list = command_list
         self.controller = controller

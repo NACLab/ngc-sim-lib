@@ -1,4 +1,5 @@
-import warnings
+from ngcsimlib.logger import warn, error
+
 
 class VerboseDict(dict):
     """
@@ -42,9 +43,9 @@ class VerboseDict(dict):
         if not successful or cname is None:
             return super().__setitem__(key, value)
 
-        warnings.warn("Failed to find compartment \"" + str(key) + "\" in " + self.name +
-                      "\nThe correct compartment for \"" + str(key) + "\" is " + str(cname) +
-                      "\nMapping \"" + str(key) + "\" to \"" + str(cname) + "\"")
+        warn("Failed to find compartment \"", key, "\" in ", self.name,
+             "\nThe correct compartment for \"", key, "\" is ", cname, "\nMapping \"", key,
+             "\" to \"", cname, "\"", sep="")
         self.mapping[key] = cname
         return super().__setitem__(self.mapping[key], value)
 
@@ -58,22 +59,24 @@ class VerboseDict(dict):
         successful, cname = find_compartment(self, self.componentClass, item)
 
         if not successful:
-            raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                               "\nAvailable compartments " + str(self.keys()))
+            error("Failed to find compartment \"", item, "\" in ", self.name,
+                  "\nAvailable compartments ", self.keys(), sep=" ")
 
         if cname is None:
-            raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                               "\n\"" + str(item) + "\" is a property of " + self.name +
-                               ", but unable to find key for requested compartment based on property name"
-                               "\nAvailable compartments " + str(self.keys()))
+            error("Failed to find compartment \"", item, "\" in ", self.name,
+                  "\n\"", item, "\" is a property of ", self.name,
+                  ", but unable to find key for requested compartment based on property name"
+                  "\nAvailable compartments ", self.keys(), sep=" ")
 
         if not self.autoMap:
-            raise RuntimeError("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                               "\nThe correct compartment for \"" + str(item) + "\" is " + str(cname) +
-                               "\nAll available compartments " + str(self.keys()))
-        warnings.warn("Failed to find compartment \"" + str(item) + "\" in " + self.name +
-                      "\nThe correct compartment for \"" + str(item) + "\" is " + str(cname) +
-                      "\nMapping \"" + str(item) + "\" to \"" + str(cname) + "\"")
+            error("Failed to find compartment \"", item, "\" in ", self.name,
+                  "\nThe correct compartment for \"", item, "\" is ", cname,
+                  "\nAll available compartments ", self.keys(), sep=" ")
+
+        warn("Failed to find compartment \"", item, "\" in ", self.name,
+             "\nThe correct compartment for \"", item, "\" is ", cname,
+             "\nMapping \"", item, "\" to \"", cname, "\"", sep=" ")
+
         self.mapping[item] = cname
         return super().__getitem__(self.mapping[item])
 
@@ -131,22 +134,18 @@ class ComponentMetadata:
             max_connections: maximum number of incoming connections this component should receive
         """
         if compartment not in self._incoming_connections.keys() and min_connections is not None:
-            raise RuntimeError(
-                str(self.component_name) + " has an incorrect number of incoming connections.\nMinimum connections: " +
-                str(min_connections) + "\t Actual Connections: None")
+            error(self.component_name, "has an incorrect number of incoming connections.\nMinimum connections:",
+                  min_connections, "\t Actual Connections: None")
 
         if compartment in self._incoming_connections.keys():
             count = self._incoming_connections[compartment]
             if min_connections is not None and count < min_connections:
-                raise RuntimeError(
-                    str(self.component_name) + "has an incorrect number of incoming connections.\nMinimum "
-                                               "connections: " +
-                    str(min_connections) + "\tActual Connections: " + str(count))
+                error(self.component_name, "has an incorrect number of incoming connections.\nMinimum connections:",
+                      min_connections, "\tActual Connections:", count)
+
             if max_connections is not None and count > max_connections:
-                raise RuntimeError(
-                    str(self.component_name) + "has an incorrect number of incoming connections.\nMaximum "
-                                               "connections: " +
-                    str(max_connections) + "\tActual Connections: " + str(count))
+                error(self.component_name, "has an incorrect number of incoming connections.\nMaximum connections:",
+                      max_connections, "\tActual Connections:", count)
 
     def check_outgoing_connections(self, compartment, min_connections=None, max_connections=None):
         """
@@ -160,22 +159,18 @@ class ComponentMetadata:
             max_connections: maximum number of incoming connections this component should receive
         """
         if compartment not in self._outgoing_connections.keys() and min_connections is not None:
-            raise RuntimeError(
-                str(self.component_name) + " has an incorrect number of outgoing connections.\nMinimum connections: " +
-                str(min_connections) + "\t Actual Connections: None")
+            error(self.component_name, "has an incorrect number of outgoing connections.\nMinimum connections:",
+                  min_connections, "\t Actual Connections: None")
 
         if compartment in self._outgoing_connections.keys():
             count = self._outgoing_connections[compartment]
             if min_connections is not None and count < min_connections:
-                raise RuntimeError(
-                    str(self.component_name) + " has an incorrect number of outgoing connections.\nMinimum "
-                                               "connections: " +
-                    str(min_connections) + "\tActual Connections: " + str(count))
+                error(self.component_name, "has an incorrect number of outgoing connections.\nMinimum connections:",
+                      min_connections, "\tActual Connections:", count)
+
             if max_connections is not None and count > max_connections:
-                raise RuntimeError(
-                    str(self.component_name) + " has an incorrect number of outgoing connections.\nMaximum "
-                                               "connections: " +
-                    str(max_connections) + "\tActual Connections: " + str(count))
+                error(self.component_name, "has an incorrect number of outgoing connections.\nMaximum connections:",
+                      max_connections, "\tActual Connections:", count)
 
 
 def find_compartment(values, componentClass, compartmentName):
