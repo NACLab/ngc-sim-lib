@@ -5,18 +5,18 @@
   items: {
     description: "The five different parts of a single cable",
     type: "object",
-    required: ["source_component", "source_compartment", "target_component", "target_compartment", "bundle"],
+    required: ["source_component_name", "source_compartment_name", "target_component_name", "target_compartment_name", "bundle"],
     properties: {
-      source_component: {
+      source_component_name: {
         type: "string"
       },
-      source_compartment: {
+      source_compartment_name: {
         type: "string"
       },
-      target_component: {
+      target_component_name: {
         type: "string"
       },
-      target_compartment: {
+      target_compartment_name: {
         type: "string"
       },
       bundle: {
