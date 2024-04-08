@@ -58,7 +58,7 @@ class Controller:
             else:
                 self.components[component].verify_connections()
 
-    def connect(self, source_component_name, source_compartment_name, destination_component_name,
+    def connect(self, source_component_name, source_compartment_name, target_component_name,
                 target_compartment_name, bundle=None):
         """
         Creates a cable from one component to another.
@@ -69,7 +69,7 @@ class Controller:
             source_compartment_name: the name of the compartment containing the
                 source value
 
-            destination_component_name: the name of the component receiving
+            target_component_name: the name of the component receiving
                 the value
 
             target_compartment_name: the name of the compartment to store the
@@ -78,16 +78,16 @@ class Controller:
             bundle: the number of the bundle rule to be used when using this
                 cable (Default: None)
         """
-        self.components[destination_component_name].create_incoming_connection(
+        self.components[target_component_name].create_incoming_connection(
             self.components[source_component_name].create_outgoing_connection(source_compartment_name),
             target_compartment_name,
             bundle)
-        self.connections.append((source_component_name, source_compartment_name, destination_component_name,
+        self.connections.append((source_component_name, source_compartment_name, target_component_name,
                                  target_compartment_name, bundle))
         self._json_objects['connections'].append({
             "source_component_name": source_component_name,
             "source_compartment_name": source_compartment_name,
-            "target_component_name": destination_component_name,
+            "target_component_name": target_component_name,
             "target_compartment_name": target_compartment_name,
             "bundle": bundle})
 
