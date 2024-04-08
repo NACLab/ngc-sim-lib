@@ -1,6 +1,7 @@
 from ngcsimlib.commands import Command
 from ngcsimlib.utils import extract_args
-import warnings
+from ngcsimlib.logger import warn, error
+
 
 class Save(Command):
     """
@@ -30,15 +31,16 @@ class Save(Command):
         super().__init__(components=components, command_name=command_name,
                          required_calls=['save'])
         if directory_flag is None:
-            raise RuntimeError(self.name + " requires a \'directory_flag\' to bind to for construction")
+            error(self.name, "requires a \'directory_flag\' to bind to for construction")
+
         self.directory_flag = directory_flag
 
     def __call__(self, *args, **kwargs):
         try:
             vals = extract_args([self.directory_flag], *args, **kwargs)
         except RuntimeError:
-            warnings.warn(self.name + ", " + str(self.directory_flag) + " is missing from keyword arguments and no "
-                                                                "positional arguments were provided", stacklevel=6)
+            warn(self.name + ",", self.directory_flag,
+                 "is missing from keyword arguments and no positional arguments were provided")
             return
 
         if vals[self.directory_flag]:

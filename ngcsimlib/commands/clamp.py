@@ -1,9 +1,7 @@
-import warnings
-
 from ngcsimlib.commands.command import Command
 from ngcsimlib.utils import extract_args
-from ngcsimlib.component_utils import find_compartment
-
+from ngcsimlib.componentUtils import find_compartment
+from ngcsimlib.logger import warn, error
 
 class Clamp(Command):
     """
@@ -33,11 +31,9 @@ class Clamp(Command):
         super().__init__(components=components, command_name=command_name,
                          required_calls=['clamp'])
         if compartment is None:
-            raise RuntimeError(
-                self.name + " requires a \'compartment\' to clamp to for construction")
+            error(self.name, "requires a \'compartment\' to clamp to for construction")
         if clamp_name is None:
-            raise RuntimeError(
-                self.name + " requires a \'clamp_name\' to bind to for construction")
+            error(self.name, "requires a \'clamp_name\' to bind to for construction")
 
         self.clamp_name = clamp_name
         self.compartment = compartment
@@ -46,23 +42,20 @@ class Clamp(Command):
             _, mapped_name = find_compartment(component.compartments, component.__class__, self.compartment)
 
             if mapped_name is None:
-                raise RuntimeError(self.name +
-                                   " is attempting to initialize clamp to non-existent compartment \"" + self.compartment
-                                   + "\" on " + name)
+                error(self.name, " is attempting to initialize clamp to non-existent compartment \"",
+                      self.compartment, "\" on ", name, sep=" ")
 
             if mapped_name != self.compartment:
-                warnings.warn(self.name +
-                              " is attempting to initialize clamp to a property name, not a compartment of " +
-                              name + ". If using a verboseDict and autoMap this will work, otherwise this clamp will "
-                                       "have unknown behavior")
+                warn(self.name, " is attempting to initialize clamp to a property name, not a compartment of ", name,
+                     ". If using a verboseDict and autoMap this will work, otherwise this clamp will have unknown "
+                     "behavior", sep=" ")
 
     def __call__(self, *args, **kwargs):
         try:
             vals = extract_args([self.clamp_name], *args, **kwargs)
         except RuntimeError:
-            raise RuntimeError(self.name + ", " + str(
-                self.clamp_name) + " is missing from keyword arguments or a positional "
-                                   "arguments can be provided")
+            error(self.name, ",", self.clamp_name,
+                  "is missing from keyword arguments or a positional arguments can be provided")
 
         for component in self.components:
             self.components[component].clamp(self.compartment, vals[self.clamp_name])

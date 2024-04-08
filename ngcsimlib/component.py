@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-import warnings
 import ngcsimlib.utils as utils
-from ngcsimlib.component_utils import VerboseDict, ComponentMetadata
+from ngcsimlib.componentUtils import VerboseDict, ComponentMetadata
 
 
 

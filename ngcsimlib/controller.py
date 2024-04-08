@@ -1,5 +1,6 @@
 from ngcsimlib.utils import check_attributes, load_from_path, make_unique_path, check_serializable
-import json, os, warnings, inspect
+import json, os, inspect
+from ngcsimlib.logger import warn, error, info
 
 
 class Controller:
@@ -11,10 +12,11 @@ class Controller:
     (and was referred to as the "nodes-and-cables" system in earlier versions of
     ngc-learn).
     """
+
     def __init__(self):
         self.steps = []
         self.commands = {}
-        self.components = {} ## components/nodes that characterize system/simulation object
+        self.components = {}  ## components/nodes that characterize system/simulation object
         self.connections = []  ## cables that characterize system/simulation object
 
         self._json_objects = {
@@ -77,9 +79,11 @@ class Controller:
                 cable (Default: None)
         """
         self.components[destination_component_name].create_incoming_connection(
-            self.components[source_component_name].create_outgoing_connection(source_compartment_name), target_compartment_name,
+            self.components[source_component_name].create_outgoing_connection(source_compartment_name),
+            target_compartment_name,
             bundle)
-        self.connections.append((source_component_name, source_compartment_name, destination_component_name, target_compartment_name, bundle))
+        self.connections.append((source_component_name, source_compartment_name, destination_component_name,
+                                 target_compartment_name, bundle))
         self._json_objects['connections'].append({
             "source_component_name": source_component_name,
             "source_compartment_name": source_compartment_name,
@@ -206,17 +210,15 @@ class Controller:
         elif inspect.isfunction(Component_class):
             call = Component_class
         else:
-            raise RuntimeError("Given component type " + str(component_type)
-                               + " is not callable")
+            error("Given component type", component_type, "is not callable")
 
         try:
             component = Component_class(**kwargs)
         except TypeError as E:
             count = call.__code__.co_argcount - 1
             named_args = call.__code__.co_varnames[1:count]
-            print(E)
-            raise RuntimeError(str(E) + "\nProvided keyword arguments:\t" + str(list(kwargs.keys())) +
-                               "\nRequired keyword arguments:\t" + str(list(named_args)))
+            error(E, "\nProvided keyword arguments:\t", list(kwargs.keys()),
+                  "\nRequired keyword arguments:\t", list(named_args))
 
         check_attributes(component, ["name", "verify_connections"], fatal=True)
         self.components[component.name] = component
@@ -225,7 +227,7 @@ class Controller:
         bad_keys = check_serializable(obj)
         for key in bad_keys:
             del obj[key]
-            print("Failed to serialize \"" + str(key) + "\" in " + component.name)
+            info("Failed to serialize \"", key, "\" in ", component.name, sep="")
 
         if "directory" in obj.keys():
             del obj["directory"]
@@ -277,9 +279,9 @@ class Controller:
         """
         Command_class = load_from_path(path=command_type, match_case=match_case, absolute_path=absolute_path)
         if not callable(Command_class):
-            raise RuntimeError("The object named \"" + Command_class.__name__ + "\" is not callable. Please make sure "
-                                                                                "the object is callable and returns a "
-                                                                                "callable object")
+            error("The object named \"", Command_class.__name__,
+                  "\" is not callable. Please make sure the object is callable and returns a callable object", sep="")
+
         if component_names is not None:
             componentObjs = [self.components[name] for name in component_names]
         else:
@@ -290,17 +292,15 @@ class Controller:
         elif inspect.isfunction(Command_class):
             call = Command_class
         else:
-            raise RuntimeError("Given command type " + str(command_type)
-                               + " is not callable")
+            error("Given command type", command_type, "is not callable")
 
         count = call.__code__.co_argcount - 1
         named_args = call.__code__.co_varnames[1:count]
         try:
             command = Command_class(components=componentObjs, controller=self, command_name=command_name, **kwargs)
         except TypeError as E:
-            print(E)
-            raise RuntimeError(str(E) + "\nProvided keyword arguments:\t" + str(list(kwargs.keys())) +
-                               "\nRequired keyword arguments:\t" + str(list(named_args)))
+            error(E, "\nProvided keyword arguments:\t", list(kwargs.keys()),
+                  "\nRequired keyword arguments:\t", list(named_args))
 
         self.commands[command_name] = command
         self.__setattr__(command_name, command)
@@ -310,7 +310,7 @@ class Controller:
         bad_keys = check_serializable(obj)
         for key in bad_keys:
             del obj[key]
-            print("Failed to serialize \"" + str(key) + "\" in " + command_name)
+            info("Failed to serialize \"", key, "\" in ", command_name, sep="")
 
         self._json_objects['commands'].append(obj)
         return command
@@ -328,7 +328,7 @@ class Controller:
         """
         command = self.commands.get(command_name, None)
         if command is None:
-            raise RuntimeError("Can not find command: " + str(command_name))
+            error("Can not find command:", command_name)
         command(*args, **kwargs)
 
     def save_to_json(self, directory, model_name=None, custom_save=True):
@@ -387,8 +387,8 @@ class Controller:
                         self._json_objects['components'][idx][cKey] = param
 
                     else:
-                        warnings.warn("Unable to extract hyperparameter " + str(param) +
-                                      " as it is mismatched between components. Parameter will not be extracted")
+                        warn("Unable to extract hyperparameter", param,
+                             "as it is mismatched between components. Parameter will not be extracted")
 
             for component in self._json_objects['components']:
                 if "parameterMap" in component.keys():
@@ -408,7 +408,7 @@ class Controller:
             if check_attributes(self, ['save']):
                 self.save(path + "/custom")
             else:
-                warnings.warn("Controller doesn't have a save command registered. No custom saving happened")
+                warn("Controller doesn't have a save command registered. No custom saving happened")
 
         return (path, path + "/custom") if custom_save else (path, None)
 
