@@ -1,6 +1,6 @@
 import logging
 import sys
-from ngcsimlib.configManager import GlobalConfig
+from ngcsimlib.configManager import get_config
 
 def _concatArgs(*args, **kwargs):
     """Internal Decorator for concatenating arguments into a single string"""
@@ -19,7 +19,7 @@ _ngclogger = logging.getLogger("ngclogger")
 
 
 def init_logging():
-    loggingConfig = GlobalConfig.get_config("logging")
+    loggingConfig = get_config("logging")
     if loggingConfig is None:
         loggingConfig = {"logging_file": None,
                          "logging_level": logging.WARNING,
