@@ -4,12 +4,12 @@ from . import controller
 from . import commands
 from . import logger
 
-import argparse, os, warnings, json, logging
+import argparse, os, warnings, json
 from types import SimpleNamespace
 from pathlib import Path
 from sys import argv
 from importlib import import_module
-from ngcsimlib.configManager import GlobalConfig
+from ngcsimlib.configManager import init_config, get_config
 
 from pkg_resources import get_distribution
 
@@ -17,23 +17,12 @@ __version__ = get_distribution('ngcsimlib').version  ## set software version
 
 
 ###### Preload Modules
-def preload():
-    parser = argparse.ArgumentParser(description='Build and run a model using ngclearn')
-    parser.add_argument("--modules", type=str, help='location of modules.json file')
-
-    ## ngc-sim-lib only cares about --modules argument
-    args, unknown = parser.parse_known_args()  # args = parser.parse_args()
-    try:
-        module_path = args.modules
-    except:
-        module_path = None
-
-    if module_path is None:
-        module_config = GlobalConfig.get_config("modules")
-        if module_config is None:
-            module_path = "json_files/modules.json"
-        else:
-            module_path = module_config.get("module_path", "json_files/modules.json")
+def preload_modules():
+    module_config = get_config("modules")
+    if module_config is None:
+        module_path = "json_files/modules.json"
+    else:
+        module_path = module_config.get("module_path", "json_files/modules.json")
 
     if not os.path.isfile(module_path):
         warnings.warn("\nMissing file to preload modules from. Attempted to locate file at \"" + str(module_path) +
@@ -79,7 +68,7 @@ def configure():
                       "\nSee PUT LINK HERE for additional information")
         return
 
-    GlobalConfig.init_config(config_path)
+    init_config(config_path)
 
 
 
@@ -88,6 +77,5 @@ if not Path(argv[0]).name == "sphinx-build" or Path(argv[0]).name == "build.py":
     if "readthedocs" not in argv[0]:  ## prevent readthedocs execution of preload
         configure()
         logger.init_logging()
-
-        preload()
+        preload_modules()
 
