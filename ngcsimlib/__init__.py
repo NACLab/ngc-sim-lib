@@ -1,4 +1,3 @@
-
 from . import utils
 from . import controller
 from . import commands
@@ -27,7 +26,7 @@ def preload_modules():
     if not os.path.isfile(module_path):
         warnings.warn("\nMissing file to preload modules from. Attempted to locate file at \"" + str(module_path) +
                       "\". No modules will be preloaded. "
-    "\nSee https://ngc-learn.readthedocs.io/en/latest/tutorials/model_basics/json_modules.html for additional information")
+                      "\nSee https://ngc-learn.readthedocs.io/en/latest/tutorials/model_basics/json_modules.html for additional information")
         return
 
     with open(module_path, 'r') as file:
@@ -65,12 +64,12 @@ def configure():
     if not os.path.isfile(config_path):
         warnings.warn("\nMissing configuration file. Attempted to locate file at \"" + str(config_path) +
                       "\". Default Config will be used. "
-                      "\nSee PUT LINK HERE for additional information")
+                      "\nSee https://ngc-learn.readthedocs.io/en/latest/tutorials/model_basics/configuration.html for "
+                      "additional information")
         return
 
+
     init_config(config_path)
-
-
 
 
 if not Path(argv[0]).name == "sphinx-build" or Path(argv[0]).name == "build.py":
@@ -78,4 +77,3 @@ if not Path(argv[0]).name == "sphinx-build" or Path(argv[0]).name == "build.py":
         configure()
         logger.init_logging()
         preload_modules()
-
