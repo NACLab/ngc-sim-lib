@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 import ngcsimlib.utils as utils
-from ngcsimlib.componentUtils import VerboseDict, ComponentMetadata
+from ngcsimlib.componentUtils import ComponentMetadata
+from ngcsimlib.metaComponent import MetaComponent
 
 
-
-class Component(ABC):
+class Component(metaclass=MetaComponent):
     """
     Components are a foundational part of ngclearn and its component/command
     structure. In ngclearn, all stateful parts of a model take the form of
@@ -51,69 +51,10 @@ class Component(ABC):
         # Component Data
         self.name = name
 
-        self.compartments = VerboseDict(name=self.name, componentClass=self.__class__, **kwargs) if useVerboseDict else {}
-        self.bundle_rules = {}
-        self.sources = []
-
         # Meta Data
         self.metadata = ComponentMetadata(name=self.name, **kwargs)
 
     ##Intialization Methods
-    def create_outgoing_connection(self, source_compartment):
-        """
-        Creates a callback function to a specific compartment of the component.
-        These connections are how other components will read specific parts of
-        this components state at run time.
-
-        Args:
-            source_compartment: the specific compartment whose state will be
-                returned by the callback function
-
-        Returns:
-            a callback function that takes no parameters and returns the state
-                of the specified compartment
-        """
-        self.metadata.add_outgoing_connection(source_compartment)
-        return lambda: self.compartments[source_compartment]
-
-    def create_incoming_connection(self, source, target_compartment, bundle=None):
-        """
-        Binds callback function to a specific local compartment.
-
-        Args:
-            source: The defined callback function generally produced by
-                `create_outgoing_connection`
-
-            target_compartment: The local compartment the value should be stored in
-
-            bundle: The bundle or input rule to be used to put the data into the
-                compartment, this is overwriting the value by default, but rules
-                like appending and adding are also provided in `bundle_rules.py`
-        """
-        self.metadata.add_incoming_connection(target_compartment)
-        if bundle not in self.bundle_rules.keys():
-            self.create_bundle(bundle, bundle)
-        self.sources.append((source, target_compartment, bundle))
-
-    def create_bundle(self, bundle_name, bundle_rule_name):
-        """
-        This tracks the all the bundle rules that the component will need while gathering information
-
-        Args:
-            bundle_name: the local name of the bundle name
-
-            bundle_rule_name: the rule name or keyword defined in `modules.json`
-        """
-        if bundle_name is not None:
-            rule = utils.load_attribute(bundle_rule_name)
-            self.bundle_rules[bundle_name] = rule
-        else:
-            try:
-                rule = utils.load_attribute(bundle_rule_name)
-            except:
-                from .bundle_rules import overwrite
-                rule = overwrite
-            self.bundle_rules[bundle_name] = rule
 
     ## Runtime Methods
     def clamp(self, compartment, value):
@@ -125,46 +66,9 @@ class Component(ABC):
 
             value: provided Value
         """
-        self.compartments[compartment] = value
-
-    def process_incoming(self):
-        """
-        Calls each callback function and yields results from all connections
-
-        Returns:
-            yields tuples of the form (value, target_compartment, bundle)
-        """
-        for (source, target_compartment, bundle) in self.sources:
-            yield source(), target_compartment, bundle
-
-    def pre_gather(self):
-        """
-        Optionally implemented method that is called before all the connections
-        are processed. An example use case for this method is that if a compartment
-        should be reset before multiple cables under the additive bundle rule
-        are processed.
-        """
-        pass
-
-    def gather(self):
-        """
-        The method that does all the processing of incoming value including
-        calling pre_gather, and using the correct bundle rule.
-        """
-        self.pre_gather()
-        for val, dest_comp, bundle in self.process_incoming():
-            self.bundle_rules[bundle](self, val, dest_comp)
+        raise NotImplementedError("Clamp is not implement")
 
     ##Abstract Methods
-    @abstractmethod
-    def verify_connections(self):
-        """
-        An abstract method that generally uses component metadata to verify that
-        there are the correct number of connections. This should error if it
-        fails the verification.
-        """
-        pass
-
     @abstractmethod
     def advance_state(self, **kwargs):
         """

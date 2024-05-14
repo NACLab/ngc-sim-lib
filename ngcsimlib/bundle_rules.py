@@ -1,3 +1,5 @@
+"""DEPRECATED USE OPERATIONS"""
+
 """
 Contains all the built-in bundle rules as well as the default one for an unbundled
 cable. Bundle(s) usage is that it is to be added to a component's bundle rules
