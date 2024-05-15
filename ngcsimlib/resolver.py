@@ -23,7 +23,7 @@ def resolver(pure_fn,
         if output_compartments is None:
             output_compartments = compartments[:]
     else:
-        varnames = pure_fn.__func__.__code__.co_varnames
+        varnames = pure_fn.__func__.__code__.co_varnames[:pure_fn.__func__.__code__.co_argcount]
         # print(f"[DEBUG] varnames: {varnames}")
 
     def _resolver(fn):
@@ -41,13 +41,12 @@ def resolver(pure_fn,
             cargs = {}
             if parse_varnames:
                 for n in varnames:
-                    if n in pure_fn.__func__.__code__.co_varnames[:pure_fn.__func__.__code__.co_argcount]:
-                        if n not in self.__dict__.keys():
-                            cargs[n] = _kwargs.get(n)
-                        elif Compartment.is_compartment(self.__dict__[n]):
-                            comps[n] = self.__dict__[n].value
-                        else:
-                            params[n] = self.__dict__[n]
+                    if n not in self.__dict__.keys():
+                        cargs[n] = _kwargs.get(n)
+                    elif Compartment.is_compartment(self.__dict__[n]):
+                        comps[n] = self.__dict__[n].value
+                    else:
+                        params[n] = self.__dict__[n]
             else:
                 comps = {key: self.__dict__[key].value for key in compartments}
                 params = {key: self.__dict__[key] for key in parameters}
