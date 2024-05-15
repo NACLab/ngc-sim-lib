@@ -23,7 +23,8 @@ def resolver(pure_fn,
         if output_compartments is None:
             output_compartments = compartments[:]
     else:
-        varnames = pure_fn.__func__.__code__.co_varnames
+        varnames = pure_fn.__func__.__code__.co_varnames[:pure_fn.__func__.__code__.co_argcount]
+        # print(f"[DEBUG] varnames: {varnames}")
 
     def _resolver(fn):
 

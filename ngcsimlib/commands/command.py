@@ -67,6 +67,7 @@ class Command(ABC):
         def compiled(*args):
             funArgs = [args[arg_order.index(narg)] for narg in (list(_args))]
             funComps = [args[arg_order.index(narg)] for narg in comp_ids]
+            # print(f"[DEBUG] funArgs: {funArgs}, funParams: {funParams}, funComps: {funComps}")
             return pure_fn(*funArgs, *funParams, *funComps)
 
         exc_order.append((compiled, out_ids, component.name))
@@ -85,14 +86,16 @@ class Command(ABC):
                 args = []
                 parameters = []
                 compartments = []
-                varnames = pure_fn.__func__.__code__.co_varnames
+                varnames = pure_fn.__func__.__code__.co_varnames[:pure_fn.__func__.__code__.co_argcount]
                 for n in varnames:
                     if n not in component.__dict__.keys():
                         args.append(n)
                     elif Compartment.is_compartment(component.__dict__[n]):
                         compartments.append(n)
+                        # print(f"[DEBUG] added compartment: {n}")
                     else:
                         parameters.append(n)
+                    # print(f"[DEBUG] n: {n}")
 
                 if output_compartments is None:
                     output_compartments = compartments[:]
@@ -126,6 +129,7 @@ class Command(ABC):
             for i in range(loops):
                 for exc, outs, name in exc_order:
                     _comps = [compartment_values[key] for key in needed_comps]
+                    # print(f"[DEBUG] params gen: {param_generator(i)}, cargs: {cargs}, needed_comps: {needed_comps}, _comps: {_comps}")
                     vals = exc(*param_generator(i), *cargs, *_comps)
                     if len(outs) == 1:
                         compartment_values[outs[0]] = vals
