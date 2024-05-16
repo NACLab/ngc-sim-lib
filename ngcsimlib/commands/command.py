@@ -74,7 +74,7 @@ class Command(ABC):
         return exc_order
 
 
-    def compile(self, loops, param_generator):
+    def compile(self):
         assert self.compile_key is not None
         ## for each component, get compartments, get output compartments
         resolvers = {}
@@ -125,17 +125,15 @@ class Command(ABC):
             exc_order.extend(Command.__compile_component(component, resolvers[c_name], arg_order))
 
         def compiled(*cargs, compartment_values):
-
-            for i in range(loops):
-                for exc, outs, name in exc_order:
-                    _comps = [compartment_values[key] for key in needed_comps]
-                    # print(f"[DEBUG] params gen: {param_generator(i)}, cargs: {cargs}, needed_comps: {needed_comps}, _comps: {_comps}")
-                    vals = exc(*param_generator(i), *cargs, *_comps)
-                    if len(outs) == 1:
-                        compartment_values[outs[0]] = vals
-                    elif len(outs) > 1:
-                        for v, t in zip(vals, outs):
-                            compartment_values[t] = v
+            for exc, outs, name in exc_order:
+                _comps = [compartment_values[key] for key in needed_comps]
+                # print(f"[DEBUG] params gen: {param_generator(i)}, cargs: {cargs}, needed_comps: {needed_comps}, _comps: {_comps}")
+                vals = exc(*cargs, *_comps)
+                if len(outs) == 1:
+                    compartment_values[outs[0]] = vals
+                elif len(outs) > 1:
+                    for v, t in zip(vals, outs):
+                        compartment_values[t] = v
             return {key: c for key, c in compartment_values.items()}
 
         return compiled, arg_order
