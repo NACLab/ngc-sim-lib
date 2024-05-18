@@ -1,4 +1,6 @@
 from ngcsimlib.compartment import Compartment
+from ngcsimlib.context import Context
+
 class MetaComponent(type):
     @staticmethod
     def super_init(self, *args, **kwargs):
@@ -9,6 +11,8 @@ class MetaComponent(type):
         for key, value in self.__dict__.items():
             if Compartment.is_compartment(value):
                 value._setup(self.add_connection)
+        # add component to context
+        Context.get_current_context().components[self.name] = self
 
     @staticmethod
     def add_connection(self, op):
