@@ -49,14 +49,8 @@ class Command(ABC):
 
         ### Op resolve
         for connection in component.connections:
-            pure_op, input_ids, output_id = connection.compile()
-            iids = [str(i) for i in input_ids]
-
-            def _op_compiled(*args):
-                op_args = [args[arg_order.index(narg)] for narg in iids]
-                return pure_op(*op_args)
-
-            exc_order.append((_op_compiled, [str(output_id)], "op"))
+            _pure_fn, output_id = connection.compile(arg_order)
+            exc_order.append((_pure_fn, [str(output_id)], "op"))
 
         ### Component resolve
         comp_ids = [str(component.__dict__[comp]._uid) for comp in comps]
@@ -64,10 +58,10 @@ class Command(ABC):
 
         funParams = [component.__dict__[narg] for narg in (list(params))]
 
+
         def compiled(*args):
             funArgs = [args[arg_order.index(narg)] for narg in (list(_args))]
             funComps = [args[arg_order.index(narg)] for narg in comp_ids]
-            # print(f"[DEBUG] funArgs: {funArgs}, funParams: {funParams}, funComps: {funComps}")
             return pure_fn(*funArgs, *funParams, *funComps)
 
         exc_order.append((compiled, out_ids, component.name))
@@ -105,16 +99,18 @@ class Command(ABC):
         needed_args = []
         needed_comps = []
         init_comp_vals = {}
+
         for c_name, component in self.components.items():
             _, outs, args, params, comps = resolvers[c_name]
             for a in args:
                 if a not in needed_args:
                     needed_args.append(a)
 
-            for connection in component.connections:
-                op, inputs, outputs = connection.compile()
-                needed_comps.extend([str(i) for i in inputs])
 
+
+            for connection in component.connections:
+                inputs, outputs = connection.parse()
+                needed_comps.extend([str(i) for i in inputs])
             for comp in comps:
                 needed_comps.append(str(component.__dict__[comp]._uid))
                 init_comp_vals[str(component.__dict__[comp]._uid)] = component.__dict__[comp].value
@@ -126,14 +122,19 @@ class Command(ABC):
 
         def compiled(*cargs, compartment_values):
             for exc, outs, name in exc_order:
+                # print(compartment_values)
                 _comps = [compartment_values[key] for key in needed_comps]
                 # print(f"[DEBUG] params gen: {param_generator(i)}, cargs: {cargs}, needed_comps: {needed_comps}, _comps: {_comps}")
                 vals = exc(*cargs, *_comps)
+                # print(compartment_values[outs[0]])
+
+
                 if len(outs) == 1:
                     compartment_values[outs[0]] = vals
                 elif len(outs) > 1:
                     for v, t in zip(vals, outs):
                         compartment_values[t] = v
+                # print(compartment_values[outs[0]])
             return {key: c for key, c in compartment_values.items()}
 
         return compiled, arg_order
