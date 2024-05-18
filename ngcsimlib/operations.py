@@ -28,6 +28,9 @@ class BaseOp():
                 inputs.append(s._uid)
         return inputs, self.destination._uid if self.destination is not None else None
 
+    def __repr__(self) -> str:
+        return f"[OP:overwrite] {self.sources[0].name}"
+
     def __init__(self, *sources):
         self.sources = sources
         self.destination = None
@@ -44,6 +47,7 @@ class BaseOp():
 
     def resolve(self, value):
         if self.destination is not None:
+            print(f"[OP.resolve] destination: {self.destination}")
             self.destination.set(value)
 
 
