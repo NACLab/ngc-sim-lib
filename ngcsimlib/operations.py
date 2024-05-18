@@ -38,6 +38,7 @@ class BaseOp():
 
     def resolve(self, value):
         if self.destination is not None:
+            print(f"[OP.resolve] destination: {self.destination}")
             self.destination.set(value)
 
 
