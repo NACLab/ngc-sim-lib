@@ -8,13 +8,14 @@ class Compartment():
     def is_compartment(cls, obj):
         return hasattr(obj, "_is_compartment")
 
-    def __init__(self, initial_value=None, static=False):
+    def __init__(self, initial_value=None, static=False, name="default"):
         self._is_compartment = True
         self.__add_connection = None
         self._static = static
         self.value = initial_value
         self._uid = uuid.uuid4()
         All_compartments[str(self._uid)] = self
+        self.name = name
 
     def _setup(self, add_connection):
         self.__add_connection = add_connection
@@ -26,7 +27,7 @@ class Compartment():
             raise RuntimeError("Can not assign value to static compartment")
 
     def __repr__(self):
-        return repr(self.value)
+        return f"[{self.name}] {repr(self.value)}"
 
     def __str__(self):
         return str(self.value)

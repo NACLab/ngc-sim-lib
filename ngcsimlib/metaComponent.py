@@ -12,6 +12,7 @@ class MetaComponent(type):
 
     @staticmethod
     def add_connection(self, op):
+        print(f"[MetaComponent/add_connection] added: {op}, self.connnections: {self.connections}")
         self.connections.append(op)
 
     @staticmethod
