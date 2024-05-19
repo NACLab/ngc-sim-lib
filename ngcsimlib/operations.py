@@ -28,9 +28,6 @@ class BaseOp():
                 inputs.append(s._uid)
         return inputs, self.destination._uid if self.destination is not None else None
 
-    def __repr__(self) -> str:
-        return f"[OP:overwrite] {self.sources[0].name}"
-
     def __init__(self, *sources):
         self.sources = sources
         self.destination = None
@@ -47,7 +44,7 @@ class BaseOp():
 
     def resolve(self, value):
         if self.destination is not None:
-            print(f"[OP.resolve] destination: {self.destination}")
+            # print(f"[OP.resolve] destination: {self.destination}")
             self.destination.set(value)
 
 
@@ -62,10 +59,16 @@ class summation(BaseOp):
                 s += source
         return s
 
+    def __repr__(self) -> str:
+        return f"[OP:summation] {[self.source.name for source in self.sources]}"
+
 class negate(BaseOp):
     @staticmethod
     def operation(*sources):
         return -sources[0]
+
+    def __repr__(self) -> str:
+        return f"[OP:negate] {self.sources[0].name}"
 
 class add(BaseOp):
     @staticmethod
@@ -86,3 +89,6 @@ class overwrite(BaseOp):
     @staticmethod
     def operation(*sources):
         return sources[0]
+
+    def __repr__(self) -> str:
+        return f"[OP:overwrite] {self.sources[0].name}"
