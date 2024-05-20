@@ -36,7 +36,6 @@ class Compartment():
         if isinstance(other, BaseOp):
             other.set_destination(self)
             self.__add_connection(other)
-
         else:
             op = overwrite(other)
             op.set_destination(self)

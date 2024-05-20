@@ -8,32 +8,39 @@ def get_resolver(class_name, resolver_key):
 
 def resolver(pure_fn,
              output_compartments=None,
-             parse_varnames=True,
              args=None,
              parameters=None,
-             compartments=None
+             compartments=None,
+             expand_args=True
              ):
-    if parse_varnames is False:
+    if not(args is None and parameters is None and compartments is None):
+        parse_varnames = False
         if args is None:
             args = []
         if parameters is None:
             parameters = []
         if compartments is None:
             compartments = []
-        if output_compartments is None:
-            output_compartments = compartments[:]
     else:
+        parse_varnames = True
         varnames = pure_fn.__func__.__code__.co_varnames[:pure_fn.__func__.__code__.co_argcount]
-        # print(f"[DEBUG] varnames: {varnames}")
+
+
+    if output_compartments is None:
+        output_compartments = []
 
     def _resolver(fn):
+        if len(output_compartments) == 0:
+            for n in fn.__code__.co_varnames[1:fn.__code__.co_argcount]:
+                output_compartments.append(n)
+
 
         class_name = ".".join(fn.__qualname__.split('.')[:-1])
         resolver_key = fn.__qualname__.split('.')[-1]
 
         __component_resolvers[class_name + "/" + resolver_key] = pure_fn, output_compartments
 
-        __resolver_meta_data[class_name + "/" + resolver_key] = (args, parameters, compartments)
+        __resolver_meta_data[class_name + "/" + resolver_key] = (args, parameters, compartments, parse_varnames)
 
         def _wrapped(self=None, *_args, **_kwargs):
             comps = {}
@@ -53,6 +60,9 @@ def resolver(pure_fn,
                 cargs = {key: _kwargs.get(key) for key in args}
 
             vals = pure_fn(**cargs, **params, **comps)
-            fn(self, vals)
+            if expand_args and len(output_compartments) > 1:
+                fn(self, *vals)
+            else:
+                fn(self, vals)
         return _wrapped
     return _resolver

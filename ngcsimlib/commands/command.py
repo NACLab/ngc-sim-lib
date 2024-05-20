@@ -49,20 +49,33 @@ class Command(ABC):
 
         ### Op resolve
         for connection in component.connections:
-            _pure_fn, output_id = connection.compile(arg_order)
-            exc_order.append((_pure_fn, [str(output_id)], "op"))
+            exc_order.append(connection.compile(arg_order))
 
         ### Component resolve
-        comp_ids = [str(component.__dict__[comp]._uid) for comp in comps]
+        comp_ids = [str(component.__dict__[comp]._uid) for _, comp in comps]
         out_ids = [str(component.__dict__[comp]._uid) for comp in outs]
 
-        funParams = [component.__dict__[narg] for narg in (list(params))]
+        funParams = [component.__dict__[narg] for _, narg in (list(params))]
+
+        arg_locs = [loc for loc, _ in _args]
+        param_locs = [loc for loc, _ in params]
+        comp_locs = [loc for loc, _ in comps]
 
 
         def compiled(*args):
-            funArgs = [args[arg_order.index(narg)] for narg in (list(_args))]
+            funArgs = [args[arg_order.index(narg)] for _, narg in (list(_args))]
             funComps = [args[arg_order.index(narg)] for narg in comp_ids]
-            return pure_fn(*funArgs, *funParams, *funComps)
+
+            fargs = []
+            for i in range(len(arg_locs) + len(param_locs) + len(comp_locs)):
+                if i in arg_locs:
+                    fargs.append(funArgs.pop(0))
+                elif i in param_locs:
+                    fargs.append(funParams.pop(0))
+                else:
+                    fargs.append(funComps.pop(0))
+
+            return pure_fn(*fargs)
 
         exc_order.append((compiled, out_ids, component.name))
         return exc_order
@@ -73,47 +86,51 @@ class Command(ABC):
         ## for each component, get compartments, get output compartments
         resolvers = {}
         for c_name, component in self.components.items():
-            (pure_fn, output_compartments), (args, parameters, compartments) = \
+            (pure_fn, output_compartments), (args, parameters, compartments, parse_varnames) = \
                 get_resolver(component.__class__.__name__, self.compile_key)
 
-            if args is None:
+
+            if parse_varnames:
                 args = []
                 parameters = []
                 compartments = []
                 varnames = pure_fn.__func__.__code__.co_varnames[:pure_fn.__func__.__code__.co_argcount]
-                for n in varnames:
+
+                for idx, n in enumerate(varnames):
                     if n not in component.__dict__.keys():
-                        args.append(n)
+                        args.append((idx, n))
                     elif Compartment.is_compartment(component.__dict__[n]):
-                        compartments.append(n)
-                        # print(f"[DEBUG] added compartment: {n}")
+                        compartments.append((idx, n))
                     else:
-                        parameters.append(n)
-                    # print(f"[DEBUG] n: {n}")
+                        parameters.append((idx, n))
 
                 if output_compartments is None:
                     output_compartments = compartments[:]
+
+
 
             resolvers[c_name] = (pure_fn, output_compartments, args, parameters, compartments)
 
         needed_args = []
         needed_comps = []
-        init_comp_vals = {}
 
         for c_name, component in self.components.items():
             _, outs, args, params, comps = resolvers[c_name]
-            for a in args:
+            for _, a in args:
                 if a not in needed_args:
                     needed_args.append(a)
 
-
-
             for connection in component.connections:
                 inputs, outputs = connection.parse()
-                needed_comps.extend([str(i) for i in inputs])
-            for comp in comps:
-                needed_comps.append(str(component.__dict__[comp]._uid))
-                init_comp_vals[str(component.__dict__[comp]._uid)] = component.__dict__[comp].value
+                ncs = [str(i) for i in inputs]
+                for nc in ncs:
+                    if nc not in needed_comps:
+                        needed_comps.append(nc)
+
+            for _, comp in comps:
+                uid = str(component.__dict__[comp]._uid)
+                if uid not in needed_comps:
+                    needed_comps.append(uid)
 
         arg_order = needed_args + needed_comps
         exc_order = []
@@ -122,20 +139,14 @@ class Command(ABC):
 
         def compiled(*cargs, compartment_values):
             for exc, outs, name in exc_order:
-                # print(compartment_values)
                 _comps = [compartment_values[key] for key in needed_comps]
-                # print(f"[DEBUG] params gen: {param_generator(i)}, cargs: {cargs}, needed_comps: {needed_comps}, _comps: {_comps}")
                 vals = exc(*cargs, *_comps)
-                # print(compartment_values[outs[0]])
-
-
                 if len(outs) == 1:
                     compartment_values[outs[0]] = vals
                 elif len(outs) > 1:
                     for v, t in zip(vals, outs):
                         compartment_values[t] = v
-                # print(compartment_values[outs[0]])
-            return {key: c for key, c in compartment_values.items()}
+            return compartment_values
 
         return compiled, arg_order
 

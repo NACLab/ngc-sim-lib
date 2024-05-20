@@ -14,8 +14,9 @@ class Context:
         return super().__new__(cls)
 
     def __init__(self, name):
-        if Context._current_context + "/" + str(name) in Context._contexts.keys():
+        if hasattr(self, "_init"):
             return
+        self._init = True
 
         Context._contexts[Context._current_context + "/" + str(name)] = self
         self.components = {}

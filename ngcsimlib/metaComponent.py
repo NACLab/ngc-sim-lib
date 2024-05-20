@@ -17,11 +17,9 @@ class MetaComponent(type):
     @staticmethod
     def add_connection(self, op):
         self.connections.append(op)
-        # print(f"[MetaComponent/add_connection] [Component {self.name}] connnections: {self.connections}")
 
     @staticmethod
     def gather(self):
-        # print(f"[gather] ajsondakljsdnkajsd")
         for comm in self.connections:
             comm()
 
