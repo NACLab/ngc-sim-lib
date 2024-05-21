@@ -20,7 +20,7 @@ class Context:
 
         Context._contexts[Context._current_context + "/" + str(name)] = self
         self.components = {}
-        self.commands = []
+        self.commands = {}
         self.name = name
 
         #Used for contexts
@@ -42,11 +42,18 @@ class Context:
 
     def add_component(self, component):
         self.components[component.name] = component
-        self.__setattr__(component.name, component)
 
     def build_component(self, component_type, *args, **kwargs):
         print("building component:", component_type, "\tusing", args, kwargs)
 
 
     def add_command(self, command):
+        self.commands[command.name] = command
         self.__setattr__(command.name, command)
+
+
+    @staticmethod
+    def dynamicCommand(fn):
+        if Context.get_current_context() is not None:
+            Context.get_current_context().__setattr__(fn.__name__, fn)
+        return fn

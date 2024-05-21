@@ -1,9 +1,25 @@
 from ngcsimlib.operations import BaseOp, overwrite
 import uuid
 
-All_compartments = {}
+#Note these are to get a copied hash table of values not the actual compartments
+__all_compartments = {}
+def Get_Compartment_Batch(compartment_uids=None):
+    if compartment_uids is None:
+        return {key: c.value for key, c in __all_compartments.items()}
+    return {key: __all_compartments[key].value for key in compartment_uids}
 
-class Compartment():
+def Set_Compartment_Batch(compartment_map=None):
+    if compartment_map is None:
+        return
+
+    for key, value in compartment_map.items():
+        if key not in __all_compartments.keys():
+            __all_compartments[key] = value
+        else:
+            __all_compartments[key].set(value)
+
+
+class Compartment:
     @classmethod
     def is_compartment(cls, obj):
         return hasattr(obj, "_is_compartment")
@@ -14,7 +30,7 @@ class Compartment():
         self._static = static
         self.value = initial_value
         self._uid = uuid.uuid4()
-        All_compartments[str(self._uid)] = self
+        Set_Compartment_Batch({str(self._uid): self})
         self.name = name
 
     def _setup(self, add_connection):
@@ -25,6 +41,9 @@ class Compartment():
             self.value = value
         else:
             raise RuntimeError("Can not assign value to static compartment")
+
+    def clamp(self, value):
+        self.set(value)
 
     def __repr__(self):
         return f"[{self.name}] {repr(self.value)}"

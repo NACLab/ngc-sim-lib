@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-import ngcsimlib.utils as utils
 from ngcsimlib.componentUtils import ComponentMetadata
 from ngcsimlib.metaComponent import MetaComponent
+from ngcsimlib.compartment import Compartment
 
 
 class Component(metaclass=MetaComponent):
@@ -66,7 +66,8 @@ class Component(metaclass=MetaComponent):
 
             value: provided Value
         """
-        raise NotImplementedError("Clamp is not implement")
+        if hasattr(self, compartment) and isinstance(getattr(self, compartment), Compartment):
+            getattr(self, compartment).set(value)
 
     ##Abstract Methods
     @abstractmethod

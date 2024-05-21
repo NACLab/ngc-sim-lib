@@ -12,7 +12,7 @@ class MetaComponent(type):
             if Compartment.is_compartment(value):
                 value._setup(self.add_connection)
         # add component to context
-        Context.get_current_context().components[self.name] = self
+        Context.get_current_context().add_component(self)
 
     @staticmethod
     def add_connection(self, op):
