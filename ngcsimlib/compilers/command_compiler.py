@@ -1,4 +1,5 @@
 from ngcsimlib.compilers.component_compiler import parse as parse_component, compile as compile_component
+from ngcsimlib.compilers.op_compiler import parse as parse_connection
 from ngcsimlib.compartment import Get_Compartment_Batch, Set_Compartment_Batch
 
 def _compile(compile_key, components):
@@ -18,7 +19,7 @@ def _compile(compile_key, components):
                 needed_args.append(a)
 
         for connection in component.connections:
-            inputs, outputs = connection.parse()
+            inputs, outputs = parse_connection(connection)
             ncs = [str(i) for i in inputs]
             for nc in ncs:
                 if nc not in needed_comps:
