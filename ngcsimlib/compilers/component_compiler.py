@@ -1,6 +1,6 @@
 from ngcsimlib.compilers.op_compiler import compile as op_compile
 
-from ngcsimlib.resolver import get_resolver
+from ngcsimlib.utils import get_resolver
 from ngcsimlib.compartment import Compartment
 
 def parse(component, compile_key):
@@ -35,8 +35,8 @@ def compile(component, resolver, arg_order):
         exc_order.append(op_compile(connection, arg_order))
 
     ### Component resolve
-    comp_ids = [str(component.__dict__[comp]._uid) for _, comp in comps]
-    out_ids = [str(component.__dict__[comp]._uid) for comp in outs]
+    comp_ids = [str(component.__dict__[comp].path) for _, comp in comps]
+    out_ids = [str(component.__dict__[comp].path) for comp in outs]
 
     funParams = [component.__dict__[narg] for _, narg in (list(params))]
 

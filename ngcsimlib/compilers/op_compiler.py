@@ -12,9 +12,9 @@ def parse(op):
                 if inp not in inputs:
                     inputs.append(inp)
         else:
-            inputs.append(s._uid)
+            inputs.append(s.path)
 
-    return inputs, op.destination._uid if op.destination is not None else None
+    return inputs, op.destination.name if op.destination is not None else None
 
 
 def compile(op, arg_order):
@@ -26,14 +26,14 @@ def compile(op, arg_order):
             exc_order.append(compile(s, arg_order))
             ops.append(idx)
 
-    output = op.destination._uid if op.destination is not None else None
+    output = op.destination.path if op.destination is not None else None
 
     iids = []
     for s in op.sources:
         if isinstance(s, BaseOp):
             pass
         else:
-            iids.append(str(s._uid))
+            iids.append(str(s.path))
 
     def _op_compiled(*args):
         computed_values = [cmd(*args) for cmd, _, _ in exc_order]

@@ -235,3 +235,58 @@ def extract_args(keywords=None, *args, **kwargs):
             a[key] = args[idx]
 
     return a
+
+#Note these are to get a copied hash table of values not the actual compartments
+__all_compartments = {}
+def Get_Compartment_Batch(compartment_uids=None):
+    if compartment_uids is None:
+        return {key: c.value for key, c in __all_compartments.items()}
+    return {key: __all_compartments[key].value for key in compartment_uids}
+
+def Set_Compartment_Batch(compartment_map=None):
+    if compartment_map is None:
+        return
+
+    for key, value in compartment_map.items():
+        if key not in __all_compartments.keys():
+            __all_compartments[key] = value
+        else:
+            __all_compartments[key].set(value)
+
+def get_compartment_by_name(context, name):
+    return __all_compartments[context.path + "/" + name]
+
+
+__component_resolvers = {}
+__resolver_meta_data = {}
+
+def get_resolver(class_name, resolver_key):
+    return __component_resolvers[class_name + "/" + resolver_key], __resolver_meta_data[class_name + "/" + resolver_key]
+
+def add_component_resolver(class_name, resolver_key, data):
+    __component_resolvers[class_name + "/" + resolver_key] = data
+
+
+def add_resolver_meta(class_name, resolver_key, data):
+    __resolver_meta_data[class_name + "/" + resolver_key] = data
+
+
+## Contexts
+__current_context = ""
+__contexts = {"": None}
+
+def get_current_context():
+    return __contexts[__current_context]
+
+def get_current_path():
+    return __current_context
+
+def get_context(path):
+    return __contexts.get(__current_context + "/" + path, None)
+
+def add_context(name, con):
+    __contexts[__current_context + "/" + name] = con
+
+def set_new_context(path):
+    global __current_context
+    __current_context = path

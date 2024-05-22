@@ -1,40 +1,28 @@
 from ngcsimlib.operations import BaseOp, overwrite
+from ngcsimlib.utils import Set_Compartment_Batch, get_current_path
 import uuid
-
-#Note these are to get a copied hash table of values not the actual compartments
-__all_compartments = {}
-def Get_Compartment_Batch(compartment_uids=None):
-    if compartment_uids is None:
-        return {key: c.value for key, c in __all_compartments.items()}
-    return {key: __all_compartments[key].value for key in compartment_uids}
-
-def Set_Compartment_Batch(compartment_map=None):
-    if compartment_map is None:
-        return
-
-    for key, value in compartment_map.items():
-        if key not in __all_compartments.keys():
-            __all_compartments[key] = value
-        else:
-            __all_compartments[key].set(value)
-
 
 class Compartment:
     @classmethod
     def is_compartment(cls, obj):
         return hasattr(obj, "_is_compartment")
 
-    def __init__(self, initial_value=None, static=False, name="default"):
+    def __init__(self, initial_value=None, static=False):
+
         self._is_compartment = True
         self.__add_connection = None
         self._static = static
         self.value = initial_value
         self._uid = uuid.uuid4()
-        Set_Compartment_Batch({str(self._uid): self})
-        self.name = name
+        self.name = None
+        self.path = None
 
-    def _setup(self, add_connection):
-        self.__add_connection = add_connection
+
+    def _setup(self, current_component, key):
+        self.__add_connection = current_component.add_connection
+        self.name = current_component.name + "/" + key
+        self.path = get_current_path() + "/" + self.name
+        Set_Compartment_Batch({str(self.path): self})
 
     def set(self, value):
         if not self._static:
@@ -46,7 +34,7 @@ class Compartment:
         self.set(value)
 
     def __repr__(self):
-        return f"[{self.name}] {repr(self.value)}"
+        return f"[{self.name}]"
 
     def __str__(self):
         return str(self.value)

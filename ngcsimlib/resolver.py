@@ -1,10 +1,5 @@
 from ngcsimlib.compartment import Compartment
-
-__component_resolvers = {}
-__resolver_meta_data = {}
-
-def get_resolver(class_name, resolver_key):
-    return __component_resolvers[class_name + "/" + resolver_key], __resolver_meta_data[class_name + "/" + resolver_key]
+from ngcsimlib.utils import add_component_resolver, add_resolver_meta
 
 def resolver(pure_fn,
              output_compartments=None,
@@ -38,9 +33,9 @@ def resolver(pure_fn,
         class_name = ".".join(fn.__qualname__.split('.')[:-1])
         resolver_key = fn.__qualname__.split('.')[-1]
 
-        __component_resolvers[class_name + "/" + resolver_key] = pure_fn, output_compartments
+        add_component_resolver(class_name, resolver_key, (pure_fn, output_compartments))
 
-        __resolver_meta_data[class_name + "/" + resolver_key] = (args, parameters, compartments, parse_varnames)
+        add_resolver_meta(class_name, resolver_key, (args, parameters, compartments, parse_varnames))
 
         def _wrapped(self=None, *_args, **_kwargs):
             comps = {}

@@ -1,6 +1,6 @@
 from ngcsimlib.compilers.component_compiler import parse as parse_component, compile as compile_component
 from ngcsimlib.compilers.op_compiler import parse as parse_connection
-from ngcsimlib.compartment import Get_Compartment_Batch, Set_Compartment_Batch
+from ngcsimlib.utils import Get_Compartment_Batch, Set_Compartment_Batch
 
 def _compile(compile_key, components):
     assert compile_key is not None
@@ -26,10 +26,9 @@ def _compile(compile_key, components):
                     needed_comps.append(nc)
 
         for _, comp in comps:
-            uid = str(component.__dict__[comp]._uid)
-            if uid not in needed_comps:
-                needed_comps.append(uid)
-
+            path = str(component.__dict__[comp].path)
+            if path not in needed_comps:
+                needed_comps.append(path)
     arg_order = needed_args + needed_comps
     exc_order = []
     for c_name, component in components.items():

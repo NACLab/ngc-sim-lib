@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from ngcsimlib.utils import check_attributes
-from ngcsimlib.context import Context
+from ngcsimlib.utils import check_attributes, get_current_context
+
 
 
 class Command(ABC):
@@ -19,6 +19,11 @@ class Command(ABC):
     """
     compile_key = None
 
+    def __new__(cls, components=None, command_name=None, *args, **kwargs):
+        if get_current_context() is not None:
+            get_current_context().register_command(cls.__name__, *args, components=components, command_name=command_name, **kwargs)
+        return super().__new__(cls)
+
     def __init__(self, components=None, command_name=None, required_calls=None):
         """
         Required calls on Components: ['name']
@@ -32,13 +37,16 @@ class Command(ABC):
         """
 
         self.name = str(command_name)
-        Context.get_current_context().add_command(self)
 
         self.components = {}
         required_calls = ['name'] if required_calls is None else required_calls + ['name']
         for comp in components:
             if check_attributes(comp, required_calls, fatal=True):
                 self.components[comp.name] = comp
+
+
+        get_current_context().add_command(self)
+
 
     @abstractmethod
     def __call__(self, *args, **kwargs):
