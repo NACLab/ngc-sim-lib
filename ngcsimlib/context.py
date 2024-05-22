@@ -220,7 +220,10 @@ class Context:
                 klass = load_from_path(component["class"])
                 _args = component['args']
                 _kwargs = component['kwargs']
-                klass(*_args, **_kwargs, parameter_map=parameterMap)
+                obj = klass(*_args, **_kwargs, parameter_map=parameterMap)
+
+                if check_attributes(obj, ["load"]):
+                    obj.load(custom_file_dir)
 
 
 
