@@ -58,7 +58,7 @@ def dynamic_compile(*components, compile_key=None):
 
 def wrap_command(command):
     def _wrapped(*args):
-        vals = command(*args, compartment_values=Get_Compartment_Batch())
+        vals = command(Get_Compartment_Batch(), *args)
         Set_Compartment_Batch(vals)
         return vals
     return _wrapped
