@@ -1,12 +1,9 @@
 from . import utils
 from . import controller
 from . import commands
-from . import logger
 
 import argparse, os, warnings, json
 from types import SimpleNamespace
-from pathlib import Path
-from sys import argv
 from importlib import import_module
 from ngcsimlib.configManager import init_config, get_config
 
@@ -68,12 +65,4 @@ def configure():
                       "additional information")
         return
 
-
     init_config(config_path)
-
-
-if not Path(argv[0]).name == "sphinx-build" or Path(argv[0]).name == "build.py":
-    if "readthedocs" not in argv[0]:  ## prevent readthedocs execution of preload
-        configure()
-        logger.init_logging()
-        preload_modules()

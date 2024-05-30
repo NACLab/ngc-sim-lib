@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from ngcsimlib.utils import check_attributes
+from ngcsimlib.utils import check_attributes, get_current_context
+
 
 
 class Command(ABC):
@@ -11,6 +12,18 @@ class Command(ABC):
     attributes are present on each component. Note that this step does not
     ensure types or values, just that they do or do not exist.
     """
+
+    """
+    The Compile key is the name of the resolver the compile function will look for
+    when compiling this command. If unset the compile will fail.
+    """
+    compile_key = None
+
+    def __new__(cls, components=None, command_name=None, *args, **kwargs):
+        if get_current_context() is not None:
+            get_current_context().register_command(cls.__name__, *args, components=components, command_name=command_name, **kwargs)
+        return super().__new__(cls)
+
     def __init__(self, components=None, command_name=None, required_calls=None):
         """
         Required calls on Components: ['name']
@@ -22,13 +35,20 @@ class Command(ABC):
 
             command_name: the name of the command on the controller
         """
+
         self.name = str(command_name)
+
         self.components = {}
         required_calls = ['name'] if required_calls is None else required_calls + ['name']
         for comp in components:
             if check_attributes(comp, required_calls, fatal=True):
                 self.components[comp.name] = comp
 
+
+        get_current_context().add_command(self)
+
+
     @abstractmethod
     def __call__(self, *args, **kwargs):
         pass
+
