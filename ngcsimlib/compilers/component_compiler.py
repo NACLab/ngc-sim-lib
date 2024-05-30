@@ -56,7 +56,7 @@ def parse(component, compile_key):
     return (pure_fn, output_compartments, args, parameters, compartments)
 
 
-def compile(component, resolver, arg_order):
+def compile(component, resolver):
     """
         compiles down the component to a single pure method
 
@@ -64,8 +64,6 @@ def compile(component, resolver, arg_order):
         component: the component to compile
 
         resolver: the parsed output of the component
-
-        arg_order: the expected argument order being passed through everything
 
     Returns:
         the compiled method
@@ -75,39 +73,19 @@ def compile(component, resolver, arg_order):
 
     ### Op resolve
     for connection in component.connections:
-        exc_order.append(op_compile(connection, arg_order))
+        exc_order.append(op_compile(connection))
 
     ### Component resolve
     comp_ids = [str(component.__dict__[comp].path) for _, comp in comps]
     out_ids = [str(component.__dict__[comp].path) for comp in outs]
 
-    funParams = [component.__dict__[narg] for _, narg in (list(params))]
+    funParams = {narg: component.__dict__[narg] for _, narg in (list(params))}
 
-    arg_locs = [loc for loc, _ in _args]
-    param_locs = [loc for loc, _ in params]
-    comp_locs = [loc for loc, _ in comps]
+    def compiled(**kwargs):
+        funArgs = {narg: kwargs.get(narg) for _, narg in (list(_args))}
+        funComps = {narg.split('/')[-1]: kwargs.get(narg) for narg in comp_ids}
 
-    def compiled(*args):
-        funArgs = [args[arg_order.index(narg)] for _, narg in (list(_args))]
-        funComps = [args[arg_order.index(narg)] for narg in comp_ids]
-
-        _arg_loc = 0
-        _param_loc = 0
-        _comps_loc = 0
-
-        fargs = []
-        for i in range(len(arg_locs) + len(param_locs) + len(comp_locs)):
-            if i in arg_locs:
-                fargs.append(funArgs[_arg_loc])
-                _arg_loc += 1
-            elif i in param_locs:
-                fargs.append(funParams[_param_loc])
-                _param_loc += 1
-            else:
-                fargs.append(funComps[_comps_loc])
-                _comps_loc += 1
-
-        return pure_fn(*fargs)
+        return pure_fn(**funParams, **funArgs, **funComps)
 
     exc_order.append((compiled, out_ids, component.name))
     return exc_order

@@ -31,7 +31,7 @@ are still required to be passed in at run time.
 from ngcsimlib.compilers.component_compiler import parse as parse_component, compile as compile_component
 from ngcsimlib.compilers.op_compiler import parse as parse_connection
 from ngcsimlib.utils import Get_Compartment_Batch, Set_Compartment_Batch
-
+from ngcsimlib.logger import critical
 
 def _compile(compile_key, components):
     """
@@ -81,15 +81,20 @@ def _compile(compile_key, components):
             path = str(component.__dict__[comp].path)
             if path not in needed_comps:
                 needed_comps.append(path)
-    arg_order = needed_args + needed_comps
+
     exc_order = []
     for c_name, component in components.items():
-        exc_order.extend(compile_component(component, resolvers[c_name], arg_order))
+        exc_order.extend(compile_component(component, resolvers[c_name]))
 
-    def compiled(compartment_values, *cargs):
+    def compiled(compartment_values, **kwargs):
+        for n in needed_args:
+            if n not in kwargs:
+                critical(f"Missing keyword argument \"{n}\" in compiled function."
+                         f"\tExpected keyword arguments {needed_args}")
+
         for exc, outs, name in exc_order:
-            _comps = [compartment_values[key] for key in needed_comps]
-            vals = exc(*cargs, *_comps)
+            _comps = {key: compartment_values[key] for key in needed_comps}
+            vals = exc(**kwargs, **_comps)
             if len(outs) == 1:
                 compartment_values[outs[0]] = vals
             elif len(outs) > 1:

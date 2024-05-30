@@ -38,14 +38,12 @@ def parse(op):
     return inputs, op.destination.name if op.destination is not None else None
 
 
-def compile(op, arg_order):
+def compile(op):
     """
         compiles the operation down to its execution order
 
     Args:
         op: the operation to compile
-
-        arg_order: the global argument order provided by the command compiler
 
     Returns:
         the execution order needed to run this operation compiled
@@ -55,7 +53,7 @@ def compile(op, arg_order):
 
     for idx, s in enumerate(op.sources):
         if isinstance(s, BaseOp):
-            exc_order.append(compile(s, arg_order))
+            exc_order.append(compile(s))
             ops.append(idx)
 
     output = op.destination.path if op.destination is not None else None
@@ -67,9 +65,9 @@ def compile(op, arg_order):
         else:
             iids.append(str(s.path))
 
-    def _op_compiled(*args):
-        computed_values = [cmd(*args) for cmd, _, _ in exc_order]
-        compartment_args = [args[arg_order.index(narg)] for narg in iids]
+    def _op_compiled(**kwargs):
+        computed_values = [cmd(**kwargs) for cmd, _, _ in exc_order]
+        compartment_args = [kwargs.get(narg) for narg in iids]
 
         _val_loc = 0
         _arg_loc = 0
