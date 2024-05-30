@@ -58,19 +58,19 @@ def load_module(module_path, match_case=False, absolute_path=False):
     Returns:
         the module that has been loaded
     """
-    #Return if we have already loaded this module
+    # Return if we have already loaded this module
     if module_path in _Loaded_Modules.keys():
         return _Loaded_Modules[module_path]
-    #Unkown module
+    # Unkown module
     module_name = None
     if absolute_path:
         module_name = module_path
     else:
-        #Extract the final module from the module_path
+        # Extract the final module from the module_path
         final_mod = module_path.split('.')[-1]
         final_mod = final_mod if match_case else final_mod.lower()
 
-        #Try to match the final module to any currently loaded module
+        # Try to match the final module to any currently loaded module
         for module in sys.modules:
             last_mod = module.split('.')[-1]
             last_mod = last_mod if match_case else last_mod.lower()
@@ -79,13 +79,14 @@ def load_module(module_path, match_case=False, absolute_path=False):
                 module_name = module
                 break
 
-        #Will only be None if no imported modules match the import name
+        # Will only be None if no imported modules match the import name
         if module_name is None:
             raise RuntimeError("Failed to find dynamic import for \"" + module_path + "\"")
 
     mod = import_module(module_name)
     _Loaded_Modules[module_path] = mod
     return mod
+
 
 def load_from_path(path, match_case=False, absolute_path=False):
     """
@@ -138,7 +139,8 @@ def load_attribute(attribute_name, module_path=None, match_case=False, absolute_
     if attribute_name is None:
         raise RuntimeError()
 
-    mod = load_module(attribute_name if module_path is None else module_path, match_case=match_case, absolute_path=absolute_path)
+    mod = load_module(attribute_name if module_path is None else module_path, match_case=match_case,
+                      absolute_path=absolute_path)
 
     attribute_name = attribute_name if match_case else attribute_name[0].upper() + attribute_name[1:]
 
@@ -150,6 +152,7 @@ def load_attribute(attribute_name, module_path=None, match_case=False, absolute_
 
     _Loaded_Attributes[attribute_name] = attr
     return attr
+
 
 def make_unique_path(directory, root_name=None):
     """
@@ -236,12 +239,16 @@ def extract_args(keywords=None, *args, **kwargs):
 
     return a
 
-#Note these are to get a copied hash table of values not the actual compartments
+
+# Note these are to get a copied hash table of values not the actual compartments
 __all_compartments = {}
+
+
 def Get_Compartment_Batch(compartment_uids=None):
     if compartment_uids is None:
         return {key: c.value for key, c in __all_compartments.items()}
     return {key: __all_compartments[key].value for key in compartment_uids}
+
 
 def Set_Compartment_Batch(compartment_map=None):
     if compartment_map is None:
@@ -253,6 +260,7 @@ def Set_Compartment_Batch(compartment_map=None):
         else:
             __all_compartments[key].set(value)
 
+
 def get_compartment_by_name(context, name):
     return __all_compartments[context.path + "/" + name]
 
@@ -260,8 +268,10 @@ def get_compartment_by_name(context, name):
 __component_resolvers = {}
 __resolver_meta_data = {}
 
+
 def get_resolver(class_name, resolver_key):
     return __component_resolvers[class_name + "/" + resolver_key], __resolver_meta_data[class_name + "/" + resolver_key]
+
 
 def add_component_resolver(class_name, resolver_key, data):
     __component_resolvers[class_name + "/" + resolver_key] = data
@@ -275,17 +285,22 @@ def add_resolver_meta(class_name, resolver_key, data):
 __current_context = ""
 __contexts = {"": None}
 
+
 def get_current_context():
     return __contexts[__current_context]
+
 
 def get_current_path():
     return __current_context
 
+
 def get_context(path):
     return __contexts.get(__current_context + "/" + path, None)
 
+
 def add_context(name, con):
     __contexts[__current_context + "/" + name] = con
+
 
 def set_new_context(path):
     global __current_context

@@ -1,6 +1,7 @@
 from ngcsimlib.compartment import Compartment
 from ngcsimlib.utils import add_component_resolver, add_resolver_meta
 
+
 def resolver(pure_fn,
              output_compartments=None,
              args=None,
@@ -8,7 +9,7 @@ def resolver(pure_fn,
              compartments=None,
              expand_args=True
              ):
-    if not(args is None and parameters is None and compartments is None):
+    if not (args is None and parameters is None and compartments is None):
         parse_varnames = False
         if args is None:
             args = []
@@ -20,7 +21,6 @@ def resolver(pure_fn,
         parse_varnames = True
         varnames = pure_fn.__func__.__code__.co_varnames[:pure_fn.__func__.__code__.co_argcount]
 
-
     if output_compartments is None:
         output_compartments = []
 
@@ -28,7 +28,6 @@ def resolver(pure_fn,
         if len(output_compartments) == 0:
             for n in fn.__code__.co_varnames[1:fn.__code__.co_argcount]:
                 output_compartments.append(n)
-
 
         class_name = ".".join(fn.__qualname__.split('.')[:-1])
         resolver_key = fn.__qualname__.split('.')[-1]
@@ -59,5 +58,7 @@ def resolver(pure_fn,
                 fn(self, *vals)
             else:
                 fn(self, vals)
+
         return _wrapped
+
     return _resolver

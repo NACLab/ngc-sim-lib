@@ -52,5 +52,5 @@ def compile(op, arg_order):
                 _arg_loc += 1
 
         return op.operation(*_args)
-    return (_op_compiled, [str(output)], "op")
 
+    return (_op_compiled, [str(output)], "op")

@@ -65,8 +65,4 @@ def configure():
                       "additional information")
         return
 
-
     init_config(config_path)
-
-
-

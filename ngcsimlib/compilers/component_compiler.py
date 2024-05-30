@@ -3,6 +3,7 @@ from ngcsimlib.compilers.op_compiler import compile as op_compile
 from ngcsimlib.utils import get_resolver
 from ngcsimlib.compartment import Compartment
 
+
 def parse(component, compile_key):
     (pure_fn, output_compartments), (args, parameters, compartments, parse_varnames) = \
         get_resolver(component.__class__.__name__, compile_key)
@@ -25,6 +26,7 @@ def parse(component, compile_key):
             output_compartments = compartments[:]
 
     return (pure_fn, output_compartments, args, parameters, compartments)
+
 
 def compile(component, resolver, arg_order):
     exc_order = []

@@ -1,5 +1,6 @@
 from abc import abstractmethod
 
+
 class BaseOp():
     is_compilable = True
 
@@ -38,8 +39,8 @@ class BaseOp():
 
         destination = self.destination.name if self.destination is not None else None
 
-
         return {"class": class_name, "sources": source_array, "destination": destination}
+
     def __repr__(self) -> str:
         line = f"[OP:{self.__class__.__name__}]"
         if len(self.sources) > 0:
@@ -47,6 +48,7 @@ class BaseOp():
         if self.destination is not None:
             line += f"\tDestination: {self.destination.name}"
         return line
+
 
 class summation(BaseOp):
     @staticmethod
@@ -59,18 +61,20 @@ class summation(BaseOp):
                 s += source
         return s
 
+
 class negate(BaseOp):
     @staticmethod
     def operation(*sources):
         return -sources[0]
 
 
-
 class add(summation):
     is_compilable = False
+
     def resolve(self, value):
         if self.destination is not None:
             self.destination.set(self.destination.value + value)
+
 
 class overwrite(BaseOp):
     @staticmethod

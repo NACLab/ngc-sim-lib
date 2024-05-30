@@ -2,6 +2,7 @@ from ngcsimlib.operations import BaseOp, overwrite
 from ngcsimlib.utils import Set_Compartment_Batch, get_current_path
 import uuid
 
+
 class Compartment:
     @classmethod
     def is_compartment(cls, obj):
@@ -16,7 +17,6 @@ class Compartment:
         self._uid = uuid.uuid4()
         self.name = None
         self.path = None
-
 
     def _setup(self, current_component, key):
         self.__add_connection = current_component.add_connection

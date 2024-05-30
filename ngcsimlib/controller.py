@@ -1,6 +1,6 @@
 from ngcsimlib.utils import check_attributes, load_from_path, make_unique_path, check_serializable
-import json, os, inspect
 from ngcsimlib.logger import warn, error, info
+import json, os, inspect
 
 
 class Controller:

@@ -2,7 +2,6 @@ from ngcsimlib.compartment import Compartment
 from ngcsimlib.utils import get_current_context
 
 
-
 class MetaComponent(type):
     @staticmethod
     def super_init(self, name, *args, **kwargs):
@@ -17,8 +16,6 @@ class MetaComponent(type):
                 value._setup(self, key)
         # add component to context
         get_current_context().add_component(self)
-
-
 
     @staticmethod
     def add_connection(self, op):
@@ -40,10 +37,7 @@ class MetaComponent(type):
             orig_init(self, *args, **kwargs)
             cls.post_init(self, *args, **kwargs)
 
-
         x.__init__ = wrapped_init
         x.add_connection = cls.add_connection
         x.gather = cls.gather
         return x
-
-

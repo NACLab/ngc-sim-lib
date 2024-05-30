@@ -2,6 +2,7 @@ from ngcsimlib.compilers.component_compiler import parse as parse_component, com
 from ngcsimlib.compilers.op_compiler import parse as parse_connection
 from ngcsimlib.utils import Get_Compartment_Batch, Set_Compartment_Batch
 
+
 def _compile(compile_key, components):
     assert compile_key is not None
     ## for each component, get compartments, get output compartments
@@ -48,17 +49,19 @@ def _compile(compile_key, components):
     return compiled, needed_args
 
 
-
 def compile(command):
     return _compile(command.compile_key, command.components)
+
 
 def dynamic_compile(*components, compile_key=None):
     assert compile_key is not None
     return _compile(compile_key, {c.name: c for c in components})
+
 
 def wrap_command(command):
     def _wrapped(*args):
         vals = command(Get_Compartment_Batch(), *args)
         Set_Compartment_Batch(vals)
         return vals
+
     return _wrapped

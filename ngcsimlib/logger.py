@@ -1,6 +1,7 @@
+from ngcsimlib.configManager import get_config
 import logging
 import sys
-from ngcsimlib.configManager import get_config
+
 
 def _concatArgs(*args, **kwargs):
     """Internal Decorator for concatenating arguments into a single string"""

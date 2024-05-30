@@ -3,7 +3,6 @@ from ngcsimlib.logger import warn, info
 from ngcsimlib.utils import get_compartment_by_name, \
     get_context, add_context, get_current_path, get_current_context, set_new_context
 from ngcsimlib.compilers.command_compiler import dynamic_compile
-from ngcsimlib.commands import Command
 import json, os
 
 
@@ -27,13 +26,11 @@ class Context:
         self.commands = {}
         self.name = name
 
-        #Used for contexts
+        # Used for contexts
         self.path = get_current_path() + "/" + str(name)
         self._last_context = ""
 
         self._json_objects = {"ops": [], "components": {}, "commands": {}}
-
-
 
     def __enter__(self):
         self._last_context = get_current_path()
@@ -55,7 +52,8 @@ class Context:
 
     def register_command(self, klass, *args, components=None, command_name=None, **kwargs):
         _components = [components.name for components in components]
-        self._json_objects['commands'][command_name] = {"class": klass, "components": _components, "args": args, "kwargs": kwargs}
+        self._json_objects['commands'][command_name] = {"class": klass, "components": _components, "args": args,
+                                                        "kwargs": kwargs}
 
     def register_component(self, component, *args, **kwargs):
         if component.path in self._component_paths.keys():
@@ -86,6 +84,7 @@ class Context:
     def add_component(self, component):
         if component.name not in self.components.keys():
             self.components[component.name] = component
+
     def add_command(self, command, name=None):
         name = command.name if name is None else name
 
@@ -161,7 +160,6 @@ class Context:
 
             json.dump(obj, fp, indent=4)
 
-
         if custom_save:
             os.mkdir(path + "/custom")
             if check_attributes(self, ['save']):
@@ -173,7 +171,6 @@ class Context:
                         component.save(path + "/custom")
 
         return (path, path + "/custom") if custom_save else (path, None)
-
 
     def load_from_dir(self, directory, custom_folder="/custom"):
         """
@@ -225,9 +222,6 @@ class Context:
                 if check_attributes(obj, ["load"]):
                     obj.load(custom_file_dir)
 
-
-
-
     def make_ops(self, path_to_ops_file):
         """
         Loads a collection of ops from a json file. Follow `ops.schema`
@@ -251,7 +245,8 @@ class Context:
                         *self.get_components(*command['components']), compile_key=command['compile_key'], name=c_name)
                 else:
                     klass = load_from_path(command['class'])
-                    klass(*command['args'], **command['kwargs'], components=self.get_components(*command['components']), command_name=c_name)
+                    klass(*command['args'], **command['kwargs'], components=self.get_components(*command['components']),
+                          command_name=c_name)
 
     def _make_op(self, op_spec):
         klass = load_from_path(op_spec["class"])
@@ -270,7 +265,6 @@ class Context:
         else:
             dest = get_compartment_by_name(get_current_context(), op_spec['destination'])
             dest << obj
-
 
     @staticmethod
     def dynamicCommand(fn):
