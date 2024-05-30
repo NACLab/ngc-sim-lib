@@ -1,10 +1,38 @@
-from ngcsimlib.compilers.op_compiler import compile as op_compile
+"""
+This is the file that contains the code to compile a component for a command.
 
+There are two primary method provided in this file. The first of them is the parse command. This command is designed
+to provide everything that is needed to compile the component down without actually doing so. This is generally used
+by the command compiler to produce a working list of everything that is needed prior to the actual compiling of all
+components.
+
+The second method that is provided in this file the actual method for compiling the component. This method takes in
+the component, the parsed component, and the global argument order for the compiled method. The result of this method
+is the execution order needed to be run to compute the compiled method over this component. This execution order is
+consistent with the same pattern used by the command compiler.
+
+"""
+from ngcsimlib.compilers.op_compiler import compile as op_compile
 from ngcsimlib.utils import get_resolver
 from ngcsimlib.compartment import Compartment
 
 
 def parse(component, compile_key):
+    """
+    Returns the parsed version of a component for use in compiling
+
+    Args:
+        component: the component to parse
+
+        compile_key: the key to parse with
+
+    Returns: the pure function,
+             the output compartments to resolve to,
+             the arguments needed,
+             the parameters needed,
+             the compartments needed
+
+    """
     (pure_fn, output_compartments), (args, parameters, compartments, parse_varnames) = \
         get_resolver(component.__class__.__name__, compile_key)
 
@@ -29,6 +57,19 @@ def parse(component, compile_key):
 
 
 def compile(component, resolver, arg_order):
+    """
+        compiles down the component to a single pure method
+
+    Args:
+        component: the component to compile
+
+        resolver: the parsed output of the component
+
+        arg_order: the expected argument order being passed through everything
+
+    Returns:
+        the compiled method
+    """
     exc_order = []
     pure_fn, outs, _args, params, comps = resolver
 

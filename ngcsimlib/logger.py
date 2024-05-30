@@ -47,21 +47,49 @@ def init_logging():
 
 @_concatArgs()
 def warn(msg):
+    """
+    Logs a warning message
+    This is decorated to have the same functionality of python's print argument concatenation
+
+    Args:
+        msg: message to log
+    """
     _ngclogger.warning(msg)
 
 
 @_concatArgs()
 def error(msg):
+    """
+    Logs an error message
+    This is decorated to have the same functionality of python's print argument concatenation
+
+    Args:
+        msg: message to log
+    """
     _ngclogger.error(msg)
     raise RuntimeError(msg)
 
 
 @_concatArgs()
 def critical(msg):
+    """
+    Logs a critical message
+    This is decorated to have the same functionality of python's print argument concatenation
+
+    Args:
+        msg: message to log
+    """
     _ngclogger.critical(msg)
     raise RuntimeError(msg)
 
 
 @_concatArgs()
 def info(msg):
+    """
+    Logs an info message
+    This is decorated to have the same functionality of python's print argument concatenation
+
+    Args:
+        msg: message to log
+    """
     _ngclogger.info(msg)

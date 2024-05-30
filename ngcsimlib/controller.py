@@ -14,6 +14,7 @@ class Controller:
     """
 
     def __init__(self):
+        warn("Controllers have been deprecated in favor of contexts and will be removed in the future")
         self.steps = []
         self.commands = {}
         self.components = {}  ## components/nodes that characterize system/simulation object

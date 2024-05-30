@@ -1,12 +1,5 @@
 """
-The utilities file for ngcsimlib supports the foundation of how ngclearn does its
-dynamic loading of attributes and modules. When the file is imported, it will
-automatically search for a file (default `json_files/modules.json`, or pass a
-default --modules="json_files/modules.json") to load all the modules for dynamic
-loading. Without this file, when the controller goes on to try to load a component
-or command class, it will be unable to do so/find them. Please see the `modules.schema`
-file in the `json_schemes` folder for more details on how to create the
-modules.json file.
+The utilities file for ngcsimlib
 """
 import sys, uuid, os, json
 from importlib import import_module
@@ -147,7 +140,8 @@ def load_attribute(attribute_name, module_path=None, match_case=False, absolute_
     try:
         attr = getattr(mod, attribute_name)
     except AttributeError:
-        raise RuntimeError("Could not find an attribute with name \"" + attribute_name + "\" in module " + mod.__name__) \
+        raise RuntimeError("Could not find an attribute with name \"" + attribute_name + "\" in module " +
+                           mod.__name__) \
             from None
 
     _Loaded_Attributes[attribute_name] = attr
@@ -245,12 +239,32 @@ __all_compartments = {}
 
 
 def Get_Compartment_Batch(compartment_uids=None):
+    """
+    This method should be used sparingly
+
+    Get a subset of all compartment values based on provided paths. If no paths are provided it will grab all of them
+
+    Args:
+        compartment_uids: needed ids
+
+    Returns:
+        a subset of all compartment values
+
+    """
     if compartment_uids is None:
         return {key: c.value for key, c in __all_compartments.items()}
     return {key: __all_compartments[key].value for key in compartment_uids}
 
 
 def Set_Compartment_Batch(compartment_map=None):
+    """
+    This method should be used sparingly
+
+    Sets a subset of compartments to their corresponding value in the provided dictionary
+
+    Args:
+        compartment_map: a map of compartment paths to values
+    """
     if compartment_map is None:
         return
 
@@ -262,7 +276,18 @@ def Set_Compartment_Batch(compartment_map=None):
 
 
 def get_compartment_by_name(context, name):
-    return __all_compartments[context.path + "/" + name]
+    """
+    Gets a specific compartment from a given context
+
+    Args:
+        context: context to extract compartment from
+
+        name: name of compartment to get
+
+    Returns: expected compartment, None if not a valid compartment
+
+    """
+    return __all_compartments.get(context.path + "/" + name, None)
 
 
 __component_resolvers = {}
@@ -270,14 +295,23 @@ __resolver_meta_data = {}
 
 
 def get_resolver(class_name, resolver_key):
+    """
+    A helper method for searching through the resolver list
+    """
     return __component_resolvers[class_name + "/" + resolver_key], __resolver_meta_data[class_name + "/" + resolver_key]
 
 
 def add_component_resolver(class_name, resolver_key, data):
+    """
+    A helper function for adding component resolvers
+    """
     __component_resolvers[class_name + "/" + resolver_key] = data
 
 
 def add_resolver_meta(class_name, resolver_key, data):
+    """
+    A helper function for adding component resolvers metadata
+    """
     __resolver_meta_data[class_name + "/" + resolver_key] = data
 
 
@@ -287,21 +321,36 @@ __contexts = {"": None}
 
 
 def get_current_context():
+    """
+    A helper method for getting the current active context object
+    """
     return __contexts[__current_context]
 
 
 def get_current_path():
+    """
+    A helper method for getting the current context path
+    """
     return __current_context
 
 
 def get_context(path):
+    """
+    A helper method for getting a context by a provided path
+    """
     return __contexts.get(__current_context + "/" + path, None)
 
 
 def add_context(name, con):
+    """
+    A helper method for adding a context to the current path
+    """
     __contexts[__current_context + "/" + name] = con
 
 
 def set_new_context(path):
+    """
+    A helper method for updating the current active context
+    """
     global __current_context
     __current_context = path

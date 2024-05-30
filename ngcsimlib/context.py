@@ -7,7 +7,28 @@ import json, os
 
 
 class Context:
+    """
+    The ngc context is the foundation of all ngclearn models and the central operational construct for simulating
+    complex systems. The controller is the object that organizes all the components, commands, and connections that
+    characterize a complex system and/or model to be simulated over time (and was referred to as the
+    "nodes-and-cables" system in earlier versions of ngc-learn).
+
+    On a software engineering side of things the contexts are how ngcsimlib organizes all components and compartments
+    made during the runtime. Every context is named and if a context is constructed in the future with the same name
+    the original context will be provided with access to all previously added components and commands. There is one
+    additional note about naming, as contexts can be nestest each one keeps a path from the top level context ('/')
+    appending its name to end of the path. This is the true value that is used to reproduce a context in teh future.
+    So if a context is nested on creation the path will need to be provided to access it again (This can also just be
+    done by nesting contexts again)
+    """
+
     def __new__(cls, name, *args, **kwargs):
+        """
+        When building a context if it exists return the existing context else make a new one
+
+        Args:
+             name: the name of the context
+        """
         assert len(name) > 0
         con = get_context(str(name))
         if con is None:
@@ -16,6 +37,14 @@ class Context:
             return con
 
     def __init__(self, name):
+        """
+        Builds the initial context object, if `__new__` provides an already initialized context do not continue with
+        construction as it is already initialized. This is where the path to a context is assigned so their paths are
+        dependent on the current context path upon creation.
+
+        Args:
+             name: The name of the new context can not be empty
+        """
         if hasattr(self, "_init"):
             return
         self._init = True
@@ -33,29 +62,79 @@ class Context:
         self._json_objects = {"ops": [], "components": {}, "commands": {}}
 
     def __enter__(self):
+        """
+        Contexts provide an enter to track the previous context and set themselves as the current one
+        """
         self._last_context = get_current_path()
         set_new_context(self.path)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Contexts provide an exit to return to the previous context upon exiting
+        """
         set_new_context(self._last_context)
 
-    def get_components(self, *args):
+    def get_components(self, *component_names):
+        """
+        Gets all the components by name in a context
+
+        Args:
+            component_names: an arbitrary list of component names to get
+
+        Returns:
+             either a list of components or a single component depending on the number of components being retrieved
+        """
+        if len(component_names) == 0:
+            return None
         _components = []
-        for a in args:
+        for a in component_names:
             if a in self.components.keys():
                 _components.append(self.components[a])
-        return _components
+            else:
+                warn(f"Could not fine a component with the name \"{a}\" in the context")
+        return _components if len(component_names) > 1 else _components[0]
 
     def register_op(self, op):
+        """
+        Adds an operation to the local json storage for saving
+
+        Args:
+             op: the operation to save
+        """
         self._json_objects['ops'].append(op.dump())
 
     def register_command(self, klass, *args, components=None, command_name=None, **kwargs):
+        """
+        Adds a command to the local json storage for saving
+
+        Args:
+            klass: the class of the command
+
+            args: the positional arguments to the constructor
+
+            components: the components passed into the command (default: None)
+
+            command_name: the command name
+
+            kwargs: the keyword arguments passed into the command
+        """
         _components = [components.name for components in components]
         self._json_objects['commands'][command_name] = {"class": klass, "components": _components, "args": args,
                                                         "kwargs": kwargs}
 
     def register_component(self, component, *args, **kwargs):
+        """
+        Adds a component to the local json storage for saving, will provide a warning for all values it fails to
+        serialize into a json file
+
+        Args:
+            component: the component object to save
+
+            args: the positional arguments to build the component
+
+            kwargs: the keyword arguments to build the component
+        """
         if component.path in self._component_paths.keys():
             return
         self._component_paths[component.path] = component
@@ -82,10 +161,26 @@ class Context:
         self._json_objects['components'][c_path] = obj
 
     def add_component(self, component):
+        """
+        Adds a component to the context if it does not exist already in the context
+
+        Args:
+            component: the component being added to the context
+        """
         if component.name not in self.components.keys():
             self.components[component.name] = component
+        else:
+            warn(f"Failed to add {component.name} to current context as it already exists")
 
     def add_command(self, command, name=None):
+        """
+        Adds a command to the context, if no name is provided it will use the command's internal name
+
+        Args:
+            command:
+
+            name: The name of the command (default: None)
+        """
         name = command.name if name is None else name
 
         self.commands[name] = command
@@ -237,6 +332,13 @@ class Context:
                 self._make_op(op)
 
     def make_commands(self, path_to_commands_file):
+        """
+        Goes through the provided command file and builds and adds all commands to the context
+
+        Args:
+            path_to_commands_file: a path to the commands file
+
+        """
         with open(path_to_commands_file, 'r') as file:
             commands = json.load(file)
             for c_name, command in commands.items():
@@ -268,11 +370,35 @@ class Context:
 
     @staticmethod
     def dynamicCommand(fn):
+        """
+        Provides a decorator that will automatically bind the decorated method to the current context.
+        Note this if this is called from a context object it will still use the current context not the object
+
+        Args:
+            fn: The wrapped method
+
+        Returns: The method
+
+        """
         if get_current_context() is not None:
             get_current_context().__setattr__(fn.__name__, fn)
         return fn
 
     def compile_command_key(self, *components, compile_key, name=None):
+        """
+        Compiles a given set of components with a given compile key.
+        It will automatically add it to the context after compiling
+
+        Args:
+            *components: positional arguments for all components
+
+            compile_key: a keyword argument for the compile key
+
+            name: the name to register the command under (default: None)
+
+        Returns:
+            The compiled command, the argument list needed to run the command
+        """
         cmd, args = dynamic_compile(*components, compile_key=compile_key)
         if name is None:
             name = compile_key

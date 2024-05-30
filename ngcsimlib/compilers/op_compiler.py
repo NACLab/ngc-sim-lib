@@ -1,7 +1,28 @@
+"""
+This file contains the logic needed to compile down an operation and produce an execution order that is compatible
+with the order found in the command compiler.
+
+This file contains two methods a parse and a compile method for operations. The parse method returns the metadata
+needed by the command compiler to know what values the operation will use.
+
+The second one is the compile method which returns the execution order for the compile operation. It is important to
+know that all operation should have an `is_compilable` flag set to true if they are compilable. Some operations such
+as the `add` operation are not compilable as their resolve method contains execution logic that will not be captured
+by the compiled command.
+"""
 from ngcsimlib.operations import BaseOp
 
 
 def parse(op):
+    """
+    parses the provided operation
+
+    Args:
+        op: the operation to parse
+
+    Returns:
+        the parsed operation
+    """
     assert op.is_compilable
     inputs = []
     for s in op.sources:
@@ -18,6 +39,17 @@ def parse(op):
 
 
 def compile(op, arg_order):
+    """
+        compiles the operation down to its execution order
+
+    Args:
+        op: the operation to compile
+
+        arg_order: the global argument order provided by the command compiler
+
+    Returns:
+        the execution order needed to run this operation compiled
+    """
     exc_order = []
     ops = []
 

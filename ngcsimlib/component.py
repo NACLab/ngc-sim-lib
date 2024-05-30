@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod
-from ngcsimlib.componentUtils import ComponentMetadata
+from abc import abstractmethod
 from ngcsimlib.metaComponent import MetaComponent
 from ngcsimlib.compartment import Compartment
 
@@ -17,17 +16,9 @@ class Component(metaclass=MetaComponent):
     and for other components, are stored. As the components are the stateful
     pieces of the model, they also contain the methods and logic behind advancing
     their internal state (values) forward in time.
-
-    The use of this abstract base class for components is completely optional.
-    There is no part of ngclearn that strictly dictates/requires its use; however,
-    starting here will provide a good foundation for development and help avoid
-    errors produced from missing attributes. That being said, this is not an
-    exhaustive/comprehensive base class. There are some commands such as `Evolve`
-    that requires an additional method called `evolve` to be present within the
-    component.
     """
 
-    def __init__(self, name, useVerboseDict=False, **kwargs):
+    def __init__(self, name, **kwargs):
         """
         The only truly required parameter for any component in ngclearn is a
         name value. These names should be unique; otherwise, there will be
@@ -37,22 +28,12 @@ class Component(metaclass=MetaComponent):
         Args:
             name: the name of the component
 
-            useVerboseDict: a boolean value that controls if a more debug
-                friendly dictionary is used for this component's compartments.
-                This dictionary will monitor when new keys are added to the
-                compartments dictionary and tell you which component key errors
-                occur on. It is not recommended to have these turned on when
-                training as they add additional logic that might cause a
-                performance decrease. (Default: False)
-
             kwargs: additional keyword arguments. These are not used in the base class,
                 but this is here for future use if needed.
         """
         # Component Data
         self.name = name
 
-        # Meta Data
-        self.metadata = ComponentMetadata(name=self.name, **kwargs)
 
     ##Intialization Methods
 
@@ -66,7 +47,7 @@ class Component(metaclass=MetaComponent):
 
             value: provided Value
         """
-        if hasattr(self, compartment) and isinstance(getattr(self, compartment), Compartment):
+        if hasattr(self, compartment) and Compartment.is_compartment(getattr(self, compartment)):
             getattr(self, compartment).set(value)
 
     ##Abstract Methods
