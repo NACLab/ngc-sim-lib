@@ -17,6 +17,8 @@ class MetaComponent(type):
         self.connections = []
         self.path = get_current_context().path + "/" + name
         get_current_context().register_component(self, name, *args, **kwargs)
+        self._meta_init = True
+
 
     @staticmethod
     def post_init(self, *args, **kwargs):
@@ -28,7 +30,6 @@ class MetaComponent(type):
                 value._setup(self, key)
         # add component to context
         get_current_context().add_component(self)
-        self._meta_init = True
 
     @staticmethod
     def add_connection(self, op):
@@ -55,7 +56,7 @@ class MetaComponent(type):
         orig_init = x.__init__
 
         def wrapped_init(self, *args, **kwargs):
-            if hasattr(self, "_meta_init"):
+            if self.__dict__.get("_meta_init", False):
                 orig_init(self, *args, **kwargs)
             else:
                 cls.pre_init(self, *args, **kwargs)
