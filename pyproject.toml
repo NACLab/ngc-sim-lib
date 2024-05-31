@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ngcsimlib"
-version = "0.2.beta2"
+version = "0.3.beta1"
 
 description = "Simulation software backend for ngc-learn."
 authors = [
@@ -13,7 +13,7 @@ authors = [
 ]
 readme = "README.md"
 keywords = ['python', 'complex-systems', 'simulation']
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 license = {text = "BSD-3-Clause License"}
 
 [project.urls]
