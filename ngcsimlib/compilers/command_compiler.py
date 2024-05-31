@@ -148,8 +148,8 @@ def wrap_command(command):
     Returns:
         the output of the command after it's been executed
     """
-    def _wrapped(*args):
-        vals = command(Get_Compartment_Batch(), *args)
+    def _wrapped(**kwargs):
+        vals = command(Get_Compartment_Batch(), **kwargs)
         Set_Compartment_Batch(vals)
         return vals
 

@@ -2,7 +2,7 @@ from ngcsimlib.utils import make_unique_path, check_attributes, check_serializab
 from ngcsimlib.logger import warn, info
 from ngcsimlib.utils import get_compartment_by_name, \
     get_context, add_context, get_current_path, get_current_context, set_new_context
-from ngcsimlib.compilers.command_compiler import dynamic_compile
+from ngcsimlib.compilers.command_compiler import dynamic_compile, wrap_command
 import json, os
 
 
@@ -343,7 +343,7 @@ class Context:
             commands = json.load(file)
             for c_name, command in commands.items():
                 if command['class'] == "dynamic_compiled":
-                    self.compile_command_key(
+                    self.compile_by_key(
                         *self.get_components(*command['components']), compile_key=command['compile_key'], name=c_name)
                 else:
                     klass = load_from_path(command['class'])
@@ -384,7 +384,7 @@ class Context:
             get_current_context().__setattr__(fn.__name__, fn)
         return fn
 
-    def compile_command_key(self, *components, compile_key, name=None):
+    def compile_by_key(self, *components, compile_key, name=None):
         """
         Compiles a given set of components with a given compile key.
         It will automatically add it to the context after compiling
@@ -408,3 +408,15 @@ class Context:
         self._json_objects['commands'][name] = {"class": klass, "components": _components, "compile_key": compile_key}
         self.__setattr__(name, cmd)
         return cmd, args
+
+
+    def wrap_and_add_command(self, command, name=None):
+        """
+        wraps a command and adds it to the context, if no name is provided it will use the command's internal name
+
+        Args:
+            command: The command to wrap
+
+            name: The name of the command (default: None)
+        """
+        self.add_command(wrap_command(command), name=name)
