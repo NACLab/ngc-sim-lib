@@ -1,6 +1,5 @@
 from abc import abstractmethod, ABC
 
-
 class BaseOp(ABC):
     """
     This is the base class for all operations that define cable behavior in ngcsimlib. Generally the there is one
@@ -86,53 +85,3 @@ class BaseOp(ABC):
         if self.destination is not None:
             line += f"\tDestination: {self.destination.name}"
         return line
-
-
-class summation(BaseOp):
-    """
-    Adds together all the provided compartment's values and overwrites the previous value
-    """
-
-    @staticmethod
-    def operation(*sources):
-        s = None
-        for source in sources:
-            if s is None:
-                s = source
-            else:
-                s += source
-        return s
-
-
-class negate(BaseOp):
-    """
-    negates the first source compartment (other will be ignored) and overwrite the previous value
-    """
-
-    @staticmethod
-    def operation(*sources):
-        return -sources[0]
-
-
-class add(summation):
-    """
-    Not Compilable
-
-    A subclass of summation that also adds the destinations value instead of overwriting it. For a compiler friendly
-    version of this add the destination as a source to summation.
-    """
-    is_compilable = False
-
-    def resolve(self, value):
-        if self.destination is not None:
-            self.destination.set(self.destination.value + value)
-
-
-class overwrite(BaseOp):
-    """
-    The default operation behavior for cable's
-    Overwrites the previous value with the first source value (all other sources will be ignored)
-    """
-    @staticmethod
-    def operation(*sources):
-        return sources[0]

@@ -10,7 +10,7 @@ know that all operation should have an `is_compilable` flag set to true if they 
 as the `add` operation are not compilable as their resolve method contains execution logic that will not be captured
 by the compiled command.
 """
-from ngcsimlib.operations import BaseOp
+from ngcsimlib.operations.baseOp import BaseOp
 
 
 def parse(op):
