@@ -3,7 +3,7 @@
 
 # NGC-Sim-Lib: Support Library for NGC-Learn
 
-<b>ngc-sim-lib</b> is the support library and central dependency for
+<b>ngc-sim-lib</b> is the support library backend and central dependency for
 <i><a href="https://github.com/NACLab/ngc-learn/">ngc-learn</a></i>, a library
 designed for computational neuroscience and cognitive neuroscience research.
 While ngc-learn contains the JAX-implemented routines and any supporting C
