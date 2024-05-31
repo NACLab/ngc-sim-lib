@@ -1,7 +1,7 @@
 from ngcsimlib.commands.command import Command
 from ngcsimlib.utils import extract_args
-from ngcsimlib.componentUtils import find_compartment
-from ngcsimlib.logger import warn, error
+from ngcsimlib.logger import error
+from ngcsimlib.compartment import Compartment
 
 class Clamp(Command):
     """
@@ -39,16 +39,14 @@ class Clamp(Command):
         self.compartment = compartment
 
         for name, component in self.components.items():
-            _, mapped_name = find_compartment(component.compartments, component.__class__, self.compartment)
+            mapped = hasattr(component, self.compartment)
+            if mapped:
+                if Compartment.is_compartment(getattr(compartment, self.compartment)):
+                    continue
 
-            if mapped_name is None:
-                error(self.name, " is attempting to initialize clamp to non-existent compartment \"",
-                      self.compartment, "\" on ", name, sep=" ")
+            error(self.name, " is attempting to initialize clamp to non-existent compartment \"",
+                  self.compartment, "\" on ", name, sep=" ")
 
-            if mapped_name != self.compartment:
-                warn(self.name, " is attempting to initialize clamp to a property name, not a compartment of ", name,
-                     ". If using a verboseDict and autoMap this will work, otherwise this clamp will have unknown "
-                     "behavior", sep=" ")
 
     def __call__(self, *args, **kwargs):
         try:

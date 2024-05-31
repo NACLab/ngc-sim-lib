@@ -1,7 +1,28 @@
+"""
+This file contains the logic needed to compile down an operation and produce an execution order that is compatible
+with the order found in the command compiler.
+
+This file contains two methods a parse and a compile method for operations. The parse method returns the metadata
+needed by the command compiler to know what values the operation will use.
+
+The second one is the compile method which returns the execution order for the compile operation. It is important to
+know that all operation should have an `is_compilable` flag set to true if they are compilable. Some operations such
+as the `add` operation are not compilable as their resolve method contains execution logic that will not be captured
+by the compiled command.
+"""
 from ngcsimlib.operations import BaseOp
 
 
 def parse(op):
+    """
+    parses the provided operation
+
+    Args:
+        op: the operation to parse
+
+    Returns:
+        the parsed operation
+    """
     assert op.is_compilable
     inputs = []
     for s in op.sources:
@@ -17,13 +38,22 @@ def parse(op):
     return inputs, op.destination.name if op.destination is not None else None
 
 
-def compile(op, arg_order):
+def compile(op):
+    """
+        compiles the operation down to its execution order
+
+    Args:
+        op: the operation to compile
+
+    Returns:
+        the execution order needed to run this operation compiled
+    """
     exc_order = []
     ops = []
 
     for idx, s in enumerate(op.sources):
         if isinstance(s, BaseOp):
-            exc_order.append(compile(s, arg_order))
+            exc_order.append(compile(s))
             ops.append(idx)
 
     output = op.destination.path if op.destination is not None else None
@@ -35,9 +65,9 @@ def compile(op, arg_order):
         else:
             iids.append(str(s.path))
 
-    def _op_compiled(*args):
-        computed_values = [cmd(*args) for cmd, _, _ in exc_order]
-        compartment_args = [args[arg_order.index(narg)] for narg in iids]
+    def _op_compiled(**kwargs):
+        computed_values = [cmd(**kwargs) for cmd, _, _ in exc_order]
+        compartment_args = [kwargs.get(narg) for narg in iids]
 
         _val_loc = 0
         _arg_loc = 0
