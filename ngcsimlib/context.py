@@ -1,8 +1,10 @@
 from ngcsimlib.utils import make_unique_path, check_attributes, check_serializable, load_from_path
 from ngcsimlib.logger import warn, info
 from ngcsimlib.utils import get_compartment_by_name, \
-    get_context, add_context, get_current_path, get_current_context, set_new_context
+    get_context, add_context, get_current_path, get_current_context, set_new_context, load_module, is_pre_loaded
+from ngcsimlib import preload_modules
 from ngcsimlib.compilers.command_compiler import dynamic_compile, wrap_command
+
 import json, os
 
 
@@ -75,12 +77,14 @@ class Context:
         """
         set_new_context(self._last_context)
 
-    def get_components(self, *component_names):
+    def get_components(self, *component_names, unwrap=True):
         """
         Gets all the components by name in a context
 
         Args:
             component_names: an arbitrary list of component names to get
+
+            unwrap: return just the component not a list of length 1 if only a single component is retrieved
 
         Returns:
              either a list of components or a single component depending on the number of components being retrieved
@@ -93,7 +97,7 @@ class Context:
                 _components.append(self.components[a])
             else:
                 warn(f"Could not fine a component with the name \"{a}\" in the context")
-        return _components if len(component_names) > 1 else _components[0]
+        return _components if len(component_names) > 1 or not unwrap else _components[0]
 
     def register_op(self, op):
         """
@@ -119,7 +123,7 @@ class Context:
 
             kwargs: the keyword arguments passed into the command
         """
-        _components = [components.name for components in components]
+        _components = [component.name for component in components]
         self._json_objects['commands'][command_name] = {"class": klass, "components": _components, "args": args,
                                                         "kwargs": kwargs}
 
@@ -208,6 +212,9 @@ class Context:
         """
         path = make_unique_path(directory, model_name)
 
+        with open(path + "/modules.json", "w") as fp:
+            json.dump(self.make_modules(), fp, indent=4)
+
         with open(path + "/ops.json", 'w') as fp:
             json.dump(self._json_objects['ops'], fp, indent=4)
 
@@ -278,6 +285,11 @@ class Context:
             custom_folder: The name of the custom data folder for building
                 components. (Default: `/custom`)
         """
+
+        if os.path.isfile(directory + "/modules.json") and not is_pre_loaded():
+            info("No modules file loaded, loading from model directory")
+            preload_modules(path=directory + "/modules.json")
+
         self.make_components(directory + "/components.json", directory + custom_folder)
         self.make_ops(directory + "/ops.json")
         self.make_commands(directory + "/commands.json")
@@ -343,11 +355,17 @@ class Context:
             commands = json.load(file)
             for c_name, command in commands.items():
                 if command['class'] == "dynamic_compiled":
-                    self.compile_by_key(
-                        *self.get_components(*command['components']), compile_key=command['compile_key'], name=c_name)
+                    if len(command['components']) > 1:
+                        self.compile_by_key(
+                            *self.get_components(*command['components'], unwrap=False), compile_key=command['compile_key'],
+                            name=c_name)
+                    else:
+                        self.compile_by_key(
+                            self.get_components(*command['components'], unwrap=False), compile_key=command['compile_key'],
+                            name=c_name)
                 else:
                     klass = load_from_path(command['class'])
-                    klass(*command['args'], **command['kwargs'], components=self.get_components(*command['components']),
+                    klass(*command['args'], **command['kwargs'], components=self.get_components(*command['components'], unwrap=False),
                           command_name=c_name)
 
     def _make_op(self, op_spec):
@@ -420,3 +438,54 @@ class Context:
             name: The name of the command (default: None)
         """
         self.add_command(wrap_command(command), name=name)
+
+    def make_modules(self):
+        modules = {}
+        jComponents = self._json_objects['components']
+        for c_path, c in jComponents.items():
+            mod = load_module(c["class"]).__name__
+
+            module = ".".join(mod.split(".")[:-1])
+            klass = c["class"]
+
+            if module not in modules.keys():
+                modules[module] = {"attributes": []}
+
+            if klass not in map(lambda x: x["name"], modules[module]["attributes"]):
+                modules[module]["attributes"].append({"name": klass})
+
+        jOperators = self._json_objects['ops']
+        for o in jOperators:
+            mod = load_module(o["class"]).__name__
+
+            module = ".".join(mod.split(".")[:-1])
+            klass = o["class"]
+
+            if module not in modules.keys():
+                modules[module] = {"attributes": []}
+
+            if klass not in map(lambda x: x["name"], modules[module]["attributes"]):
+                modules[module]["attributes"].append({"name": klass})
+
+
+        jCommands = self._json_objects['commands']
+        for c_name, c in jCommands.items():
+            if c["class"] == "dynamic_compiled":
+                continue
+
+            mod = load_module(c["class"]).__name__
+
+            module = ".".join(mod.split(".")[:-1])
+            klass = c["class"]
+
+            if module not in modules.keys():
+                modules[module] = {"attributes": []}
+
+            if klass not in map(lambda x: x["name"], modules[module]["attributes"]):
+                modules[module]["attributes"].append({"name": klass})
+
+        _modules = []
+        for key, value in modules.items():
+            _modules.append({"absolute_path": key, "attributes": value["attributes"]})
+
+        return _modules
