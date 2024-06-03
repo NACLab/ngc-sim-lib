@@ -21,6 +21,9 @@ def preload_modules(path=None):
         else:
             module_path = module_config.get("module_path", "json_files/modules.json")
 
+        if module_path is None:
+            return
+
         if not os.path.isfile(module_path):
             warn("Missing file to preload modules from. Attempted to locate file at \"" + str(module_path) +
                           "\". No modules will be preloaded. "
