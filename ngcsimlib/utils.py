@@ -3,11 +3,18 @@ The utilities file for ngcsimlib
 """
 import sys, uuid, os, json
 from importlib import import_module
+from ngcsimlib.logger import info
 
 ## Globally tracking all the modules, and attributes have been dynamically loaded
 _Loaded_Attributes = {}
 _Loaded_Modules = {}
+_Loaded = False
+def is_pre_loaded():
+    return _Loaded
 
+def set_loaded(val):
+    global _Loaded
+    _Loaded = val
 
 def check_attributes(obj, required, fatal=False):
     """
@@ -68,7 +75,7 @@ def load_module(module_path, match_case=False, absolute_path=False):
             last_mod = module.split('.')[-1]
             last_mod = last_mod if match_case else last_mod.lower()
             if final_mod == last_mod:
-                print("Loading module from " + module)
+                info("Loading module from " + module)
                 module_name = module
                 break
 

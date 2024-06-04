@@ -41,7 +41,7 @@ class Clamp(Command):
         for name, component in self.components.items():
             mapped = hasattr(component, self.compartment)
             if mapped:
-                if Compartment.is_compartment(getattr(compartment, self.compartment)):
+                if Compartment.is_compartment(getattr(component, self.compartment)):
                     continue
 
             error(self.name, " is attempting to initialize clamp to non-existent compartment \"",

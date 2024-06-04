@@ -6,25 +6,31 @@ import argparse, os, warnings, json
 from types import SimpleNamespace
 from importlib import import_module
 from ngcsimlib.configManager import init_config, get_config
-
+from ngcsimlib.logger import warn
 from pkg_resources import get_distribution
 
 __version__ = get_distribution('ngcsimlib').version  ## set software version
 
 
 ###### Preload Modules
-def preload_modules():
-    module_config = get_config("modules")
-    if module_config is None:
-        module_path = "json_files/modules.json"
-    else:
-        module_path = module_config.get("module_path", "json_files/modules.json")
+def preload_modules(path=None):
+    if path is None:
+        module_config = get_config("modules")
+        if module_config is None:
+            module_path = "json_files/modules.json"
+        else:
+            module_path = module_config.get("module_path", "json_files/modules.json")
 
-    if not os.path.isfile(module_path):
-        warnings.warn("\nMissing file to preload modules from. Attempted to locate file at \"" + str(module_path) +
-                      "\". No modules will be preloaded. "
-                      "\nSee https://ngc-learn.readthedocs.io/en/latest/tutorials/model_basics/json_modules.html for additional information")
-        return
+        if module_path is None:
+            return
+
+        if not os.path.isfile(module_path):
+            warn("Missing file to preload modules from. Attempted to locate file at \"" + str(module_path) +
+                          "\". No modules will be preloaded. "
+                          "\nSee https://ngc-learn.readthedocs.io/en/latest/tutorials/model_basics/json_modules.html for additional information")
+            return
+    else:
+        module_path = path
 
     with open(module_path, 'r') as file:
         modules = json.load(file, object_hook=lambda d: SimpleNamespace(**d))
@@ -42,6 +48,7 @@ def preload_modules():
                 for keyword in attribute.keywords:
                     utils._Loaded_Attributes[keyword] = atr
 
+    utils.set_loaded(True)
 
 ###### Initialize Config
 def configure():
@@ -59,7 +66,7 @@ def configure():
         config_path = "json_files/config.json"
 
     if not os.path.isfile(config_path):
-        warnings.warn("\nMissing configuration file. Attempted to locate file at \"" + str(config_path) +
+        warn("Missing configuration file. Attempted to locate file at \"" + str(config_path) +
                       "\". Default Config will be used. "
                       "\nSee https://ngc-learn.readthedocs.io/en/latest/tutorials/model_basics/configuration.html for "
                       "additional information")
