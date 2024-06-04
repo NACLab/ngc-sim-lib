@@ -132,7 +132,8 @@ def dynamic_compile(*components, compile_key=None):
     Returns:
         compiled_command, needed_arguments
     """
-    assert compile_key is not None
+    if compile_key is None:
+        critical("Can not compile a command without a compile key")
     return _compile(compile_key, {c.name: c for c in components})
 
 

@@ -3,7 +3,7 @@ The utilities file for ngcsimlib
 """
 import sys, uuid, os, json
 from importlib import import_module
-from ngcsimlib.logger import info
+from ngcsimlib.logger import info, critical
 
 ## Globally tracking all the modules, and attributes have been dynamically loaded
 _Loaded_Attributes = {}
@@ -305,6 +305,12 @@ def get_resolver(class_name, resolver_key):
     """
     A helper method for searching through the resolver list
     """
+    resolver = __component_resolvers.get(class_name + "/" + resolver_key, None)
+    meta_data = __component_resolvers.get(class_name + "/" + resolver_key, None)
+
+    if resolver or meta_data is None:
+        critical(f"The class \"{class_name}\" does not have a resolver for the key \"{resolver_key}\"")
+
     return __component_resolvers[class_name + "/" + resolver_key], __resolver_meta_data[class_name + "/" + resolver_key]
 
 
