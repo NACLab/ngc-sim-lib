@@ -458,7 +458,7 @@ class Context:
         modules = {}
         jComponents = self._json_objects['components']
         for c_path, c in jComponents.items():
-            module = load_module(c["module"], absolute_path=True).__name__
+            module = c["module"]
             klass = c["class"]
 
             if module not in modules.keys():
