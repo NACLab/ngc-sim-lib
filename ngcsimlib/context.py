@@ -372,16 +372,9 @@ class Context:
             commands = json.load(file)
             for c_name, command in commands.items():
                 if command['class'] == "dynamic_compiled":
-                    if len(command['components']) > 1:
-                        self.compile_by_key(
-                            *self.get_components(*command['components'], unwrap=False),
-                            compile_key=command['compile_key'],
-                            name=c_name)
-                    else:
-                        self.compile_by_key(
-                            self.get_components(*command['components'], unwrap=False),
-                            compile_key=command['compile_key'],
-                            name=c_name)
+                    self.compile_by_key(
+                        *self.get_components(*command['components'], unwrap=False), compile_key=command['compile_key'],
+                        name=c_name)
                 else:
                     klass = load_from_path(command['class'])
                     klass(*command['args'], **command['kwargs'],
