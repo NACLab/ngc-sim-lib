@@ -34,7 +34,7 @@ def parse(component, compile_key):
 
     """
     (pure_fn, output_compartments), (args, parameters, compartments, parse_varnames) = \
-        get_resolver(component.__class__.__name__, compile_key)
+        get_resolver(component.__class__, compile_key)
 
     if parse_varnames:
         args = []

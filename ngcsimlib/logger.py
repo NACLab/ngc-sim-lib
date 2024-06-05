@@ -99,9 +99,6 @@ def init_logging():
         _ngclogger.addHandler(file_handler)
 
 
-    custom_log("test", logging_level="analysis")
-
-
 @_concatArgs
 def warn(msg):
     """
