@@ -32,7 +32,7 @@ class Context:
              name: the name of the context
         """
         if len(name) == 0:
-            critical
+            critical("Name can not be empty")
         con = get_context(str(name))
         if con is None:
             return super().__new__(cls)
