@@ -34,7 +34,7 @@ def parse(component, compile_key):
 
     """
     (pure_fn, output_compartments), (args, parameters, compartments, parse_varnames) = \
-        get_resolver(component.__class__.__name__, compile_key)
+        get_resolver(component.__class__, compile_key)
 
     if parse_varnames:
         args = []
@@ -85,7 +85,7 @@ def compile(component, resolver):
         funArgs = {narg: kwargs.get(narg) for _, narg in (list(_args))}
         funComps = {narg.split('/')[-1]: kwargs.get(narg) for narg in comp_ids}
 
-        return pure_fn(**funParams, **funArgs, **funComps)
+        return pure_fn.__func__(**funParams, **funArgs, **funComps)
 
     exc_order.append((compiled, out_ids, component.name))
     return exc_order

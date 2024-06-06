@@ -1,10 +1,11 @@
 from ngcsimlib.utils import make_unique_path, check_attributes, check_serializable, load_from_path
-from ngcsimlib.logger import warn, info
+from ngcsimlib.logger import warn, info, critical
 from ngcsimlib.utils import get_compartment_by_name, \
     get_context, add_context, get_current_path, get_current_context, set_new_context, load_module, is_pre_loaded
 from ngcsimlib import preload_modules
 from ngcsimlib.compilers.command_compiler import dynamic_compile, wrap_command
-import json, os
+import json, os, shutil
+
 
 
 class Context:
@@ -30,11 +31,13 @@ class Context:
         Args:
              name: the name of the context
         """
-        assert len(name) > 0
+        if len(name) == 0:
+            critical("Name can not be empty")
         con = get_context(str(name))
         if con is None:
             return super().__new__(cls)
         else:
+            info(f"Returning already existing context: {name}")
             return con
 
     def __init__(self, name):
@@ -144,6 +147,7 @@ class Context:
 
         c_path = component.path
         c_class = component.__class__.__name__
+        c_mod = component.__class__.__module__
 
         _args = []
 
@@ -160,7 +164,7 @@ class Context:
             del _kwargs[key]
             info("Failed to serialize \"", key, "\" in ", component.path, sep="")
 
-        obj = {"class": c_class, "args": _args, "kwargs": _kwargs}
+        obj = {"class": c_class, "module": c_mod, "args": _args, "kwargs": _kwargs}
         self._json_objects['components'][c_path] = obj
 
     def add_component(self, component):
@@ -189,7 +193,7 @@ class Context:
         self.commands[name] = command
         self.__setattr__(name, command)
 
-    def save_to_json(self, directory, model_name=None, custom_save=True):
+    def save_to_json(self, directory, model_name=None, custom_save=True, overwrite=False):
         """
         Dumps all the required json files to rebuild the current controller to a specified directory. If there is a
         `save` command present on the controller and custom_save is True, it will run that command as well.
@@ -204,11 +208,26 @@ class Context:
             custom_save: A boolean that if true will attempt to call the `save`
                 command if present on the controller (Default: True)
 
+            overwrite: A boolean for if the saved model should be in a unique folder or if it should overwrite
+            existing folders
+
         Returns:
             a tuple where the first value is the path to the model, and the
                 second is the path to the custom save folder if custom_save is
                 true and None if false
         """
+        if overwrite and os.path.isdir(directory + "/" + model_name):
+            for filename in os.listdir(directory + "/" + model_name):
+                file_path = os.path.join(directory + "/" + model_name, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
+            shutil.rmtree(directory + "/" + model_name)
+
         path = make_unique_path(directory, model_name)
 
         with open(path + "/modules.json", "w") as fp:
@@ -254,6 +273,8 @@ class Context:
             for c_path, component in self._json_objects['components'].items():
                 if "parameter_map" in component['kwargs'].keys():
                     del component['kwargs']["parameter_map"]
+                if "module" in component.keys():
+                    del component['module']
 
             obj = {"components": self._json_objects['components']}
             if len(hp.keys()) != 0:
@@ -359,7 +380,8 @@ class Context:
                         name=c_name)
                 else:
                     klass = load_from_path(command['class'])
-                    klass(*command['args'], **command['kwargs'], components=self.get_components(*command['components'], unwrap=False),
+                    klass(*command['args'], **command['kwargs'],
+                          components=self.get_components(*command['components'], unwrap=False),
                           command_name=c_name)
 
     def _make_op(self, op_spec):
@@ -421,7 +443,6 @@ class Context:
         self.__setattr__(name, cmd)
         return cmd, args
 
-
     def wrap_and_add_command(self, command, name=None):
         """
         wraps a command and adds it to the context, if no name is provided it will use the command's internal name
@@ -437,9 +458,7 @@ class Context:
         modules = {}
         jComponents = self._json_objects['components']
         for c_path, c in jComponents.items():
-            mod = load_module(c["class"]).__name__
-
-            module = ".".join(mod.split(".")[:-1])
+            module = c["module"]
             klass = c["class"]
 
             if module not in modules.keys():
@@ -460,7 +479,6 @@ class Context:
 
             if klass not in map(lambda x: x["name"], modules[module]["attributes"]):
                 modules[module]["attributes"].append({"name": klass})
-
 
         jCommands = self._json_objects['commands']
         for c_name, c in jCommands.items():

@@ -11,6 +11,7 @@ as the `add` operation are not compilable as their resolve method contains execu
 by the compiled command.
 """
 from ngcsimlib.operations.baseOp import BaseOp
+from ngcsimlib.logger import critical
 
 
 def parse(op):
@@ -28,7 +29,10 @@ def parse(op):
     for s in op.sources:
         if isinstance(s, BaseOp):
             needed_inputs, dest = parse(s)
-            assert dest is None
+            if dest is not None:
+                critical(
+                    "An operation with a destination compartment is being used as a source object for another "
+                    "operation")
             for inp in needed_inputs:
                 if inp not in inputs:
                     inputs.append(inp)
