@@ -147,6 +147,7 @@ class Context:
 
         c_path = component.path
         c_class = component.__class__.__name__
+        c_mod = component.__class__.__module__
 
         _args = []
 
@@ -163,7 +164,7 @@ class Context:
             del _kwargs[key]
             info("Failed to serialize \"", key, "\" in ", component.path, sep="")
 
-        obj = {"class": c_class, "args": _args, "kwargs": _kwargs}
+        obj = {"class": c_class, "module": c_mod, "args": _args, "kwargs": _kwargs}
         self._json_objects['components'][c_path] = obj
 
     def add_component(self, component):
@@ -272,6 +273,8 @@ class Context:
             for c_path, component in self._json_objects['components'].items():
                 if "parameter_map" in component['kwargs'].keys():
                     del component['kwargs']["parameter_map"]
+                if "module" in component.keys():
+                    del component['module']
 
             obj = {"components": self._json_objects['components']}
             if len(hp.keys()) != 0:
@@ -455,9 +458,7 @@ class Context:
         modules = {}
         jComponents = self._json_objects['components']
         for c_path, c in jComponents.items():
-            mod = load_module(c["class"]).__name__
-
-            module = ".".join(mod.split(".")[:-1])
+            module = c["module"]
             klass = c["class"]
 
             if module not in modules.keys():
