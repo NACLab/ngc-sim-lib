@@ -163,6 +163,23 @@ def debug(msg):
 
 @_concatArgs
 def custom_log(msg, logging_level=None):
+    """
+    Logs to a user defined logging level. This will only work for user defined
+    levels if a builtin logging level is desired please use on of the builtin
+    logging methods found in this file. To defined logging levels add them to the
+    configuration file of your project. To add levels here add the map of
+    `logging_levels` to the top level logging object and have the key be the new
+    logging level name, and the value be the numerical logging value. To see all
+    build in logging levels look at the builtin python logger package.
+
+
+    This is decorated to have the same functionality of python's print argument concatenation
+
+    Args:
+        msg: The message to log
+
+        logging_level: The user defined logging level.
+    """
     if isinstance(logging_level, str):
         logging_level = logging_level.upper()
 
