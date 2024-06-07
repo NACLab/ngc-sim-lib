@@ -69,7 +69,7 @@ def init_logging():
         loggingConfig = {"logging_file": None,
                          "logging_level": logging.WARNING,
                          "hide_console": False,
-                         "custom_levels": {"ANALYSIS", 25}}
+                         "custom_levels": {"ANALYSIS": 25}}
 
     if loggingConfig.get("custom_levels", None) is not None:
         for level_name, level_num in loggingConfig.get("custom_levels", {}).items():
