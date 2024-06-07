@@ -85,7 +85,7 @@ def compile(component, resolver):
         funArgs = {narg: kwargs.get(narg) for _, narg in (list(_args))}
         funComps = {narg.split('/')[-1]: kwargs.get(narg) for narg in comp_ids}
 
-        return pure_fn(**funParams, **funArgs, **funComps)
+        return pure_fn.__func__(**funParams, **funArgs, **funComps)
 
     exc_order.append((compiled, out_ids, component.name))
     return exc_order

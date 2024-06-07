@@ -104,7 +104,7 @@ def resolver(pure_fn,
                 params = {key: self.__dict__[key] for key in parameters}
                 cargs = {key: _kwargs.get(key) for key in args}
 
-            vals = pure_fn(**cargs, **params, **comps)
+            vals = pure_fn.__func__(**cargs, **params, **comps)
             if expand_args and len(output_compartments) > 1:
                 fn(self, *vals)
             else:
