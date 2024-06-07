@@ -327,6 +327,7 @@ class Context:
                 this directory is named `custom` if the save_to_json method is
                 used. (Default: None)
         """
+        made_components = []
         with open(path_to_components_file, 'r') as file:
             componentsConfig = json.load(file)
 
@@ -348,6 +349,9 @@ class Context:
 
                 if check_attributes(obj, ["load"]):
                     obj.load(custom_file_dir)
+
+                made_components.append(obj)
+        return made_components
 
     def make_ops(self, path_to_ops_file):
         """
@@ -501,3 +505,4 @@ class Context:
             _modules.append({"absolute_path": key, "attributes": value["attributes"]})
 
         return _modules
+
