@@ -4,7 +4,7 @@ from ngcsimlib.utils import get_compartment_by_name, \
     get_context, add_context, get_current_path, get_current_context, set_new_context, load_module, is_pre_loaded
 from ngcsimlib import preload_modules
 from ngcsimlib.compilers.command_compiler import dynamic_compile, wrap_command
-import json, os, shutil
+import json, os, shutil, copy
 
 
 
@@ -241,8 +241,8 @@ class Context:
 
         with open(path + "/components.json", 'w') as fp:
             hyperparameters = {}
-
-            for c_path, component in self._json_objects['components'].items():
+            _components = copy.deepcopy(self._json_objects['components'])
+            for c_path, component in _components.items():
                 if component['kwargs'].get('parameter_map', None) is not None:
                     for cKey, pKey in component['kwargs']['parameter_map'].items():
                         pVal = component['kwargs'][cKey]
@@ -264,19 +264,19 @@ class Context:
 
                 for c_path, cKey, _ in hyperparameters[param]:
                     if matched:
-                        self._json_objects['components'][c_path]['kwargs'][cKey] = param
+                        _components[c_path]['kwargs'][cKey] = param
 
                     else:
                         warn("Unable to extract hyperparameter", param,
                              "as it is mismatched between components. Parameter will not be extracted")
 
-            for c_path, component in self._json_objects['components'].items():
+            for c_path, component in _components.items():
                 if "parameter_map" in component['kwargs'].keys():
                     del component['kwargs']["parameter_map"]
                 if "module" in component.keys():
                     del component['module']
 
-            obj = {"components": self._json_objects['components']}
+            obj = {"components": _components}
             if len(hp.keys()) != 0:
                 obj["hyperparameters"] = hp
 
