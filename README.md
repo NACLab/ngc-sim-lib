@@ -23,7 +23,7 @@ maintained by the
 
 <i>Setup:</i> Ensure that you have installed the following base dependencies in
 your system. Note that this library was developed and tested on
-Ubuntu 22.04.3 LTS. ngc-sim-lib requires: `Python (>=3.10)`.
+Ubuntu 22.04.3 LTS. ngc-sim-lib requires: `Python (>=3.8)`.
 
 Once you have ensured that the appropriate Python is installed, you can then
 have the <code>ngcsimlib</code> package installed on your system using either 
@@ -41,7 +41,7 @@ $ pip install --editable . # OR pip install -e .
 </pre>
 
 **Version:**<br>
-0.2.0 <!-- -Alpha -->
+0.3.2-Beta <!-- -Alpha -->
 
 Authors:
 William Gebhardt, Alexander G. Ororbia II<br>
