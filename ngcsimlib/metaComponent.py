@@ -15,8 +15,12 @@ class MetaComponent(type):
         Called before the classes default init
         """
         self.connections = []
-        self.path = get_current_context().path + "/" + name
-        get_current_context().register_component(self, name, *args, **kwargs)
+        cc = get_current_context()
+        if cc is None:
+            self.path = "/" + name
+        else:
+            self.path = cc.path + "/" + name
+            cc.register_component(self, name, *args, **kwargs)
         self._meta_init = True
 
 
@@ -29,7 +33,8 @@ class MetaComponent(type):
             if Compartment.is_compartment(value):
                 value._setup(self, key)
         # add component to context
-        get_current_context().add_component(self)
+        if get_current_context() is not None:
+            get_current_context().add_component(self)
 
     @staticmethod
     def add_connection(self, op):
