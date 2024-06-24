@@ -1,5 +1,6 @@
 from ngcsimlib.operations import BaseOp, overwrite
 from ngcsimlib.utils import Set_Compartment_Batch, get_current_path
+from ngcsimlib.logger import error
 import uuid
 
 
@@ -64,7 +65,7 @@ class Compartment:
         if not self._static:
             self.value = value
         else:
-            raise RuntimeError("Can not assign value to static compartment")
+            error("Can not assign value to static compartment")
 
     def clamp(self, value):
         """

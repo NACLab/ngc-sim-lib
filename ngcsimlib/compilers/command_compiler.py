@@ -66,18 +66,18 @@ def _compile(compile_key, components):
 
     for c_name, component in components.items():
         _, outs, args, params, comps = resolvers[c_name]
-        for _, a in args:
+        for a in args:
             if a not in needed_args:
                 needed_args.append(a)
 
         for connection in component.connections:
-            inputs, outputs = parse_connection(connection)
+            inputs, _ = parse_connection(connection)
             ncs = [str(i) for i in inputs]
             for nc in ncs:
                 if nc not in needed_comps:
                     needed_comps.append(nc)
 
-        for _, comp in comps:
+        for comp in comps:
             path = str(component.__dict__[comp].path)
             if path not in needed_comps:
                 needed_comps.append(path)
