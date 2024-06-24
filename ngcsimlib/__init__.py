@@ -2,7 +2,7 @@ from . import utils
 from . import controller
 from . import commands
 
-import argparse, os, warnings, json
+import argparse, os, json
 from types import SimpleNamespace
 from importlib import import_module
 from ngcsimlib.configManager import init_config, get_config
@@ -17,9 +17,9 @@ def preload_modules(path=None):
     if path is None:
         module_config = get_config("modules")
         if module_config is None:
-            module_path = "json_files/modules.json"
+            module_path = None
         else:
-            module_path = module_config.get("module_path", "json_files/modules.json")
+            module_path = module_config.get("module_path", None)
 
         if module_path is None:
             return
