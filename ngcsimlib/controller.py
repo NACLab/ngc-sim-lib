@@ -1,8 +1,9 @@
 from ngcsimlib.utils import check_attributes, load_from_path, make_unique_path, check_serializable
 from ngcsimlib.logger import warn, error, info
 import json, os, inspect
+from ngcsimlib.deprecators import deprecated
 
-
+@deprecated
 class Controller:
     """
     The ngc controller is the foundation of all ngclearn models and the central
@@ -14,7 +15,6 @@ class Controller:
     """
 
     def __init__(self):
-        warn("Controllers have been deprecated in favor of contexts and will be removed in the future")
         self.steps = []
         self.commands = {}
         self.components = {}  ## components/nodes that characterize system/simulation object

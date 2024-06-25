@@ -15,7 +15,7 @@ def deprecate_args(_rebind=True, **arg_list):
                 if kwarg in arg_list.keys():
                     new_kwarg = arg_list[kwarg]
                     if new_kwarg is None:
-                        warn(f"The argument \"{kwarg}\" is depricated for {fn.__qualname__}, and will no longer be supported")
+                        warn(f"The argument \"{kwarg}\" is deprecated for {fn.__qualname__}, and will no longer be supported")
                     else:
                         warn(f"The argument \"{kwarg}\" is deprecated for {fn.__qualname__}, use \"{new_kwarg}\" instead")
 
