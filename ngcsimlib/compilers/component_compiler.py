@@ -1,7 +1,7 @@
 """
 This is the file that contains the code to compile a component for a command.
 
-There are two primary method provided in this file. The first of them is the
+There are two primary methods provided in this file. The first of them is the
 parse command. This command is designed to provide everything that is needed
 to compile the component down without actually doing so. This is generally
 used by the command compiler to produce a working list of everything that is
