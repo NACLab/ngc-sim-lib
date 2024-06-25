@@ -4,3 +4,4 @@ from .io import *
 from .misc import *
 from .modules import *
 from .resolvers import *
+from .help import *
