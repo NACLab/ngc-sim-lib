@@ -37,16 +37,16 @@ def preload_modules(path=None):
 
     for module in modules:
         mod = import_module(module.absolute_path)
-        utils._Loaded_Modules[module.absolute_path] = mod
+        utils.modules._Loaded_Modules[module.absolute_path] = mod
 
         for attribute in module.attributes:
             atr = getattr(mod, attribute.name)
-            utils._Loaded_Attributes[attribute.name] = atr
+            utils.modules._Loaded_Attributes[attribute.name] = atr
 
-            utils._Loaded_Attributes[".".join([module.absolute_path, attribute.name])] = atr
+            utils.modules._Loaded_Attributes[".".join([module.absolute_path, attribute.name])] = atr
             if hasattr(attribute, "keywords"):
                 for keyword in attribute.keywords:
-                    utils._Loaded_Attributes[keyword] = atr
+                    utils.modules._Loaded_Attributes[keyword] = atr
 
     utils.set_loaded(True)
 
