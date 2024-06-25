@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from ngcsimlib.metaComponent import MetaComponent
 from ngcsimlib.compartment import Compartment
-
+from ngcsimlib.logger import warn
 
 class Component(metaclass=MetaComponent):
     """
@@ -9,12 +9,14 @@ class Component(metaclass=MetaComponent):
     structure. In ngclearn, all stateful parts of a model take the form of
     components. The internal storage of the state within a component takes one
     of two forms, either as a compartment or as a member variable. The member
-    variables are values such as hyperparameters and weights/synaptic efficacies,
+    variables are values such as hyperparameters and weights/synaptic
+    efficacies,
     where the transfer of their individual state from component to component is
     not needed.
     Compartments, on the other hand, are where the state information, both from
     and for other components, are stored. As the components are the stateful
-    pieces of the model, they also contain the methods and logic behind advancing
+    pieces of the model, they also contain the methods and logic behind
+    advancing
     their internal state (values) forward in time.
     """
 
@@ -28,12 +30,12 @@ class Component(metaclass=MetaComponent):
         Args:
             name: the name of the component
 
-            kwargs: additional keyword arguments. These are not used in the base class,
+            kwargs: additional keyword arguments. These are not used in the
+            base class,
                 but this is here for future use if needed.
         """
         # Component Data
         self.name = name
-
 
     ##Intialization Methods
 
@@ -47,8 +49,35 @@ class Component(metaclass=MetaComponent):
 
             value: provided Value
         """
-        if hasattr(self, compartment) and Compartment.is_compartment(getattr(self, compartment)):
+        if hasattr(self, compartment) and Compartment.is_compartment(
+            getattr(self, compartment)):
             getattr(self, compartment).set(value)
+
+    def validate(self):
+        """
+        Validates that each compartment of the component is wired correctly
+
+        Returns: if it is valid
+        """
+        valid = True
+        for key, item in self.__dict__.items():
+            if Compartment.is_compartment(item):
+                if not item.is_wired():
+                    _help = self.help()
+                    _path = ("compartments/inputs/" + item.path.split("/")[-1])
+                    for _p in _path.split("/"):
+                        _help = _help.get(_p, None)
+                        if _help is None:
+                            break
+
+                    msg = (f"The compartment at the path \"{item.path}\" is "
+                           f"expected to have an incoming cable and it "
+                           f"currently does not.")
+                    if _help is not None:
+                        msg += f"\nCompartment Description:\t{_help}"
+                    warn(msg)
+                    valid = False
+        return valid
 
     ##Abstract Methods
     @abstractmethod
@@ -78,3 +107,9 @@ class Component(metaclass=MetaComponent):
             directory:  the directory to save the state to
         """
         pass
+
+    @classmethod
+    @abstractmethod
+    def help(cls):
+        pass
+
