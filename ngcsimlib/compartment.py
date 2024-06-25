@@ -61,7 +61,7 @@ class Compartment:
         """
         Finishes initializing the compartment, called by the component that
         builds the compartment
-        (Handel automatically)
+        (Handled automatically)
         """
         self.__add_connection = current_component.add_connection
         self.name = current_component.name + "/" + key
