@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ngcsimlib"
-version = "0.3.beta3"
+version = "0.3.beta4"
 
 description = "Simulation software backend for ngc-learn."
 authors = [
