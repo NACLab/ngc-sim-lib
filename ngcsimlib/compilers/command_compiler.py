@@ -92,8 +92,8 @@ def _compile(compile_key, components):
                 critical(f"Missing keyword argument \"{n}\" in compiled function."
                          f"\tExpected keyword arguments {needed_args}")
 
-        for exc, outs, name in exc_order:
-            _comps = {key: compartment_values[key] for key in needed_comps}
+        for exc, outs, name, comp_ids in exc_order:
+            _comps = {key: compartment_values[key] for key in comp_ids}
             vals = exc(**kwargs, **_comps)
             if len(outs) == 1:
                 compartment_values[outs[0]] = vals

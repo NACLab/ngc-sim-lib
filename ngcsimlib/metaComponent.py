@@ -1,7 +1,7 @@
 from ngcsimlib.compartment import Compartment
 from ngcsimlib.utils import get_current_context
 from ngcsimlib.utils.help import Guides
-from ngcsimlib.logger import debug
+from ngcsimlib.logger import debug, warn
 
 
 class MetaComponent(type):
@@ -82,7 +82,14 @@ class MetaComponent(type):
             else:
                 cls.pre_init(self, *args, **kwargs)
                 x._orig_init(self, *args, **kwargs)
+                args_count = self._orig_init.__code__.co_argcount
+                _kwargs = self._orig_init.__code__.co_varnames[:args_count]
+                for key, value in kwargs.items():
+                    if key not in _kwargs:
+                        debug(f"There is an extra param {key} in component constructor for {self.name}")
                 cls.post_init(self, *args, **kwargs)
+                if hasattr(self, "_setup"):
+                    self._setup()
 
         x.__init__ = wrapped_init
 

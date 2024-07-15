@@ -102,11 +102,13 @@ def compile(component, resolver):
 
     funParams = {narg: component.__dict__[narg] for narg in params}
 
+    comp_key_key = [(narg.split('/')[-1], narg) for narg in comp_ids]
+
     def compiled(**kwargs):
         funArgs = {narg: kwargs.get(narg) for narg in _args}
-        funComps = {narg.split('/')[-1]: kwargs.get(narg) for narg in comp_ids}
+        funComps = {knarg: kwargs.get(narg) for knarg, narg in comp_key_key}
 
         return pure_fn.__func__(**funParams, **funArgs, **funComps)
 
-    exc_order.append((compiled, out_ids, component.name))
+    exc_order.append((compiled, out_ids, component.name, comp_ids))
     return exc_order
