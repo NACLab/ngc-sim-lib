@@ -31,7 +31,7 @@ class Compartment:
         """
         return hasattr(obj, "_is_compartment")
 
-    def __init__(self, initial_value=None, static=False, is_input=False):
+    def __init__(self, initial_value=None, static=False, is_input=False, display_name=None, units=None):
         """
         Builds a compartment to be used inside a component. It is important
         to note that building compartments
@@ -56,6 +56,8 @@ class Compartment:
         self.path = None
         self.is_input = is_input
         self._is_destination = False
+        self._display_name = display_name
+        self._units = units
 
     def _setup(self, current_component, key):
         """
@@ -131,3 +133,12 @@ class Compartment:
             return True
 
         return self._is_destination
+
+    @property
+    def display_name(self):
+        return self._display_name if self._display_name is not None else self.name
+
+    @property
+    def units(self):
+        return self._units if self._units is not None else "dimensionless"
+
