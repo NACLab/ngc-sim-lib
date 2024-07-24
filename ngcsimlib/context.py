@@ -49,7 +49,7 @@ class Context:
             info(f"Returning already existing context: {name}")
             return con
 
-    def __init__(self, name, should_validate=None):
+    def __init__(self, name, should_validate=None, validation_kwargs=None):
         """
         Builds the initial context object, if `__new__` provides an already
         initialized context do not continue with
@@ -59,6 +59,14 @@ class Context:
 
         Args:
              name: The name of the new context can not be empty
+
+             should_validate: boolean on whether the context validated; if
+                None, this will use the config setting at context/should_validate
+                (default: None)
+
+            validation_kwargs: keyword arguments to be passed to each component's
+                validation call; if None, this will use the config setting at
+                context/validation_kwargs (default: None)
         """
         if hasattr(self, "_init"):
             return
@@ -83,6 +91,14 @@ class Context:
             self.should_validate = _base_config.get("should_validate", False)
         else:
             self.should_validate = should_validate
+
+        if validation_kwargs is None:
+            _base_config = get_config("context")
+            if _base_config is None:
+                _base_config = {}
+            self.validation_kwargs = _base_config.get("validation_kwargs", {})
+        else:
+            self.validation_kwargs = validation_kwargs
 
     def __enter__(self):
         """
@@ -592,7 +608,7 @@ class Context:
         valid = True
         for cname, component in self.components.items():
             if cname not in _skip:
-                if not component.validate():
+                if not component.validate(**self.validation_kwargs):
                     valid = False
         return valid
 

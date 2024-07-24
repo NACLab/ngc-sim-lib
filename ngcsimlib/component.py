@@ -53,7 +53,7 @@ class Component(metaclass=MetaComponent):
             getattr(self, compartment)):
             getattr(self, compartment).set(value)
 
-    def validate(self):
+    def validate(self, **validation_kwargs):
         """
         Validates that each compartment of the component is wired correctly
 
