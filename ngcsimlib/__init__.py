@@ -58,7 +58,7 @@ def configure():
     ## ngc-sim-lib only cares about --config argument
     args, unknown = parser.parse_known_args()  # args = parser.parse_args()
     try:
-        config_path = args.modules
+        config_path = args.config
     except:
         config_path = None
 
