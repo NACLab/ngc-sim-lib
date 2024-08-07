@@ -37,9 +37,16 @@ def parse(component, compile_key):
              the compartments needed
 
     """
-    (pure_fn, output_compartments), (
-        args, parameters, compartments, parse_varnames) = \
-        get_resolver(component.__class__, compile_key)
+    if component.__class__.__dict__.get("auto_resolve", True):
+        (pure_fn, output_compartments), (
+            args, parameters, compartments, parse_varnames) = \
+            get_resolver(component.__class__, compile_key)
+    else:
+        build_method = component.__class__.__dict__.get(f"build_{compile_key}", None)
+        if build_method is None:
+            critical(f"Component {component.name} if flagged to not use resolvers but "
+                     f"does not have a build_{compile_key} method")
+        return build_method(component)
 
     if parse_varnames:
         args = []
@@ -95,11 +102,13 @@ def compile(component, resolver):
 
     funParams = {narg: component.__dict__[narg] for narg in params}
 
+    comp_key_key = [(narg.split('/')[-1], narg) for narg in comp_ids]
+
     def compiled(**kwargs):
         funArgs = {narg: kwargs.get(narg) for narg in _args}
-        funComps = {narg.split('/')[-1]: kwargs.get(narg) for narg in comp_ids}
+        funComps = {knarg: kwargs.get(narg) for knarg, narg in comp_key_key}
 
         return pure_fn.__func__(**funParams, **funArgs, **funComps)
 
-    exc_order.append((compiled, out_ids, component.name))
+    exc_order.append((compiled, out_ids, component.name, comp_ids))
     return exc_order

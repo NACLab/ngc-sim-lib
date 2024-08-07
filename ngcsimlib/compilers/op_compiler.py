@@ -85,8 +85,13 @@ def compile(op):
         else:
             iids.append(str(s.path))
 
+    additional_idds = []
+    for _, _, _, _iids in exc_order:
+        additional_idds.extend(_iids)
+
+    # print(additional_idds)
     def _op_compiled(**kwargs):
-        computed_values = [cmd(**kwargs) for cmd, _, _ in exc_order]
+        computed_values = [cmd(**kwargs) for cmd, _, _, _ in exc_order]
         compartment_args = [kwargs.get(narg) for narg in iids]
 
         _val_loc = 0
@@ -103,4 +108,4 @@ def compile(op):
 
         return op.operation(*_args)
 
-    return (_op_compiled, [str(output)], "op")
+    return (_op_compiled, [str(output)], op.__class__.__name__, iids + additional_idds)
