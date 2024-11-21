@@ -6,9 +6,10 @@ from ngcsimlib.logger import debug, warn
 
 class MetaComponent(type):
     """
-    This is the metaclass for the component objects in ngc-learn. This does a large amount of setup work behind the
-    scenes to link everything together in the context that it is constructed in. In addition to this it also is
-    responsible for adding all compartment value to the global hashmap.
+    This is the metaclass for the component objects in ngc-learn. This does a
+     large amount of setup work behind the scenes to link everything together
+     in the context that it is constructed in. In addition to this it also
+     is responsible for adding all compartment value to the global hashmap.
     """
 
     @staticmethod
@@ -40,7 +41,8 @@ class MetaComponent(type):
     @staticmethod
     def add_connection(self, op):
         """
-        A needed function by compartments to be able to add incoming connections to their parent component
+        A needed function by compartments to be able to add incoming
+        connections to their parent component
         """
         self.connections.append(op)
         get_current_context().register_op(op)
@@ -48,7 +50,8 @@ class MetaComponent(type):
     @staticmethod
     def gather(self):
         """
-        Runs all the connections for the given component to collect values for its own compartments
+        Runs all the connections for the given component to collect values
+        for its own compartments
         """
         for comm in self.connections:
             comm()
@@ -70,7 +73,8 @@ class MetaComponent(type):
 
     def __new__(cls, *clargs, **clkwargs):
         """
-        Wraps the class adding a pre/post-init method and some additional methods
+        Wraps the class adding a pre/post-init method and some additional
+        methods
         """
         x = super().__new__(cls, *clargs, **clkwargs)
 
@@ -86,7 +90,9 @@ class MetaComponent(type):
                 _kwargs = self._orig_init.__code__.co_varnames[:args_count]
                 for key, value in kwargs.items():
                     if key not in _kwargs:
-                        debug(f"There is an extra param {key} in component constructor for {self.name}")
+                        debug(
+                            f"There is an extra param {key} in component "
+                            f"constructor for {self.name}")
                 cls.post_init(self, *args, **kwargs)
                 if hasattr(self, "_setup"):
                     self._setup()
@@ -98,6 +104,7 @@ class MetaComponent(type):
 
         if hasattr(x, "help"):
             _orig_help = x.help
+
             def _wrapped_help(*args):
                 info = _orig_help()
                 if info is not None:
@@ -105,6 +112,7 @@ class MetaComponent(type):
                         x._format_defaults(x, info["hyperparameters"])
 
                 return info
+
             x.help = _wrapped_help
 
         x.guides = Guides(x)

@@ -17,7 +17,8 @@ def get_resolver(klass, resolver_key, root=None):
 
         resolver = None
         for parent in parent_classes:
-            resolver, meta = get_resolver(parent, resolver_key, root=klass if root is None else root)
+            resolver, meta = get_resolver(parent, resolver_key,
+                                          root=klass if root is None else root)
             if resolver is not None:
                 return resolver, meta
 
@@ -27,8 +28,11 @@ def get_resolver(klass, resolver_key, root=None):
             return None, None
 
     if root is not None:
-        debug(f"{root.__name__} is using the resolver from {class_name} for resolving key \"{resolver_key}\"")
-    return __component_resolvers[class_name + "/" + resolver_key], __resolver_meta_data[class_name + "/" + resolver_key]
+        debug(
+            f"{root.__name__} is using the resolver from {class_name} for "
+            f"resolving key \"{resolver_key}\"")
+    return __component_resolvers[class_name + "/" + resolver_key], \
+        __resolver_meta_data[class_name + "/" + resolver_key]
 
 
 def add_component_resolver(class_name, resolver_key, data):
@@ -44,6 +48,7 @@ def add_resolver_meta(class_name, resolver_key, data):
     """
     __resolver_meta_data[class_name + "/" + resolver_key] = data
 
+
 def using_resolver(**kwargs):
     """
     A decorator for linking resolvers defined in other classes to this class.
@@ -54,6 +59,7 @@ def using_resolver(**kwargs):
     Args:
         **kwargs:  any number or compile_key=class_to_inherit_resolver_from
     """
+
     def _klass_wrapper(cls):
         klass_name = cls.__name__
         for key, value in kwargs.items():
@@ -61,4 +67,5 @@ def using_resolver(**kwargs):
             add_component_resolver(klass_name, key, resolver)
             add_resolver_meta(klass_name, key, data)
         return cls
+
     return _klass_wrapper
