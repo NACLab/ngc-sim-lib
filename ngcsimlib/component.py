@@ -76,37 +76,3 @@ class Component(metaclass=MetaComponent):
                     warn(msg)
                     valid = False
         return valid
-
-    ##Abstract Methods
-    @abstractmethod
-    def advance_state(self, **kwargs):
-        """
-        An abstract method to advance the state of the component to the next one
-        (a component transitions from its current state at time t to a new one
-        at time t + dt)
-        """
-        pass
-
-    @abstractmethod
-    def reset(self, **kwargs):
-        """
-        An abstract method that should be implemented to models can be returned
-        to their original state.
-        """
-        pass
-
-    @abstractmethod
-    def save(self, directory, **kwargs):
-        """
-        An abstract method to save component specific state to the provided
-        directory
-
-        Args:
-            directory:  the directory to save the state to
-        """
-        pass
-
-    @classmethod
-    @abstractmethod
-    def help(cls):
-        pass
