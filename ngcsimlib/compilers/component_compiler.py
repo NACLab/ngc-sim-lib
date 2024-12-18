@@ -52,8 +52,13 @@ def parse(component, compile_key):
         args = []
         parameters = []
         compartments = []
-        varnames = pure_fn.__func__.__code__.co_varnames[
-                   :pure_fn.__func__.__code__.co_argcount]
+        try:
+            func = pure_fn.__func__
+        except:
+            func = pure_fn
+
+        varnames = func.__code__.co_varnames[
+                   :func.__code__.co_argcount]
 
         for name in varnames:
             if name not in component.__dict__.keys():
@@ -104,11 +109,16 @@ def compile(component, resolver):
 
     comp_key_key = [(narg.split('/')[-1], narg) for narg in comp_ids]
 
+    try:
+        func = pure_fn.__func__
+    except:
+        func = pure_fn
+
     def compiled(**kwargs):
         funArgs = {narg: kwargs.get(narg) for narg in _args}
         funComps = {knarg: kwargs.get(narg) for knarg, narg in comp_key_key}
 
-        return pure_fn.__func__(**funParams, **funArgs, **funComps)
+        return func(**funParams, **funArgs, **funComps)
 
     exc_order.append((compiled, out_ids, component.name, comp_ids))
     return exc_order
