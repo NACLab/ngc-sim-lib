@@ -16,7 +16,7 @@ the same pattern used by the command compiler.
 
 """
 from ngcsimlib.compilers.op_compiler import compile as op_compile
-from ngcsimlib.utils import get_resolver
+from ngcsimlib.utils import get_transition
 from ngcsimlib.compartment import Compartment
 from ngcsimlib.logger import critical
 
@@ -40,11 +40,11 @@ def parse(component, compile_key):
     if component.__class__.__dict__.get("auto_resolve", True):
         (pure_fn, output_compartments), (
             args, parameters, compartments, parse_varnames) = \
-            get_resolver(component.__class__, compile_key)
+            get_transition(component.__class__, compile_key)
     else:
         build_method = component.__class__.__dict__.get(f"build_{compile_key}", None)
         if build_method is None:
-            critical(f"Component {component.name} if flagged to not use resolvers but "
+            critical(f"Component {component.name} if flagged to not use a stored transition but "
                      f"does not have a build_{compile_key} method")
         return build_method(component)
 
@@ -82,20 +82,20 @@ def parse(component, compile_key):
     return (pure_fn, output_compartments, args, parameters, compartments)
 
 
-def compile(component, resolver):
+def compile(component, transition):
     """
         compiles down the component to a single pure method
 
     Args:
         component: the component to compile
 
-        resolver: the parsed output of the component
+        transition: the parsed output of the component
 
     Returns:
         the compiled method
     """
     exc_order = []
-    pure_fn, outs, _args, params, comps = resolver
+    pure_fn, outs, _args, params, comps = transition
 
     ### Op resolve
     for connection in component.connections:
