@@ -6,6 +6,7 @@ from datetime import datetime
 
 def _concatArgs(func):
     """Internal Decorator for concatenating arguments into a single string"""
+
     def wrapped(*wargs, sep=" ", end="", **kwargs):
         msg = sep.join(str(a) for a in wargs) + end
         return func(msg, **kwargs)
@@ -16,6 +17,7 @@ def _concatArgs(func):
 _ngclogger = logging.getLogger("ngclogger")
 
 _mapped_calls = {}
+
 
 def addLoggingLevel(levelName, levelNum, methodName=None):
     """
@@ -38,20 +40,23 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
         methodName: The name of the method
     """
 
-
     if not methodName:
         methodName = levelName.lower()
 
     if hasattr(logging, levelName):
-       raise AttributeError('{} already defined in logging module'.format(levelName))
+        raise AttributeError(
+            '{} already defined in logging module'.format(levelName))
     if hasattr(logging, methodName):
-       raise AttributeError('{} already defined in logging module'.format(methodName))
+        raise AttributeError(
+            '{} already defined in logging module'.format(methodName))
     if hasattr(logging.getLoggerClass(), methodName):
-       raise AttributeError('{} already defined in logger class'.format(methodName))
+        raise AttributeError(
+            '{} already defined in logger class'.format(methodName))
 
     def logForLevel(self, message, *args, **kwargs):
         if self.isEnabledFor(levelNum):
             self._log(levelNum, message, args, **kwargs)
+
     def logToRoot(message, *args, **kwargs):
         logging.log(levelNum, message, *args, **kwargs)
 
@@ -63,6 +68,7 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
     _mapped_calls[levelNum] = getattr(_ngclogger, methodName)
     _mapped_calls[levelName] = getattr(_ngclogger, methodName)
 
+
 def init_logging():
     loggingConfig = get_config("logging")
     if loggingConfig is None:
@@ -72,9 +78,9 @@ def init_logging():
                          "custom_levels": {"ANALYSIS": 25}}
 
     if loggingConfig.get("custom_levels", None) is not None:
-        for level_name, level_num in loggingConfig.get("custom_levels", {}).items():
+        for level_name, level_num in loggingConfig.get("custom_levels",
+                                                       {}).items():
             addLoggingLevel(level_name.upper(), level_num)
-
 
     if isinstance(loggingConfig.get("logging_level", None), str):
         loggingConfig["logging_level"] = \
@@ -94,7 +100,8 @@ def init_logging():
             fp.write(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
                      f"New Log {f'{datetime.utcnow():%m/%d/%Y %H:%M:%S}'}"
                      f"\n~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
-        file_handler = logging.FileHandler(filename=loggingConfig.get("logging_file", None))
+        file_handler = logging.FileHandler(
+            filename=loggingConfig.get("logging_file", None))
         file_handler.setFormatter(formatter)
         _ngclogger.addHandler(file_handler)
 
@@ -103,7 +110,8 @@ def init_logging():
 def warn(msg):
     """
     Logs a warning message
-    This is decorated to have the same functionality of python's print argument concatenation
+    This is decorated to have the same functionality of python's print
+    argument concatenation
 
     Args:
         msg: message to log
@@ -115,7 +123,8 @@ def warn(msg):
 def error(msg):
     """
     Logs an error message
-    This is decorated to have the same functionality of python's print argument concatenation
+    This is decorated to have the same functionality of python's print
+    argument concatenation
 
     Args:
         msg: message to log
@@ -128,7 +137,8 @@ def error(msg):
 def critical(msg):
     """
     Logs a critical message
-    This is decorated to have the same functionality of python's print argument concatenation
+    This is decorated to have the same functionality of python's print
+    argument concatenation
 
     Args:
         msg: message to log
@@ -141,7 +151,8 @@ def critical(msg):
 def info(msg):
     """
     Logs an info message
-    This is decorated to have the same functionality of python's print argument concatenation
+    This is decorated to have the same functionality of python's print
+    argument concatenation
 
     Args:
         msg: message to log
@@ -153,7 +164,8 @@ def info(msg):
 def debug(msg):
     """
     Logs a debug message
-    This is decorated to have the same functionality of python's print argument concatenation
+    This is decorated to have the same functionality of python's print
+    argument concatenation
 
     Args:
         msg: message to log
@@ -164,16 +176,17 @@ def debug(msg):
 @_concatArgs
 def custom_log(msg, logging_level=None):
     """
-    Logs to a user defined logging level. This will only work for user defined
-    levels if a builtin logging level is desired please use on of the builtin
-    logging methods found in this file. To defined logging levels add them to the
-    configuration file of your project. To add levels here add the map of
-    `logging_levels` to the top level logging object and have the key be the new
-    logging level name, and the value be the numerical logging value. To see all
-    build in logging levels look at the builtin python logger package.
+    Logs to a user defined logging level. This will only work for user
+    defined levels if a builtin logging level is desired please use on of the
+    builtin logging methods found in this file. To defined logging levels add
+    them to  the configuration file of your project. To add levels here add
+    the map of `logging_levels` to the top level logging object and have the
+    key be the new logging level name, and the value be the numerical logging
+    value. To see all build in logging levels look at the builtin python
+    logger package.
 
-
-    This is decorated to have the same functionality of python's print argument concatenation
+    This is decorated to have the same functionality of python's print
+    argument concatenation
 
     Args:
         msg: The message to log
@@ -189,4 +202,3 @@ def custom_log(msg, logging_level=None):
         warn("Attempted to log to undefined level", logging_level)
     else:
         _mapped_calls[logging_level](msg)
-

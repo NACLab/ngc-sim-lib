@@ -55,7 +55,8 @@ def get_config(configName):
         configName: configuration section to get
 
     Returns:
-         dictionary representing the configuration section, None if section is not present
+         dictionary representing the configuration section, None if section
+         is not present
     """
     return _GlobalConfig.get_config(configName)
 
@@ -68,6 +69,7 @@ def provide_namespace(configName):
         configName: configuration section to get
 
     Returns:
-         simple namespace representing the configuration section, none if section is not present
+         simple namespace representing the configuration section, none if
+         section is not present
     """
     return _GlobalConfig.provide_namespace(configName)

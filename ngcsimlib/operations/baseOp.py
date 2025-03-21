@@ -13,7 +13,7 @@ class BaseOp(ABC):
 
     For commands that can be compiled using ngcsimlib's compiler, all their
     operational logic must be contained inside the subclass's operation
-    method. This also means that the resolve  method that is defined on the
+    method. This also means that the transition method that is defined on the
     base class should not be overwritten.
 
     For commands that do not need to be compiled using ngcsimlib's compiler

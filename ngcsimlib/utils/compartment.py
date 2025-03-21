@@ -3,11 +3,13 @@ compartments"""
 
 __all_compartments = {}
 
+
 def Get_Compartment_Batch(compartment_uids=None):
     """
     This method should be used sparingly
 
-    Get a subset of all compartment values based on provided paths. If no paths are provided it will grab all of them
+    Get a subset of all compartment values based on provided paths. If no
+    paths are provided it will grab all of them
 
     Args:
         compartment_uids: needed ids
@@ -25,7 +27,8 @@ def Set_Compartment_Batch(compartment_map=None):
     """
     This method should be used sparingly
 
-    Sets a subset of compartments to their corresponding value in the provided dictionary
+    Sets a subset of compartments to their corresponding value in the
+    provided dictionary
 
     Args:
         compartment_map: a map of compartment paths to values
@@ -53,4 +56,3 @@ def get_compartment_by_name(context, name):
 
     """
     return __all_compartments.get(context.path + "/" + name, None)
-

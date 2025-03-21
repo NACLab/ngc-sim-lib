@@ -4,7 +4,7 @@ from ngcsimlib.utils import make_unique_path, check_attributes, \
     set_new_context, load_module, is_pre_loaded, GuideList
 from ngcsimlib.logger import warn, info, critical
 from ngcsimlib import preload_modules
-from ngcsimlib.compilers.command_compiler import dynamic_compile, wrap_command
+from ngcsimlib.compilers import dynamic_compile, wrap_command
 from ngcsimlib.component import Component
 from ngcsimlib.configManager import get_config
 import json, os, shutil, copy
@@ -52,10 +52,9 @@ class Context:
     def __init__(self, name, should_validate=None):
         """
         Builds the initial context object, if `__new__` provides an already
-        initialized context do not continue with
-        construction as it is already initialized. This is where the path to
-        a context is assigned so their paths are
-        dependent on the current context path upon creation.
+        initialized context do not continue with construction as it is
+        already initialized. This is where the path to a context is assigned
+        so their paths are dependent on the current context path upon creation.
 
         Args:
              name: The name of the new context can not be empty
@@ -112,8 +111,8 @@ class Context:
             a single component is retrieved
 
         Returns:
-             either a list of components or a single component depending on
-             the number of components being retrieved
+            either a list of components or a single component depending on
+            the number of components being retrieved
         """
         if len(component_names) == 0:
             return None
@@ -163,8 +162,7 @@ class Context:
     def register_component(self, component, *args, **kwargs):
         """
         Adds a component to the local json storage for saving, will provide a
-        warning for all values it fails to
-        serialize into a json file
+        warning for all values it fails to serialize into a json file
 
         Args:
             component: the component object to save
@@ -235,10 +233,9 @@ class Context:
     def save_to_json(self, directory, model_name=None, custom_save=True,
                      overwrite=False):
         """
-        Dumps all the required json files to rebuild the current controller
-        to a specified directory. If there is a
-        `save` command present on the controller and custom_save is True,
-        it will run that command as well.
+        Dumps all the required json files to rebuild the current controller to
+        a specified directory. If there is a `save` command present on the
+        controller and custom_save is True, it will run that command as well.
 
         Args:
             directory: The top level directory to save the model to
@@ -251,8 +248,7 @@ class Context:
                 command if present on the controller (Default: True)
 
             overwrite: A boolean for if the saved model should be in a unique
-            folder or if it should overwrite
-            existing folders
+                folder or if it should overwrite existing folders
 
         Returns:
             a tuple where the first value is the path to the model, and the
@@ -372,9 +368,8 @@ class Context:
                 and extension
 
             custom_file_dir: the path to the custom directory for custom load
-            methods,
-                this directory is named `custom` if the save_to_json method is
-                used. (Default: None)
+                methods, this directory is named `custom` if the save_to_json
+                method is used. (Default: None)
         """
         made_components = []
         with open(path_to_components_file, 'r') as file:
@@ -466,9 +461,8 @@ class Context:
     def dynamicCommand(fn):
         """
         Provides a decorator that will automatically bind the decorated
-        method to the current context.
-        Note this if this is called from a context object it will still use
-        the current context not the object
+        method to the current context. Note this if this is called from a
+        context object it will still use the current context not the object
 
         Args:
             fn: The wrapped method
@@ -482,8 +476,8 @@ class Context:
 
     def compile_by_key(self, *components, compile_key, name=None):
         """
-        Compiles a given set of components with a given compile key.
-        It will automatically add it to the context after compiling
+        Compiles a given set of components with a given compile key. It will
+        automatically add it to the context after compiling
 
         Args:
             *components: positional arguments for all components
@@ -600,6 +594,7 @@ class Context:
         """
         Views the specified guide for each component class in the model,
         skipping over any classes in skip.
+
         Args:
             guide: A ngclearn.GuideList value
             skip: a list of classes to skip, will also skip component classes
