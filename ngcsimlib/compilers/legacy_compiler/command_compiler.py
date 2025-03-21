@@ -38,9 +38,9 @@ the compartment values after running. Arguments are still required to be
 passed in at run time.
 
 """
-from ngcsimlib.compilers.component_compiler import parse as parse_component, \
+from ngcsimlib.compilers.legacy_compiler.component_compiler import parse as parse_component, \
     compile as compile_component
-from ngcsimlib.compilers.op_compiler import parse as parse_connection
+from ngcsimlib.compilers.legacy_compiler.op_compiler import parse as parse_connection
 from ngcsimlib.utils import Get_Compartment_Batch, Set_Compartment_Batch
 from ngcsimlib.logger import critical
 
@@ -157,22 +157,3 @@ def dynamic_compile(*components, compile_key=None):
     return _compile(compile_key, {c.name: c for c in components})
 
 
-def wrap_command(command):
-    """
-    Wraps the provided command to provide the state of all compartments as input
-    and saves the returned state to all compartments after running. Designed to
-    be used with compiled commands
-
-    Args:
-        command: the command to wrap
-
-    Returns:
-        the output of the command after it's been executed
-    """
-
-    def _wrapped(**kwargs):
-        vals = command(Get_Compartment_Batch(), **kwargs)
-        Set_Compartment_Batch(vals)
-        return vals
-
-    return _wrapped

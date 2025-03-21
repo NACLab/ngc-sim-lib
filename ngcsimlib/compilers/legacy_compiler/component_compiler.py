@@ -15,7 +15,7 @@ compiled method over this component. This execution order is consistent with
 the same pattern used by the command compiler.
 
 """
-from ngcsimlib.compilers.op_compiler import compile as op_compile
+from ngcsimlib.compilers.legacy_compiler.op_compiler import compile as op_compile
 from ngcsimlib.utils import get_transition
 from ngcsimlib.compartment import Compartment
 from ngcsimlib.logger import critical

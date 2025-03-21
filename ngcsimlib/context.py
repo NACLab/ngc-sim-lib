@@ -4,7 +4,7 @@ from ngcsimlib.utils import make_unique_path, check_attributes, \
     set_new_context, load_module, is_pre_loaded, GuideList
 from ngcsimlib.logger import warn, info, critical
 from ngcsimlib import preload_modules
-from ngcsimlib.compilers.command_compiler import dynamic_compile, wrap_command
+from ngcsimlib.compilers import dynamic_compile, wrap_command
 from ngcsimlib.component import Component
 from ngcsimlib.configManager import get_config
 import json, os, shutil, copy
