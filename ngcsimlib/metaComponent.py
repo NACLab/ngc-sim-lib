@@ -115,6 +115,6 @@ class MetaComponent(type):
 
             x.help = _wrapped_help
 
-        x.guides = Guides(x)
+            x.guides = Guides(x)
 
         return x
