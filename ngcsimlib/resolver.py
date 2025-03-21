@@ -1,4 +1,6 @@
 """
+Todo: rewrite to have this be the less favorable option
+
 The resolver is an important part of the compiling of components and commands
 in the ngcsimlib compilers.
 
@@ -38,7 +40,7 @@ list otherwise it will add it to the parameter list.
 """
 
 from ngcsimlib.compartment import Compartment
-from ngcsimlib.utils import add_component_resolver, add_resolver_meta
+from ngcsimlib.utils import add_component_transition, add_transition_meta
 
 
 def resolver(pure_fn,
@@ -99,10 +101,10 @@ def resolver(pure_fn,
         class_name = ".".join(fn.__qualname__.split('.')[:-1])
         resolver_key = fn.__qualname__.split('.')[-1]
 
-        add_component_resolver(class_name, resolver_key,
+        add_component_transition(class_name, resolver_key,
                                (pure_fn, output_compartments))
 
-        add_resolver_meta(class_name, resolver_key,
+        add_transition_meta(class_name, resolver_key,
                           (args, parameters, compartments, parse_varnames))
 
         def _wrapped(self=None, *_args, **_kwargs):

@@ -10,7 +10,7 @@ what values the operation will use.
 The second one is the compile method which returns the execution order for
 the compile operation. It is important to know that all operation should have
 an `is_compilable` flag set to true if they are compilable. Some operations
-such as the `add` operation are not compilable as their resolve method
+such as the `add` operation are not compilable as their transition method
 contains execution logic that will not be captured by the compiled command.
 """
 from ngcsimlib.operations.baseOp import BaseOp

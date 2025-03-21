@@ -38,9 +38,9 @@ the compartment values after running. Arguments are still required to be
 passed in at run time.
 
 """
-from ngcsimlib.compilers.component_compiler import parse as parse_component, \
+from ngcsimlib.compilers.legacy_compiler.component_compiler import parse as parse_component, \
     compile as compile_component
-from ngcsimlib.compilers.op_compiler import parse as parse_connection
+from ngcsimlib.compilers.legacy_compiler.op_compiler import parse as parse_connection
 from ngcsimlib.utils import Get_Compartment_Batch, Set_Compartment_Batch
 from ngcsimlib.logger import critical
 
@@ -61,8 +61,7 @@ def _compile(compile_key, components):
     | resolve the outputs of the compiled function
 
     Args:
-        compile_key: The key that is being compiled (mapped to each function
-        that has the @resolver decorator above it)
+        compile_key: The key for the transition that is being compiled
 
         components: The list of components to compile for this function
 
@@ -71,15 +70,15 @@ def _compile(compile_key, components):
     """
     assert compile_key is not None
     ## for each component, get compartments, get output compartments
-    resolvers = {}
+    transitions = {}
     for c_name, component in components.items():
-        resolvers[c_name] = parse_component(component, compile_key)
+        transitions[c_name] = parse_component(component, compile_key)
 
     needed_args = []
     needed_comps = []
 
     for c_name, component in components.items():
-        _, outs, args, params, comps = resolvers[c_name]
+        _, outs, args, params, comps = transitions[c_name]
         for a in args:
             if a not in needed_args:
                 needed_args.append(a)
@@ -98,7 +97,7 @@ def _compile(compile_key, components):
 
     exc_order = []
     for c_name, component in components.items():
-        exc_order.extend(compile_component(component, resolvers[c_name]))
+        exc_order.extend(compile_component(component, transitions[c_name]))
 
     def compiled(compartment_values=None, **kwargs):
         if compartment_values is None:
@@ -158,22 +157,3 @@ def dynamic_compile(*components, compile_key=None):
     return _compile(compile_key, {c.name: c for c in components})
 
 
-def wrap_command(command):
-    """
-    Wraps the provided command to provide the state of all compartments as input
-    and saves the returned state to all compartments after running. Designed to
-    be used with compiled commands
-
-    Args:
-        command: the command to wrap
-
-    Returns:
-        the output of the command after it's been executed
-    """
-
-    def _wrapped(**kwargs):
-        vals = command(Get_Compartment_Batch(), **kwargs)
-        Set_Compartment_Batch(vals)
-        return vals
-
-    return _wrapped
