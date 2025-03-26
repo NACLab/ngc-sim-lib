@@ -2,6 +2,16 @@ from ngcsimlib.compilers.process_compiler.op_compiler import compile as op_compi
 from ngcsimlib.compartment import Compartment
 from ngcsimlib.compilers.utils import compose
 
+def __make_get_arg(a):
+    return lambda current_state, **kwargs: kwargs.get(a, None)
+
+def __make_get_param(p, component):
+    lambda current_state, **kwargs: component.__dict__.get(p, None)
+
+def __make_get_comp(c, component):
+    return lambda current_state, **kwargs: current_state.get(component.__dict__[c].path, None)
+
+
 def compile(transition_method):
     composition = None
     component = transition_method.__self__
@@ -27,14 +37,15 @@ def compile(transition_method):
         composition = compose(composition, op_compile(conn))
 
     arg_methods = []
+    print(compartments)
     for a in args:
-        arg_methods.append((a, lambda current_state, **kwargs: kwargs.get(a, None)))
+        arg_methods.append((a, __make_get_arg(a)))
 
     for p in parameters:
-        arg_methods.append((p, lambda current_state, **kwargs: component.__dict__.get(p, None)))
+        arg_methods.append((p, __make_get_param(p, component)))
 
     for c in compartments:
-        arg_methods.append((c, lambda current_state, **kwargs: current_state.get(component.__dict__[c].path, None)))
+        arg_methods.append((c, __make_get_comp(c, component)))
 
     def compiled(current_state, **kwargs):
         kargvals = {key: m(current_state, **kwargs) for key, m in arg_methods}
