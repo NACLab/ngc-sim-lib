@@ -6,7 +6,7 @@ def __make_get_arg(a):
     return lambda current_state, **kwargs: kwargs.get(a, None)
 
 def __make_get_param(p, component):
-    lambda current_state, **kwargs: component.__dict__.get(p, None)
+    return lambda current_state, **kwargs: component.__dict__.get(p, None)
 
 def __make_get_comp(c, component):
     return lambda current_state, **kwargs: current_state.get(component.__dict__[c].path, None)
