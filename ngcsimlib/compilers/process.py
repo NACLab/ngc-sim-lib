@@ -59,9 +59,8 @@ class Process(object):
             compound_state.update(context.get_current_state())
         return compound_state
 
-    @classmethod
-    def updated_modified_state(cls, modified_state):
-        Set_Compartment_Batch(modified_state)
+    def updated_modified_state(self, state):
+        Set_Compartment_Batch({key: value for key, value in state.items() if key in self.get_required_state()})
 
 
 def transition(output_compartments):
