@@ -1,7 +1,7 @@
 from ngcsimlib.utils import make_unique_path, check_attributes, \
     check_serializable, load_from_path, get_compartment_by_name, \
     get_context, add_context, get_current_path, get_current_context, \
-    set_new_context, load_module, GuideList, infer_context
+    set_new_context, load_module, GuideList, infer_context, Get_Compartment_Batch
 from ngcsimlib.logger import warn, info, critical
 from ngcsimlib import preload_modules
 from ngcsimlib.compilers import dynamic_compile, wrap_command
@@ -479,7 +479,7 @@ class Context:
 
             all_processes = [Process.make_process(p) for p in process_spec]
             for p in all_processes:
-                self.add_command(p.pure, p.name)
+                self.__setattr__(p.name, p)
 
     @staticmethod
     def dynamicCommand(fn):
@@ -648,3 +648,9 @@ class Context:
         for klass in klasses:
             guides += klass.guides.__dict__[guide.value]
         return guides
+
+    def get_current_state(self):
+        for component in self.components.values():
+            print(component.path)
+
+        exit()
