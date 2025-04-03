@@ -1,7 +1,11 @@
-from ngcsimlib.utils import make_unique_path, check_attributes, \
-    check_serializable, load_from_path, get_compartment_by_name, \
-    get_context, add_context, get_current_path, get_current_context, \
-    set_new_context, load_module, GuideList, infer_context, Get_Compartment_Batch
+from ngcsimlib.utils import (make_unique_path, check_attributes, \
+                             check_serializable, load_from_path,
+                             get_compartment_by_name, \
+                             get_context, add_context, get_current_path,
+                             get_current_context, \
+                             set_new_context, load_module, GuideList,
+                             infer_context,
+                             Get_Compartment_Batch, Set_Compartment_Batch)
 from ngcsimlib.logger import warn, info, critical
 from ngcsimlib import preload_modules
 from ngcsimlib.compilers import dynamic_compile, wrap_command
@@ -74,7 +78,8 @@ class Context:
         self.path = get_current_path() + "/" + str(name)
         self._last_context = ""
 
-        self._json_objects = {"ops": [], "components": {}, "commands": {}, "processes" : []}
+        self._json_objects = {"ops": [], "components": {}, "commands": {},
+                              "processes": []}
 
         if should_validate is None:
             _base_config = get_config("context")
@@ -203,8 +208,6 @@ class Context:
 
     def register_process(self, process):
         self._json_objects['processes'].append(process)
-
-
 
     def add_component(self, component):
         """
@@ -370,7 +373,6 @@ class Context:
         self.make_ops(directory + "/ops.json")
         self.make_commands(directory + "/commands.json")
         self.make_process(directory + "/processes.json")
-
 
     def make_components(self, path_to_components_file, custom_file_dir=None):
         """
@@ -649,9 +651,16 @@ class Context:
             guides += klass.guides.__dict__[guide.value]
         return guides
 
-    def get_current_state(self):
+    def _get_state_keys(self):
         all_keys = []
         for comp_name in self.components.keys():
             all_keys.extend([key for key in Get_Compartment_Batch().keys()
                              if self.path + "/" + comp_name in key])
-        return Get_Compartment_Batch(all_keys)
+        return all_keys
+
+    def get_current_state(self):
+        return Get_Compartment_Batch(self._get_state_keys())
+
+    def update_current_state(self, state):
+        Set_Compartment_Batch({key: value for key, value in state.items() if key in self._get_state_keys()})
+
