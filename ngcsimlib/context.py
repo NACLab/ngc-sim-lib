@@ -1,10 +1,11 @@
 from ngcsimlib.utils import make_unique_path, check_attributes, \
     check_serializable, load_from_path, get_compartment_by_name, \
     get_context, add_context, get_current_path, get_current_context, \
-    set_new_context, load_module, is_pre_loaded, GuideList
+    set_new_context, load_module, GuideList, infer_context
 from ngcsimlib.logger import warn, info, critical
 from ngcsimlib import preload_modules
 from ngcsimlib.compilers import dynamic_compile, wrap_command
+from ngcsimlib.compilers.process import Process
 from ngcsimlib.component import Component
 from ngcsimlib.configManager import get_config
 import json, os, shutil, copy
@@ -73,7 +74,7 @@ class Context:
         self.path = get_current_path() + "/" + str(name)
         self._last_context = ""
 
-        self._json_objects = {"ops": [], "components": {}, "commands": {}}
+        self._json_objects = {"ops": [], "components": {}, "commands": {}, "processes" : []}
 
         if should_validate is None:
             _base_config = get_config("context")
@@ -200,6 +201,11 @@ class Context:
                "kwargs": _kwargs}
         self._json_objects['components'][c_path] = obj
 
+    def register_process(self, process):
+        self._json_objects['processes'].append(process)
+
+
+
     def add_component(self, component):
         """
         Adds a component to the context if it does not exist already in the
@@ -278,6 +284,12 @@ class Context:
         with open(path + "/commands.json", 'w') as fp:
             json.dump(self._json_objects['commands'], fp, indent=4)
 
+        with open(path + "/processes.json", 'w') as fp:
+            objs = []
+            for process in self._json_objects['processes']:
+                objs.append(process.as_obj())
+            json.dump(objs, fp, indent=4)
+
         with open(path + "/components.json", 'w') as fp:
             hyperparameters = {}
             _components = copy.deepcopy(self._json_objects['components'])
@@ -349,7 +361,7 @@ class Context:
                 components. (Default: `/custom`)
         """
 
-        if os.path.isfile(directory + "/modules.json") and not is_pre_loaded():
+        if os.path.isfile(directory + "/modules.json"):
             info("No modules file loaded, loading from model directory")
             preload_modules(path=directory + "/modules.json")
 
@@ -357,6 +369,8 @@ class Context:
                              directory + custom_folder)
         self.make_ops(directory + "/ops.json")
         self.make_commands(directory + "/commands.json")
+        self.make_process(directory + "/processes.json")
+
 
     def make_components(self, path_to_components_file, custom_file_dir=None):
         """
@@ -445,7 +459,8 @@ class Context:
                 _sources.append(self._make_op(s))
             else:
                 _sources.append(
-                    get_compartment_by_name(get_current_context(), s))
+                    get_compartment_by_name(infer_context(s, trailing_path=2),
+                                            "/".join(s.split("/")[-2:])))
 
         obj = klass(*_sources)
 
@@ -453,9 +468,18 @@ class Context:
             return obj
 
         else:
-            dest = get_compartment_by_name(get_current_context(),
-                                           op_spec['destination'])
+            d = op_spec['destination']
+            dest = get_compartment_by_name(infer_context(d, trailing_path=2),
+                                           "/".join(d.split("/")[-2:]))
             dest << obj
+
+    def make_process(self, path_to_process_file):
+        with open(path_to_process_file, 'r') as file:
+            process_spec = json.load(file)
+
+            all_processes = [Process.make_process(p) for p in process_spec]
+            for p in all_processes:
+                self.add_command(p.pure, p.name)
 
     @staticmethod
     def dynamicCommand(fn):

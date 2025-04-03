@@ -95,9 +95,9 @@ class BaseOp(ABC):
             if isinstance(source, BaseOp):
                 source_array.append(source.dump())
             else:
-                source_array.append(source.name)
+                source_array.append(source.path)
 
-        destination = self.destination.name if self.destination is not None \
+        destination = self.destination.path if self.destination is not None \
             else None
 
         return {"class": class_name, "sources": source_array,
