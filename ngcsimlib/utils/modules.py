@@ -6,17 +6,6 @@ from ngcsimlib.logger import info
 # loaded
 _Loaded_Attributes = {}
 _Loaded_Modules = {}
-_Loaded = False
-
-
-def is_pre_loaded():
-    return _Loaded
-
-
-def set_loaded(val):
-    global _Loaded
-    _Loaded = val
-
 
 def check_attributes(obj, required, fatal=False):
     """
@@ -70,15 +59,15 @@ def load_module(module_path, match_case=False, absolute_path=False):
     # Return if we have already loaded this module
     if module_path in _Loaded_Modules.keys():
         return _Loaded_Modules[module_path]
-    # Unkown module
+    # Unknown module
     module_name = None
     if absolute_path:
         module_name = module_path
     else:
+
         # Extract the final module from the module_path
         final_mod = module_path.split('.')[-1]
         final_mod = final_mod if match_case else final_mod.lower()
-
         # Try to match the final module to any currently loaded module
         for module in sys.modules:
             last_mod = module.split('.')[-1]

@@ -49,8 +49,6 @@ def preload_modules(path=None):
                 for keyword in attribute.keywords:
                     utils.modules._Loaded_Attributes[keyword] = atr
 
-    utils.set_loaded(True)
-
 ###### Initialize Config
 def configure():
     parser = argparse.ArgumentParser(description='Build and run a model using ngclearn')
