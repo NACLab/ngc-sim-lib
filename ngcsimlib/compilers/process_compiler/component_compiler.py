@@ -37,7 +37,7 @@ def compile(transition_method):
         composition = compose(composition, op_compile(conn))
 
     arg_methods = []
-    print(compartments)
+
     for a in args:
         arg_methods.append((a, __make_get_arg(a)))
 
