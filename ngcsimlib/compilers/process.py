@@ -3,22 +3,21 @@ from ngcsimlib.compilers.process_compiler.component_compiler import compile as c
 from ngcsimlib.logger import warn
 from functools import wraps
 from ngcsimlib.utils import add_component_transition, add_transition_meta
-from ngcsimlib.utils import get_current_context, get_context, infer_context
+from ngcsimlib.utils import get_current_context, infer_context, Set_Compartment_Batch
 
 class Process(object):
     def __init__(self, name):
         self._method = None
         self._calls = []
         self.name = name
+        self._needed_contexts = set([])
 
         cc = get_current_context()
-        print(get_current_context())
         if cc is not None:
             cc.register_process(self)
 
     @staticmethod
     def make_process(process_spec):
-        print(process_spec)
         newProcess = Process(process_spec['name'])
 
         for x in process_spec['calls']:
@@ -37,19 +36,32 @@ class Process(object):
 
     def transition(self, transition_call):
         self._calls.append({"path": transition_call.__self__.path, "key": transition_call.resolver_key})
+        self._needed_contexts.add(infer_context(transition_call.__self__.path))
         new_step = compile_component(transition_call)
         self._method = compose(self._method, new_step)
         return self
 
-    def execute(self, current_state, **kwargs):
+    def execute(self, update_state=False, **kwargs):
         if self._method is None:
             warn("Attempting to execute a process with no transition steps")
             return
-        return self.pure(current_state, **kwargs)
+        state = self.pure(self.get_required_state(), **kwargs)
+        if update_state:
+            self.updated_modified_state(state)
+        return state
 
     def as_obj(self):
         return {"name": self.name, "calls": self._calls}
 
+    def get_required_state(self):
+        compound_state = {}
+        for context in self._needed_contexts:
+            compound_state.update(context.get_current_state())
+        return compound_state
+
+    @classmethod
+    def updated_modified_state(cls, modified_state):
+        Set_Compartment_Batch(modified_state)
 
 
 def transition(output_compartments):

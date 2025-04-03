@@ -650,7 +650,8 @@ class Context:
         return guides
 
     def get_current_state(self):
-        for component in self.components.values():
-            print(component.path)
-
-        exit()
+        all_keys = []
+        for comp_name in self.components.keys():
+            all_keys.extend([key for key in Get_Compartment_Batch().keys()
+                             if self.path + "/" + comp_name in key])
+        return Get_Compartment_Batch(all_keys)
