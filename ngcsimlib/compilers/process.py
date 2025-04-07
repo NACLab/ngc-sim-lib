@@ -45,7 +45,7 @@ class Process(object):
         if self._method is None:
             warn("Attempting to execute a process with no transition steps")
             return
-        state = self.pure(self.get_required_state(), **kwargs)
+        state = self.pure(self.get_required_state(include_special_compartments=True), **kwargs)
         if update_state:
             self.updated_modified_state(state)
         return state
@@ -53,17 +53,17 @@ class Process(object):
     def as_obj(self):
         return {"name": self.name, "calls": self._calls}
 
-    def get_required_state(self):
+    def get_required_state(self, include_special_compartments=False):
         compound_state = {}
         for context in self._needed_contexts:
-            compound_state.update(context.get_current_state())
+            compound_state.update(context.get_current_state(include_special_compartments))
         return compound_state
 
     def updated_modified_state(self, state):
-        Set_Compartment_Batch({key: value for key, value in state.items() if key in self.get_required_state()})
+        Set_Compartment_Batch({key: value for key, value in state.items() if key in self.get_required_state(include_special_compartments=True)})
 
 
-def transition(output_compartments):
+def transition(output_compartments, builder=False):
     def _wrapper(f):
         @wraps(f)
         def inner(*args, **kwargs):
@@ -80,6 +80,7 @@ def transition(output_compartments):
 
         inner.class_name = class_name
         inner.resolver_key = resolver_key
+        inner.builder = builder
 
         add_component_transition(class_name, resolver_key,
                                (f, output_compartments))

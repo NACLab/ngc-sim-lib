@@ -11,27 +11,37 @@ def __make_get_param(p, component):
 def __make_get_comp(c, component):
     return lambda current_state, **kwargs: current_state.get(component.__dict__[c].path, None)
 
+def builder(transition_method_to_build):
+    component = transition_method_to_build.__self__
+    builder_method = transition_method_to_build.f
+    # method, output_compartments, args, params, input_compartments
+    return builder_method(component)
+
 
 def compile(transition_method):
     composition = None
     component = transition_method.__self__
 
-    pure_fn = transition_method.f
-    output = transition_method.output_compartments
+    if transition_method.builder:
+        pure_fn, output, args, parameters, compartments = builder(transition_method)
+    else:
 
-    varnames = transition_method.fargs
+        pure_fn = transition_method.f
+        output = transition_method.output_compartments
 
-    args = []
-    compartments = []
-    parameters = []
+        varnames = transition_method.fargs
 
-    for name in varnames:
-        if name not in component.__dict__.keys():
-            args.append(name)
-        elif Compartment.is_compartment(component.__dict__[name]):
-            compartments.append(name)
-        else:
-            parameters.append(name)
+        args = []
+        compartments = []
+        parameters = []
+
+        for name in varnames:
+            if name not in component.__dict__.keys():
+                args.append(name)
+            elif Compartment.is_compartment(component.__dict__[name]):
+                compartments.append(name)
+            else:
+                parameters.append(name)
 
     for conn in component.connections:
         composition = compose(composition, op_compile(conn))

@@ -651,15 +651,15 @@ class Context:
             guides += klass.guides.__dict__[guide.value]
         return guides
 
-    def _get_state_keys(self):
+    def _get_state_keys(self, include_special_compartments=False):
         all_keys = []
         for comp_name in self.components.keys():
             all_keys.extend([key for key in Get_Compartment_Batch().keys()
-                             if self.path + "/" + comp_name in key])
+                         if (self.path + "/" + comp_name in key and (include_special_compartments or "*" not in key))])
         return all_keys
 
-    def get_current_state(self):
-        return Get_Compartment_Batch(self._get_state_keys())
+    def get_current_state(self, include_special_compartments=False):
+        return Get_Compartment_Batch(self._get_state_keys(include_special_compartments))
 
     def update_current_state(self, state):
         Set_Compartment_Batch({key: value for key, value in state.items() if key in self._get_state_keys()})
