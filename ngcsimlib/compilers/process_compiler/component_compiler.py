@@ -47,8 +47,9 @@ def compile(transition_method):
         composition = compose(composition, op_compile(conn))
 
     arg_methods = []
-
+    needed_args = []
     for a in args:
+        needed_args.append(a)
         arg_methods.append((a, __make_get_arg(a)))
 
     for p in parameters:
@@ -69,4 +70,4 @@ def compile(transition_method):
 
     composition = compose(composition, compiled)
 
-    return composition
+    return composition, needed_args

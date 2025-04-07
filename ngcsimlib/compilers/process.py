@@ -10,6 +10,7 @@ class Process(object):
         self._method = None
         self._calls = []
         self.name = name
+        self._needed_args = set([])
         self._needed_contexts = set([])
 
         cc = get_current_context()
@@ -17,8 +18,10 @@ class Process(object):
             cc.register_process(self)
 
     @staticmethod
-    def make_process(process_spec):
-        newProcess = Process(process_spec['name'])
+    def make_process(process_spec, custom_process_klass=None):
+        if custom_process_klass is None:
+            custom_process_klass = Process
+        newProcess = custom_process_klass(process_spec['name'])
 
         for x in process_spec['calls']:
             path = x['path']
@@ -37,7 +40,10 @@ class Process(object):
     def transition(self, transition_call):
         self._calls.append({"path": transition_call.__self__.path, "key": transition_call.resolver_key})
         self._needed_contexts.add(infer_context(transition_call.__self__.path))
-        new_step = compile_component(transition_call)
+        new_step, new_args = compile_component(transition_call)
+
+        for arg in new_args:
+            self._needed_args.add(arg)
         self._method = compose(self._method, new_step)
         return self
 
@@ -45,13 +51,20 @@ class Process(object):
         if self._method is None:
             warn("Attempting to execute a process with no transition steps")
             return
+        for arg in self._needed_args:
+            if arg not in kwargs.keys():
+                warn("Missing kwarg", arg, "in kwargs for Process", self.name)
+            return
         state = self.pure(self.get_required_state(include_special_compartments=True), **kwargs)
         if update_state:
             self.updated_modified_state(state)
         return state
 
     def as_obj(self):
-        return {"name": self.name, "calls": self._calls}
+        return {"name": self.name, "class": self.__class__.__name__, "calls": self._calls}
+
+    def get_required_args(self):
+        return self._needed_args
 
     def get_required_state(self, include_special_compartments=False):
         compound_state = {}

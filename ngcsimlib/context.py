@@ -478,10 +478,10 @@ class Context:
     def make_process(self, path_to_process_file):
         with open(path_to_process_file, 'r') as file:
             process_spec = json.load(file)
-
-            all_processes = [Process.make_process(p) for p in process_spec]
-            for p in all_processes:
-                self.__setattr__(p.name, p)
+            for p in process_spec:
+                klass = load_from_path(p["class"])
+                process = Process.make_process(p, klass)
+                self.__setattr__(process.name, process)
 
     @staticmethod
     def dynamicCommand(fn):
@@ -583,6 +583,13 @@ class Context:
             if klass not in map(lambda x: x["name"],
                                 modules[module]["attributes"]):
                 modules[module]["attributes"].append({"name": klass})
+
+        jProcesses = self._json_objects['processes']
+        for process in jProcesses:
+            mod = process.__class__.__module__
+            klass = process.__class__.__name__
+            modules[mod] = {"attributes": []}
+            modules[mod]["attributes"].append({"name": klass})
 
         _modules = []
         for key, value in modules.items():

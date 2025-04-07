@@ -8,6 +8,7 @@ from importlib import import_module
 from ngcsimlib.configManager import init_config, get_config
 from ngcsimlib.logger import warn
 from pkg_resources import get_distribution
+from ngcsimlib.compilers.process import Process, transition
 
 __version__ = get_distribution('ngcsimlib').version  ## set software version
 
@@ -36,17 +37,21 @@ def preload_modules(path=None):
         modules = json.load(file, object_hook=lambda d: SimpleNamespace(**d))
 
     for module in modules:
-        mod = import_module(module.absolute_path)
-        utils.modules._Loaded_Modules[module.absolute_path] = mod
+        load_module(module)
 
-        for attribute in module.attributes:
-            atr = getattr(mod, attribute.name)
-            utils.modules._Loaded_Attributes[attribute.name] = atr
+def load_module(module):
+    mod = import_module(module.absolute_path)
+    utils.modules._Loaded_Modules[module.absolute_path] = mod
 
-            utils.modules._Loaded_Attributes[".".join([module.absolute_path, attribute.name])] = atr
-            if hasattr(attribute, "keywords"):
-                for keyword in attribute.keywords:
-                    utils.modules._Loaded_Attributes[keyword] = atr
+    for attribute in module.attributes:
+        atr = getattr(mod, attribute.name)
+        utils.modules._Loaded_Attributes[attribute.name] = atr
+
+        utils.modules._Loaded_Attributes[
+            ".".join([module.absolute_path, attribute.name])] = atr
+        if hasattr(attribute, "keywords"):
+            for keyword in attribute.keywords:
+                utils.modules._Loaded_Attributes[keyword] = atr
 
 ###### Initialize Config
 def configure():
