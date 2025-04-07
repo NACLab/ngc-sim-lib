@@ -1,5 +1,8 @@
 from ngcsimlib.operations.baseOp import BaseOp
 
+def _make_lambda(s):
+    return lambda current_state, **kwargs: current_state[s.path]
+
 def compile(op):
     """
         compiles the operation down to its execution order
@@ -15,7 +18,7 @@ def compile(op):
         if isinstance(s, BaseOp):
             arg_methods.append(compile(s))
         else:
-            arg_methods.append(lambda current_state, **kwargs: current_state[s.path])
+            arg_methods.append(_make_lambda(s))
 
     def compiled(current_state, **kwargs):
         argvals = [m(current_state, **kwargs) for m in arg_methods]
