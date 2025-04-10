@@ -1,3 +1,13 @@
+"""
+This file contains the methods used to compile methods for the use of Processes.
+The general methodology behind this compiler is that if all transitions can be
+expressed as f(current_state, **kwargs) -> final_state they can then be composed
+together as f(g(current_state, **kwargs) **kwargs) -> final_state. While it is
+technically possible to use the compiler outside the process its intended use
+case is through the process and thus if error occur though other uses support
+may be minimal.
+"""
+
 from ngcsimlib.compilers.process_compiler.op_compiler import compile as op_compile
 from ngcsimlib.compartment import Compartment
 from ngcsimlib.compilers.utils import compose
@@ -11,7 +21,7 @@ def __make_get_param(p, component):
 def __make_get_comp(c, component):
     return lambda current_state, **kwargs: current_state.get(component.__dict__[c].path, None)
 
-def builder(transition_method_to_build):
+def _builder(transition_method_to_build):
     component = transition_method_to_build.__self__
     builder_method = transition_method_to_build.f
     # method, output_compartments, args, params, input_compartments
@@ -19,11 +29,23 @@ def builder(transition_method_to_build):
 
 
 def compile(transition_method):
+    """
+    This method is the main compile method for the process compiler. Unlike the
+    legacy compiler this compiler is designed to be self-contained and output
+    the methods that are composed together to make the process compiler function
+    Args:
+        transition_method: a method usually component.method that has been
+        decorated by the @transition decorator.
+
+    Returns: the pure compiled method of the form
+    f(current_state, **kwargs) -> final_state)
+
+    """
     composition = None
     component = transition_method.__self__
 
     if transition_method.builder:
-        pure_fn, output, args, parameters, compartments = builder(transition_method)
+        pure_fn, output, args, parameters, compartments = _builder(transition_method)
     else:
 
         pure_fn = transition_method.f

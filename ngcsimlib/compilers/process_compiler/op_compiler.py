@@ -5,13 +5,13 @@ def _make_lambda(s):
 
 def compile(op):
     """
-        compiles the operation down to its execution order
+        compiles root operation down to a single method of
+        f(current_state, **kwargs) -> final_state
 
     Args:
         op: the operation to compile
 
-    Returns:
-        the execution order needed to run this operation compiled
+    Returns: the compiled operation
     """
     arg_methods = []
     for s in op.sources:

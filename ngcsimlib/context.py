@@ -207,6 +207,14 @@ class Context:
         self._json_objects['components'][c_path] = obj
 
     def register_process(self, process):
+        """
+        Adds a process to the list of processes to be saved by the context.
+        Unlike with the other saved parts of the context the actual json objects
+        for the processes have to be calculated as time of save since they are
+        constantly changing.
+        Args:
+            process: The process to add
+        """
         self._json_objects['processes'].append(process)
 
     def add_component(self, component):
@@ -476,6 +484,11 @@ class Context:
             dest << obj
 
     def make_process(self, path_to_process_file):
+        """
+        Will load the processes saved in the provided json file into the model
+        Args:
+            path_to_process_file: the path to the saved json file
+        """
         with open(path_to_process_file, 'r') as file:
             process_spec = json.load(file)
             for p in process_spec:
@@ -666,8 +679,27 @@ class Context:
         return all_keys
 
     def get_current_state(self, include_special_compartments=False):
+        """
+        Get the current state of the model based on the components found in this
+        context.
+        Args:
+            include_special_compartments: Should this method include
+            compartments denotes as special compartments by ngcsimlib. These are
+            all compartments that include * in their path. (Only creatable
+            dynamically)
+
+        Returns: All the compartments found in this context.
+
+        """
         return Get_Compartment_Batch(self._get_state_keys(include_special_compartments))
 
     def update_current_state(self, state):
+        """
+        Updates the compartments found in this context. While this method can
+        take a model state that includes compartments from other contexts it
+        will only update the compartments found in this context.
+        Args:
+            state: The state to update the model to
+        """
         Set_Compartment_Batch({key: value for key, value in state.items() if key in self._get_state_keys()})
 
