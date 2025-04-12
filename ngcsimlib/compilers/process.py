@@ -40,7 +40,8 @@ class Process(object):
     """
     def __init__(self, name):
         """
-        Creates and empty process using the provided name
+        Creates an empty process using the provided name
+
         Args:
             name: the name of the process (should be unique per context)
         """
@@ -57,15 +58,16 @@ class Process(object):
     @staticmethod
     def make_process(process_spec, custom_process_klass=None):
         """
-        Used the in the creation of a process from a json file. Under normal
-        circumstances this is not normally called by the user.
+        Used in the creation of a process from a json file. Under normal
+        circumstances this is not normally to be called by the user.
 
         Args:
             process_spec: the parsed json object to create a process from
+
             custom_process_klass: a custom subclass of a process to build
 
-        Returns: the created process
-
+        Returns: 
+            the created process
         """
         if custom_process_klass is None:
             custom_process_klass = Process
@@ -81,17 +83,20 @@ class Process(object):
     @property
     def pure(self):
         """
-        Returns: The current compile method for the process as a pure method
+        Returns: 
+            the current compile method for the process as a pure method
         """
         return self._method
 
     def __rshift__(self, other):
         """
-        Added wrapper for the transition method
+        Added wrapper for the transition method.
+
         Args:
             other: the transition call for the transition method
 
-        Returns: the process for the use of chaining calls
+        Returns: 
+            the process for the use of chaining calls
         """
         return self.transition(other)
 
@@ -101,10 +106,10 @@ class Process(object):
         decorated by the @transition decorator.
 
         Args:
-            transition_call: Transition method to add to the process
+            transition_call: transition method to add to the process
 
-        Returns: the process for the use of chaining calls
-
+        Returns: 
+            the process for the use of chaining calls
         """
         self._calls.append({"path": transition_call.__self__.path, "key": transition_call.resolver_key})
         self._needed_contexts.add(infer_context(transition_call.__self__.path))
@@ -119,19 +124,19 @@ class Process(object):
         """
         Executes the process using the current state of the model to run. This
         method has checks to ensure that the process has transitions added to it
-        as well as that all the keyword arguments required by each of the
-        transition call are in the provided keyword arguments. By default, this
+        as well as if all of the keyword arguments required by each of the
+        transition calls are in the provided keyword arguments. By default, this
         does not update the final state of the model but that can be toggled
         with the flag "update_state".
 
         Args:
-            update_state: Should this method update the final state of the model
-            **kwargs: The required keyword arguments to execute the process
+            update_state: should this method update the final state of the model?
 
-        Returns: the final state of the process regardless of the model is
-        updated to reflect this. Will return null if either of the above checks
-        fail
+            **kwargs: the required keyword arguments to execute the process
 
+        Returns: 
+            The final state of the process regardless of the model is updated to 
+            reflect this. Will return null/None if either of the above checks fail
         """
         if self._method is None:
             warn("Attempting to execute a process with no transition steps")
@@ -147,14 +152,15 @@ class Process(object):
 
     def as_obj(self):
         """
-        Returns: Returns this process as an object to be used with json files
+        Returns: 
+            Returns this process as an object to be used with json files
         """
         return {"name": self.name, "class": self.__class__.__name__, "calls": self._calls}
 
     def get_required_args(self):
         """
-        Returns: The needed arguments for all the transition calls in this
-        process as a set
+        Returns: 
+            The needed arguments for all the transition calls in this process as a set
         """
         return self._needed_args
 
@@ -164,14 +170,15 @@ class Process(object):
         note that if this is going to be used as an argument to the pure method
         make sure that the "include_special_compartments" flag is set to True so
         that special compartments found in certain components are visible.
+
         Args:
             include_special_compartments: A flag to show the compartments that
-            denoted as special compartments by ngcsimlib (this is any
-            compartment with * in their name, these are can only be created
-            dynamically)
+                denoted as special compartments by ngcsimlib (this is any
+                compartment with * in their name, these are can only be created
+                dynamically)
 
-        Returns: A subset of the model state based on the required compartments
-
+        Returns: 
+            A subset of the model state based on the required compartments
         """
         compound_state = {}
         for context in self._needed_contexts:
@@ -181,38 +188,40 @@ class Process(object):
     def updated_modified_state(self, state):
         """
         Updates the model with the provided state. It is important to note that
-        only values that are rquired for the execution of this process will be
-        affected by this call. If all compartments need to be updated, view
-        other options found in ngcsimlib.utils.
+        only values that are required for the execution of this process will be
+        affected by this call. If all of the compartments need to be updated, view
+        other options found in `ngcsimlib.utils`.
+        
         Args:
-            state: The state to update the model with
+            state: the state to update the model with
         """
         Set_Compartment_Batch({key: value for key, value in state.items() if key in self.get_required_state(include_special_compartments=True)})
 
 
 def transition(output_compartments, builder=False):
     """
-    The decorator to be paired with the Process call. This method does
+    The decorator to be paired with the `Process` call. This method does
     everything that the now outdated resolver did to ensure backward
-    compatability. This decorator expects to decorate a static method on a
-    class.
+    compatability. This decorator expects the user/developer to decorate a 
+    static method on a class.
 
-    Through normal patterns these decorated method will never be directly called
+    Through normal patterns, these decorated method will never be directly called
     by the end user, but if they are for the purpose of debugging there are a
-    few things to keep in mind. While the process compiler will automatically
+    few things to keep in mind. The process compiler will automatically
     link values in the component to the different values to be passed into the
     method that does not exist if they are directly called. In addition, if the
     method is going to be called at a class level the first value passed into
     the method must be None to not mess up the internal decoration.
+
     Args:
-        output_compartments: The string name of the output compartments the
-        outputs of this method will be assigned to in the order they are output.
-        builder: A boolean flag for if this method is a builder method for the
-        compiler. A builder method is a method that returns the static method to
-        use in the transition.
+        output_compartments: the string name of the output compartments the
+            outputs of this method will be assigned to in the order they are output.
+            builder: A boolean flag for if this method is a builder method for the
+            compiler. A builder method is a method that returns the static method to
+            use in the transition.
 
-    Returns: the wrapped method
-
+    Returns: 
+        the wrapped method
     """
     def _wrapper(f):
         @wraps(f)
@@ -239,3 +248,4 @@ def transition(output_compartments, builder=False):
 
         return inner
     return _wrapper
+

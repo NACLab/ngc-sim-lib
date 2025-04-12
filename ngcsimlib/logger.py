@@ -189,9 +189,9 @@ def custom_log(msg, logging_level=None):
     argument concatenation
 
     Args:
-        msg: The message to log
+        msg: the message to log
 
-        logging_level: The user defined logging level.
+        logging_level: the user defined logging level.
     """
     if isinstance(logging_level, str):
         logging_level = logging_level.upper()

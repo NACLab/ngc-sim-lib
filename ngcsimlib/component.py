@@ -55,7 +55,8 @@ class Component(metaclass=MetaComponent):
         """
         Validates that each compartment of the component is wired correctly
 
-        Returns: if it is valid
+        Returns: 
+            if this component is valid
         """
         valid = True
         for key, item in self.__dict__.items():

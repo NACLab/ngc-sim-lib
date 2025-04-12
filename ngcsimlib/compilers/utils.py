@@ -5,7 +5,7 @@ def wrap_command(command):
     """
     Wraps the provided command to provide the state of all compartments as input
     and saves the returned state to all compartments after running. Designed to
-    be used with compiled commands
+    be used with compiled commands.
 
     Args:
         command: the command to wrap
@@ -28,3 +28,4 @@ def compose(current_composition, next_method):
 
     return lambda current_state, **kwargs: next_method(
         current_composition(current_state, **kwargs), **kwargs)
+
