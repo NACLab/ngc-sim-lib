@@ -1,8 +1,10 @@
 from .baseOp import BaseOp
 
+
 class summation(BaseOp):
     """
-    Adds together all the provided compartment's values and overwrites the previous value
+    Adds together all the provided compartment's values and overwrites the
+    previous value
     """
 
     @staticmethod

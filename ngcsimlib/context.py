@@ -1,10 +1,15 @@
-from ngcsimlib.utils import make_unique_path, check_attributes, \
-    check_serializable, load_from_path, get_compartment_by_name, \
-    get_context, add_context, get_current_path, get_current_context, \
-    set_new_context, load_module, is_pre_loaded, GuideList
+from ngcsimlib.utils import (make_unique_path, check_attributes, \
+                             check_serializable, load_from_path,
+                             get_compartment_by_name, \
+                             get_context, add_context, get_current_path,
+                             get_current_context, \
+                             set_new_context, load_module, GuideList,
+                             infer_context,
+                             Get_Compartment_Batch, Set_Compartment_Batch)
 from ngcsimlib.logger import warn, info, critical
 from ngcsimlib import preload_modules
-from ngcsimlib.compilers.command_compiler import dynamic_compile, wrap_command
+from ngcsimlib.compilers import dynamic_compile, wrap_command
+from ngcsimlib.compilers.process import Process
 from ngcsimlib.component import Component
 from ngcsimlib.configManager import get_config
 import json, os, shutil, copy
@@ -52,10 +57,9 @@ class Context:
     def __init__(self, name, should_validate=None):
         """
         Builds the initial context object, if `__new__` provides an already
-        initialized context do not continue with
-        construction as it is already initialized. This is where the path to
-        a context is assigned so their paths are
-        dependent on the current context path upon creation.
+        initialized context do not continue with construction as it is
+        already initialized. This is where the path to a context is assigned
+        so their paths are dependent on the current context path upon creation.
 
         Args:
              name: The name of the new context can not be empty
@@ -74,7 +78,8 @@ class Context:
         self.path = get_current_path() + "/" + str(name)
         self._last_context = ""
 
-        self._json_objects = {"ops": [], "components": {}, "commands": {}}
+        self._json_objects = {"ops": [], "components": {}, "commands": {},
+                              "processes": []}
 
         if should_validate is None:
             _base_config = get_config("context")
@@ -112,8 +117,8 @@ class Context:
             a single component is retrieved
 
         Returns:
-             either a list of components or a single component depending on
-             the number of components being retrieved
+            either a list of components or a single component depending on
+            the number of components being retrieved
         """
         if len(component_names) == 0:
             return None
@@ -163,8 +168,7 @@ class Context:
     def register_component(self, component, *args, **kwargs):
         """
         Adds a component to the local json storage for saving, will provide a
-        warning for all values it fails to
-        serialize into a json file
+        warning for all values it fails to serialize into a json file
 
         Args:
             component: the component object to save
@@ -202,6 +206,17 @@ class Context:
                "kwargs": _kwargs}
         self._json_objects['components'][c_path] = obj
 
+    def register_process(self, process):
+        """
+        Adds a process to the list of processes to be saved by the context.
+        Unlike with the other saved parts of the context the actual json objects
+        for the processes have to be calculated as time of save since they are
+        constantly changing.
+        Args:
+            process: The process to add
+        """
+        self._json_objects['processes'].append(process)
+
     def add_component(self, component):
         """
         Adds a component to the context if it does not exist already in the
@@ -235,10 +250,9 @@ class Context:
     def save_to_json(self, directory, model_name=None, custom_save=True,
                      overwrite=False):
         """
-        Dumps all the required json files to rebuild the current controller
-        to a specified directory. If there is a
-        `save` command present on the controller and custom_save is True,
-        it will run that command as well.
+        Dumps all the required json files to rebuild the current controller to
+        a specified directory. If there is a `save` command present on the
+        controller and custom_save is True, it will run that command as well.
 
         Args:
             directory: The top level directory to save the model to
@@ -251,8 +265,7 @@ class Context:
                 command if present on the controller (Default: True)
 
             overwrite: A boolean for if the saved model should be in a unique
-            folder or if it should overwrite
-            existing folders
+                folder or if it should overwrite existing folders
 
         Returns:
             a tuple where the first value is the path to the model, and the
@@ -281,6 +294,12 @@ class Context:
 
         with open(path + "/commands.json", 'w') as fp:
             json.dump(self._json_objects['commands'], fp, indent=4)
+
+        with open(path + "/processes.json", 'w') as fp:
+            objs = []
+            for process in self._json_objects['processes']:
+                objs.append(process.as_obj())
+            json.dump(objs, fp, indent=4)
 
         with open(path + "/components.json", 'w') as fp:
             hyperparameters = {}
@@ -353,7 +372,7 @@ class Context:
                 components. (Default: `/custom`)
         """
 
-        if os.path.isfile(directory + "/modules.json") and not is_pre_loaded():
+        if os.path.isfile(directory + "/modules.json"):
             info("No modules file loaded, loading from model directory")
             preload_modules(path=directory + "/modules.json")
 
@@ -361,6 +380,7 @@ class Context:
                              directory + custom_folder)
         self.make_ops(directory + "/ops.json")
         self.make_commands(directory + "/commands.json")
+        self.make_process(directory + "/processes.json")
 
     def make_components(self, path_to_components_file, custom_file_dir=None):
         """
@@ -372,9 +392,8 @@ class Context:
                 and extension
 
             custom_file_dir: the path to the custom directory for custom load
-            methods,
-                this directory is named `custom` if the save_to_json method is
-                used. (Default: None)
+                methods, this directory is named `custom` if the save_to_json
+                method is used. (Default: None)
         """
         made_components = []
         with open(path_to_components_file, 'r') as file:
@@ -450,7 +469,8 @@ class Context:
                 _sources.append(self._make_op(s))
             else:
                 _sources.append(
-                    get_compartment_by_name(get_current_context(), s))
+                    get_compartment_by_name(infer_context(s, trailing_path=2),
+                                            "/".join(s.split("/")[-2:])))
 
         obj = klass(*_sources)
 
@@ -458,17 +478,30 @@ class Context:
             return obj
 
         else:
-            dest = get_compartment_by_name(get_current_context(),
-                                           op_spec['destination'])
+            d = op_spec['destination']
+            dest = get_compartment_by_name(infer_context(d, trailing_path=2),
+                                           "/".join(d.split("/")[-2:]))
             dest << obj
+
+    def make_process(self, path_to_process_file):
+        """
+        Will load the processes saved in the provided json file into the model
+        Args:
+            path_to_process_file: the path to the saved json file
+        """
+        with open(path_to_process_file, 'r') as file:
+            process_spec = json.load(file)
+            for p in process_spec:
+                klass = load_from_path(p["class"])
+                process = Process.make_process(p, klass)
+                self.__setattr__(process.name, process)
 
     @staticmethod
     def dynamicCommand(fn):
         """
         Provides a decorator that will automatically bind the decorated
-        method to the current context.
-        Note this if this is called from a context object it will still use
-        the current context not the object
+        method to the current context. Note this if this is called from a
+        context object it will still use the current context not the object
 
         Args:
             fn: The wrapped method
@@ -482,8 +515,8 @@ class Context:
 
     def compile_by_key(self, *components, compile_key, name=None):
         """
-        Compiles a given set of components with a given compile key.
-        It will automatically add it to the context after compiling
+        Compiles a given set of components with a given compile key. It will
+        automatically add it to the context after compiling
 
         Args:
             *components: positional arguments for all components
@@ -564,6 +597,13 @@ class Context:
                                 modules[module]["attributes"]):
                 modules[module]["attributes"].append({"name": klass})
 
+        jProcesses = self._json_objects['processes']
+        for process in jProcesses:
+            mod = process.__class__.__module__
+            klass = process.__class__.__name__
+            modules[mod] = {"attributes": []}
+            modules[mod]["attributes"].append({"name": klass})
+
         _modules = []
         for key, value in modules.items():
             _modules.append(
@@ -600,6 +640,7 @@ class Context:
         """
         Views the specified guide for each component class in the model,
         skipping over any classes in skip.
+
         Args:
             guide: A ngclearn.GuideList value
             skip: a list of classes to skip, will also skip component classes
@@ -629,3 +670,36 @@ class Context:
         for klass in klasses:
             guides += klass.guides.__dict__[guide.value]
         return guides
+
+    def _get_state_keys(self, include_special_compartments=False):
+        all_keys = []
+        for comp_name in self.components.keys():
+            all_keys.extend([key for key in Get_Compartment_Batch().keys()
+                         if (self.path + "/" + comp_name in key and (include_special_compartments or "*" not in key))])
+        return all_keys
+
+    def get_current_state(self, include_special_compartments=False):
+        """
+        Get the current state of the model based on the components found in this
+        context.
+        Args:
+            include_special_compartments: Should this method include
+            compartments denotes as special compartments by ngcsimlib. These are
+            all compartments that include * in their path. (Only creatable
+            dynamically)
+
+        Returns: All the compartments found in this context.
+
+        """
+        return Get_Compartment_Batch(self._get_state_keys(include_special_compartments))
+
+    def update_current_state(self, state):
+        """
+        Updates the compartments found in this context. While this method can
+        take a model state that includes compartments from other contexts it
+        will only update the compartments found in this context.
+        Args:
+            state: The state to update the model to
+        """
+        Set_Compartment_Batch({key: value for key, value in state.items() if key in self._get_state_keys()})
+

@@ -1,7 +1,10 @@
-from ngcsimlib.utils import check_attributes, load_from_path, make_unique_path, check_serializable
+from ngcsimlib.utils import (check_attributes, load_from_path,
+                             make_unique_path, \
+                             check_serializable)
 from ngcsimlib.logger import warn, error, info
 import json, os, inspect
 from ngcsimlib.deprecators import deprecated
+
 
 @deprecated
 class Controller:
@@ -17,8 +20,10 @@ class Controller:
     def __init__(self):
         self.steps = []
         self.commands = {}
-        self.components = {}  ## components/nodes that characterize system/simulation object
-        self.connections = []  ## cables that characterize system/simulation object
+        self.components = {}  ## components/nodes that characterize
+        # system/simulation object
+        self.connections = []  ## cables that characterize system/simulation
+        # object
 
         self._json_objects = {
             "commands": [],
@@ -54,12 +59,14 @@ class Controller:
                 verifying connections (Default: None)
         """
         for component in self.components.keys():
-            if skip_components is not None and component.name in skip_components:
+            if (skip_components is not None and component.name in
+                skip_components):
                 continue
             else:
                 self.components[component].verify_connections()
 
-    def connect(self, source_component_name, source_compartment_name, target_component_name,
+    def connect(self, source_component_name, source_compartment_name,
+                target_component_name,
                 target_compartment_name, bundle=None):
         """
         Creates a cable from one component to another.
@@ -80,10 +87,12 @@ class Controller:
                 cable (Default: None)
         """
         self.components[target_component_name].create_incoming_connection(
-            self.components[source_component_name].create_outgoing_connection(source_compartment_name),
+            self.components[source_component_name].create_outgoing_connection(
+                source_compartment_name),
             target_compartment_name,
             bundle)
-        self.connections.append((source_component_name, source_compartment_name, target_component_name,
+        self.connections.append((source_component_name, source_compartment_name,
+                                 target_component_name,
                                  target_compartment_name, bundle))
         self._json_objects['connections'].append({
             "source_component_name": source_component_name,
@@ -115,7 +124,8 @@ class Controller:
             path_to_components_file: the path to the file, including the name
                 and extension
 
-            custom_file_dir: the path to the custom directory for custom load methods,
+            custom_file_dir: the path to the custom directory for custom load
+            methods,
                 this directory is named `custom` if the save_to_json method is
                 used. (Default: None)
         """
@@ -126,7 +136,8 @@ class Controller:
             components = componentsConfig["components"]
             if "hyperparameters" in componentsConfig.keys():
                 for component in components:
-                    for pKey, pValue in componentsConfig["hyperparameters"].items():
+                    for pKey, pValue in componentsConfig[
+                        "hyperparameters"].items():
                         for cKey, cValue in component.items():
                             if pKey == cValue:
                                 component[cKey] = pValue
@@ -142,7 +153,8 @@ class Controller:
         the specific format of this json file.
 
         Args:
-            path_to_steps_file: the path of the file, including the name and extension
+            path_to_steps_file: the path of the file, including the name and
+            extension
         """
         with open(path_to_steps_file, 'r') as file:
             steps = json.load(file)
@@ -151,8 +163,8 @@ class Controller:
 
     def make_commands(self, path_to_commands_file):
         """
-        Loads a collection of commands from a json file. Follow `commands.schema`
-        for the specific format of this json file.
+        Loads a collection of commands from a json file. Follow
+        `commands.schema` for the specific format of this json file.
 
         Args:
             path_to_commands_file: the path of the file, including the name
@@ -173,38 +185,45 @@ class Controller:
             command_name: the name of the command to be added
         """
         if command_name not in self.commands.keys():
-            raise RuntimeError(str(command_name) + " is not a registered command")
+            raise RuntimeError(
+                str(command_name) + " is not a registered command")
         self.steps.append(command_name)
         self._json_objects['steps'].append({"command_name": command_name})
 
-    def add_component(self, component_type, match_case=False, absolute_path=False, **kwargs):
+    def add_component(self, component_type, match_case=False,
+                      absolute_path=False, **kwargs):
         """
         Acts as a component factory for the controller.
 
         Args:
             component_type: A string that is linked to the component class to be
                 created. If the class was loaded with the modules.json file this
-                can be the keywords defined in that file. Otherwise, it will have
-                to be dynamically loaded using the functions found in ngcsimlib.utils.
+                can be the keywords defined in that file. Otherwise, it will
+                have to be dynamically loaded using the functions found in
+                ngcsimlib.utils.
 
             match_case: A boolean that represents if the exact case should be
-                matched when dynamically loading the component class (Default: False)
+                matched when dynamically loading the component class (
+                Default: False)
 
             absolute_path: A boolean that represents if the component class
                 should be treated as an absolute path when dynamically loading
                 the component class (Default: False)
 
             kwargs: All of the keyword arguments that are needed to initialize
-                the loaded component class. The function will try to crash nicely
-                if keyword arguments are missing. This list of arguments will
-                also be stored to allow for the component to be rebuilt, but if
-                a given value is not serializable it will drop that from the
-                keyword arguments.
+                the loaded component class. The function will try to crash
+                nicely if keyword arguments are missing. This list of arguments
+                will also be stored to allow for the component to be rebuilt,
+                but if a given value is not serializable it will drop that from
+                the keyword arguments.
 
         Returns:
-            the created component (Component is also automatically added to the controller)
+            the created component (Component is also automatically added to
+            the controller)
         """
-        Component_class = load_from_path(path=component_type, match_case=match_case, absolute_path=absolute_path)
+        Component_class = load_from_path(path=component_type,
+                                         match_case=match_case,
+                                         absolute_path=absolute_path)
 
         if inspect.isclass(Component_class):
             call = Component_class.__init__
@@ -224,11 +243,13 @@ class Controller:
         check_attributes(component, ["name", "verify_connections"], fatal=True)
         self.components[component.name] = component
 
-        obj = {"component_type": component_type, "match_case": match_case, "absolute_path": absolute_path} | kwargs
+        obj = {"component_type": component_type, "match_case": match_case,
+               "absolute_path": absolute_path} | kwargs
         bad_keys = check_serializable(obj)
         for key in bad_keys:
             del obj[key]
-            info("Failed to serialize \"", key, "\" in ", component.name, sep="")
+            info("Failed to serialize \"", key, "\" in ", component.name,
+                 sep="")
 
         if "directory" in obj.keys():
             del obj["directory"]
@@ -237,13 +258,17 @@ class Controller:
 
         return component
 
-    def add_command(self, command_type, command_name, match_case=False, absolute_path=False, component_names=None,
+    def add_command(self, command_type, command_name, match_case=False,
+                    absolute_path=False, component_names=None,
                     **kwargs):
         """
         Acts as a factory to create/synthesize commands.
         In addition to adding command objects to the controllers internal
-        command list, commands are also set to their attributes on the controller.
-        For example, if a command named `step` is added myController.runCommand("step", ...)
+        command list, commands are also set to their attributes on the
+        controller.
+
+        For example, if a command named `step` is added
+        myController.runCommand("step", ...)
         is equivalent to myController.step(...).
 
         Args:
@@ -257,7 +282,8 @@ class Controller:
                 keyword that will be called elsewhere to execute this command.
 
             match_case: A boolean that represents if the exact case should be
-                matched when dynamically loading the command class (Default: False)
+                matched when dynamically loading the command class (Default:
+                False)
 
             absolute_path: A boolean that represents if the command class should
                 be treated as an absolute path when dynamically loading the
@@ -265,7 +291,8 @@ class Controller:
 
             component_names: A list of component names to be passed to the
                 command's constructor. Internally it will convert the strings to
-                the actual component objects so they must exist in the controller
+                the actual component objects so they must exist in the
+                controller
                 prior to this function being called.
 
             kwargs: All the keyword arguments that are needed to initialize the
@@ -276,12 +303,16 @@ class Controller:
                 keyword arguments.
 
         Returns:
-            the created command (Command is also automatically added to the controller)
+            the created command (Command is also automatically added to the
+            controller)
         """
-        Command_class = load_from_path(path=command_type, match_case=match_case, absolute_path=absolute_path)
+        Command_class = load_from_path(path=command_type, match_case=match_case,
+                                       absolute_path=absolute_path)
         if not callable(Command_class):
             error("The object named \"", Command_class.__name__,
-                  "\" is not callable. Please make sure the object is callable and returns a callable object", sep="")
+                  "\" is not callable. Please make sure the object is "
+                  "callable and returns a callable object",
+                  sep="")
 
         if component_names is not None:
             componentObjs = [self.components[name] for name in component_names]
@@ -298,7 +329,8 @@ class Controller:
         count = call.__code__.co_argcount - 1
         named_args = call.__code__.co_varnames[1:count]
         try:
-            command = Command_class(components=componentObjs, controller=self, command_name=command_name, **kwargs)
+            command = Command_class(components=componentObjs, controller=self,
+                                    command_name=command_name, **kwargs)
         except TypeError as E:
             error(E, "\nProvided keyword arguments:\t", list(kwargs.keys()),
                   "\nRequired keyword arguments:\t", list(named_args))
@@ -306,8 +338,10 @@ class Controller:
         self.commands[command_name] = command
         self.__setattr__(command_name, command)
 
-        obj = {"command_type": command_type, "command_name": command_name, "match_case": match_case,
-               "absolute_path": absolute_path, "component_names": component_names} | kwargs
+        obj = {"command_type": command_type, "command_name": command_name,
+               "match_case": match_case,
+               "absolute_path": absolute_path,
+               "component_names": component_names} | kwargs
         bad_keys = check_serializable(obj)
         for key in bad_keys:
             del obj[key]
@@ -334,8 +368,9 @@ class Controller:
 
     def save_to_json(self, directory, model_name=None, custom_save=True):
         """
-        Dumps all the required json files to rebuild the current controller to a specified directory. If there is a
-        `save` command present on the controller and custom_save is True, it will run that command as well.
+        Dumps all the required json files to rebuild the current controller
+        to a specified directory. If there is a `save` command present on the
+        controller and custom_save is True, it will run that command as well.
 
         Args:
             directory: The top level directory to save the model to
@@ -389,7 +424,8 @@ class Controller:
 
                     else:
                         warn("Unable to extract hyperparameter", param,
-                             "as it is mismatched between components. Parameter will not be extracted")
+                             "as it is mismatched between components. "
+                             "Parameter will not be extracted")
 
             for component in self._json_objects['components']:
                 if "parameterMap" in component.keys():
@@ -409,7 +445,9 @@ class Controller:
             if check_attributes(self, ['save']):
                 self.save(path + "/custom")
             else:
-                warn("Controller doesn't have a save command registered. No custom saving happened")
+                warn(
+                    "Controller doesn't have a save command registered. No "
+                    "custom saving happened")
 
         return (path, path + "/custom") if custom_save else (path, None)
 
@@ -424,7 +462,8 @@ class Controller:
             custom_folder: The name of the custom data folder for building
                 components. (Default: `/custom`)
         """
-        self.make_components(directory + "/components.json", directory + custom_folder)
+        self.make_components(directory + "/components.json",
+                             directory + custom_folder)
         self.make_connections(directory + "/connections.json")
         self.make_commands(directory + "/commands.json")
         self.make_steps(directory + "/steps.json")

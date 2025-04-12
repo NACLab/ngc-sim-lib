@@ -7,13 +7,12 @@ import uuid
 class Compartment:
     """
     Compartments in ngcsimlib are container objects for storing the stateful
-    values of components. Compartments are
-    tracked globaly and are automatically linked to components and methods
-    during compiling to allow for stateful
-    mechanics to be run without the need for the class object. Compartments
-    also provide an entry and exit point for
-    values inside of components allowing for cables to be connected for
-    sending and receiving values.
+    values of components. Compartments are tracked globally and are
+    automatically linked to components and methods during compiling to allow
+    for stateful mechanics to be run without the need for the class object.
+    Compartments also provide an entry and exit point for values inside of
+    components allowing for cables to be connected for sending and receiving
+    values.
     """
 
     @classmethod
@@ -31,19 +30,18 @@ class Compartment:
         """
         return hasattr(obj, "_is_compartment")
 
-    def __init__(self, initial_value=None, static=False, is_input=False):
+    def __init__(self, initial_value=None, static=False, is_input=False,
+                 display_name=None, units=None):
         """
         Builds a compartment to be used inside a component. It is important
-        to note that building compartments
-        outside of components may cause unexpected behavior as components
-        interact with their compartments during
-        construction to finish initializing them.
+        to note that building compartments outside of components may cause
+        unexpected behavior as components interact with their compartments
+        during construction to finish initializing them.
         Args:
             initial_value: The initial value of the compartment. As a general
-            practice it is a good idea to
-                provide a value that is similar to the values that will
-                normally be stored here, such as an array of
-                zeros of the correct length. (default: None)
+            practice it is a good idea to provide a value that is similar to
+            the values that will normally be stored here, such as an array of
+            zeros of the correct length. (default: None)
 
             static: a flag to lock a compartment to be static (default: False)
         """
@@ -56,6 +54,8 @@ class Compartment:
         self.path = None
         self.is_input = is_input
         self._is_destination = False
+        self._display_name = display_name
+        self._units = units
 
     def _setup(self, current_component, key):
         """
@@ -103,10 +103,9 @@ class Compartment:
     def __lshift__(self, other) -> None:
         """
         Overrides the left shift operation to be used for wiring compartments
-        into one another
-        if other is not an Operation it will create an overwrite operation
-        with other as the argument,
-        otherwise it will use the provided operation
+        into one another if other is not an Operation it will create an
+        overwrite operation with other as the argument, otherwise it will use
+        the provided operation
 
         Args:
             other: Either another component or an instance of BaseOp
@@ -131,3 +130,12 @@ class Compartment:
             return True
 
         return self._is_destination
+
+    @property
+    def display_name(self):
+        return self._display_name if self._display_name is not None else (
+            self.name)
+
+    @property
+    def units(self):
+        return self._units if self._units is not None else "dimensionless"

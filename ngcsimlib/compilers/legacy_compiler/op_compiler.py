@@ -10,7 +10,7 @@ what values the operation will use.
 The second one is the compile method which returns the execution order for
 the compile operation. It is important to know that all operation should have
 an `is_compilable` flag set to true if they are compilable. Some operations
-such as the `add` operation are not compilable as their resolve method
+such as the `add` operation are not compilable as their transition method
 contains execution logic that will not be captured by the compiled command.
 """
 from ngcsimlib.operations.baseOp import BaseOp
@@ -85,8 +85,13 @@ def compile(op):
         else:
             iids.append(str(s.path))
 
+    additional_idds = []
+    for _, _, _, _iids in exc_order:
+        additional_idds.extend(_iids)
+
+    # print(additional_idds)
     def _op_compiled(**kwargs):
-        computed_values = [cmd(**kwargs) for cmd, _, _ in exc_order]
+        computed_values = [cmd(**kwargs) for cmd, _, _, _ in exc_order]
         compartment_args = [kwargs.get(narg) for narg in iids]
 
         _val_loc = 0
@@ -103,4 +108,4 @@ def compile(op):
 
         return op.operation(*_args)
 
-    return (_op_compiled, [str(output)], "op")
+    return (_op_compiled, [str(output)], op.__class__.__name__, iids + additional_idds)

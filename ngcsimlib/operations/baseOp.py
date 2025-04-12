@@ -13,7 +13,7 @@ class BaseOp(ABC):
 
     For commands that can be compiled using ngcsimlib's compiler, all their
     operational logic must be contained inside the subclass's operation
-    method. This also means that the resolve  method that is defined on the
+    method. This also means that the transition method that is defined on the
     base class should not be overwritten.
 
     For commands that do not need to be compiled using ngcsimlib's compiler
@@ -95,9 +95,9 @@ class BaseOp(ABC):
             if isinstance(source, BaseOp):
                 source_array.append(source.dump())
             else:
-                source_array.append(source.name)
+                source_array.append(source.path)
 
-        destination = self.destination.name if self.destination is not None \
+        destination = self.destination.path if self.destination is not None \
             else None
 
         return {"class": class_name, "sources": source_array,

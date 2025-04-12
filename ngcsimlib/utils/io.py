@@ -3,8 +3,9 @@ import uuid, os, json
 
 def make_unique_path(directory, root_name=None):
     """
-    This block of code will make a uniquely named directory inside the specified output folder.
-    If the root name already exists it will append a UID to the root name to not overwrite data
+    This block of code will make a uniquely named directory inside the
+    specified output folder. If the root name already exists it will append a
+    UID to the root name to not overwrite data
 
     Args:
         directory: The root directory to save models to
@@ -22,7 +23,8 @@ def make_unique_path(directory, root_name=None):
 
     elif os.path.isdir(directory + "/" + root_name):
         root_name += "_" + str(uid)
-        print("root path already exists, generated path will be named \"" + str(root_name) + "\"")
+        print("root path already exists, generated path will be named \"" + str(
+            root_name) + "\"")
 
     path = directory + "/" + str(root_name)
     os.mkdir(path)
