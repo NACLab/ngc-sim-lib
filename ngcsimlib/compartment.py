@@ -37,6 +37,7 @@ class Compartment:
         to note that building compartments outside of components may cause
         unexpected behavior as components interact with their compartments
         during construction to finish initializing them.
+
         Args:
             initial_value: The initial value of the compartment. As a general
             practice it is a good idea to provide a value that is similar to
@@ -60,7 +61,7 @@ class Compartment:
     def _setup(self, current_component, key):
         """
         Finishes initializing the compartment, called by the component that
-        builds the compartment
+        builds the compartment 
         (Handled automatically)
         """
         self.__add_connection = current_component.add_connection
@@ -72,6 +73,7 @@ class Compartment:
         """
         Sets the value of the compartment if it not static (Raises a runtime
         error)
+        
         Args:
              value: the new value to be set
         """
@@ -124,7 +126,6 @@ class Compartment:
         """
         Returns: if this compartment not marked as an input, or is marked and
         has an input
-
         """
         if not self.is_input:
             return True

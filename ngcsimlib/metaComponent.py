@@ -16,6 +16,11 @@ class MetaComponent(type):
     def pre_init(self, name, *args, **kwargs):
         """
         Called before the classes default init
+
+        Args: 
+            *args:
+
+            **kwargs: 
         """
         self.connections = []
         cc = get_current_context()
@@ -30,6 +35,11 @@ class MetaComponent(type):
     def post_init(self, *args, **kwargs):
         """
         Called after the classes default init
+
+        Args:
+            *args: 
+
+            **kwargs: 
         """
         for key, value in self.__dict__.items():
             if Compartment.is_compartment(value):
@@ -43,6 +53,9 @@ class MetaComponent(type):
         """
         A needed function by compartments to be able to add incoming
         connections to their parent component
+
+        Args: 
+            op: the operation to add/connect
         """
         self.connections.append(op)
         get_current_context().register_op(op)
@@ -75,6 +88,11 @@ class MetaComponent(type):
         """
         Wraps the class adding a pre/post-init method and some additional
         methods
+
+        Args: 
+            *clargs: 
+
+            **clkwargs: 
         """
         x = super().__new__(cls, *clargs, **clkwargs)
 

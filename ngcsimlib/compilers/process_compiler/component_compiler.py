@@ -1,11 +1,11 @@
 """
-This file contains the methods used to compile methods for the use of Processes.
+This file contains the methods used to compile methods for the use of Process(es).
 The general methodology behind this compiler is that if all transitions can be
-expressed as f(current_state, **kwargs) -> final_state they can then be composed
+expressed as f(current_state, **kwargs) -> final_state, then they can then be composed
 together as f(g(current_state, **kwargs) **kwargs) -> final_state. While it is
-technically possible to use the compiler outside the process its intended use
-case is through the process and thus if error occur though other uses support
-may be minimal.
+technically possible to use the compiler outside the process, its intended use
+case is through the process and, thus, if errors occur through other uses, note 
+that support may be minimal.
 """
 
 from ngcsimlib.compilers.process_compiler.op_compiler import compile as op_compile
@@ -31,14 +31,15 @@ def _builder(transition_method_to_build):
 def compile(transition_method):
     """
     This method is the main compile method for the process compiler. Unlike the
-    legacy compiler this compiler is designed to be self-contained and output
+    legacy compiler, this compiler is designed to be self-contained and output
     the methods that are composed together to make the process compiler function
+
     Args:
         transition_method: a method usually component.method that has been
-        decorated by the @transition decorator.
+            decorated by the @transition decorator.
 
-    Returns: the pure compiled method of the form
-    f(current_state, **kwargs) -> final_state)
+    Returns: 
+        the pure compiled method of the form f(current_state, **kwargs) -> final_state)
 
     """
     composition = None
@@ -93,3 +94,4 @@ def compile(transition_method):
     composition = compose(composition, compiled)
 
     return composition, needed_args
+

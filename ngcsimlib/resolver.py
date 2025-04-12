@@ -1,5 +1,5 @@
 """
-Todo: rewrite to have this be the less favorable option
+TODO: rewrite to have this be the less favorable option
 
 The resolver is an important part of the compiling of components and commands
 in the ngcsimlib compilers.

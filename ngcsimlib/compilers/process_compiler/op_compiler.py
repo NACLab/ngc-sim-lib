@@ -5,13 +5,14 @@ def _make_lambda(s):
 
 def compile(op):
     """
-        compiles root operation down to a single method of
-        f(current_state, **kwargs) -> final_state
+    Compiles root operation down to a single method of 
+    f(current_state, **kwargs) -> final_state
 
     Args:
         op: the operation to compile
 
-    Returns: the compiled operation
+    Returns: 
+        the compiled operation
     """
     arg_methods = []
     for s in op.sources:
@@ -30,3 +31,4 @@ def compile(op):
             return val
 
     return compiled
+

@@ -41,6 +41,7 @@ def init_config(path):
     """
     Initializes the global configuration from the provided path
     (called automatically)
+
     Args:
         path: path to config file
     """
