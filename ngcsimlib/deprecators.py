@@ -8,7 +8,7 @@ def deprecated(fn):
     return _wrapped
 
 
-def deprecate_args(_rebind=True, **arg_list):
+def deprecate_args(_rebind=True, _keep_as=None, **arg_list):
     def _deprecate_args(fn):
         def _wrapped(*args, **kwargs):
             for kwarg in list(kwargs.keys()):
@@ -18,6 +18,10 @@ def deprecate_args(_rebind=True, **arg_list):
                         warn(f"The argument \"{kwarg}\" is deprecated for {fn.__qualname__}, and will no longer be supported")
                     else:
                         warn(f"The argument \"{kwarg}\" is deprecated for {fn.__qualname__}, use \"{new_kwarg}\" instead")
+
+                    if _keep_as is not None:
+                        warn(f"Set {new_kwarg}={_keep_as} for preserving the same behavior")
+
 
                     if _rebind:
                         if new_kwarg is not None:
