@@ -144,7 +144,7 @@ class Process(object):
         for arg in self._needed_args:
             if arg not in kwargs.keys():
                 warn("Missing kwarg", arg, "in kwargs for Process", self.name)
-            return
+                return
         state = self.pure(self.get_required_state(include_special_compartments=True), **kwargs)
         if update_state:
             self.updated_modified_state(state)
