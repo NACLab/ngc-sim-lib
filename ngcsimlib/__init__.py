@@ -1,6 +1,5 @@
 from . import utils
 from . import controller
-from . import commands
 
 import argparse, os, json
 from types import SimpleNamespace

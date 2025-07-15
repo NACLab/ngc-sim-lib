@@ -120,7 +120,7 @@ def warn(msg):
 
 
 @_concatArgs
-def error(msg):
+def error(msg, errorCls=RuntimeError):
     """
     Logs an error message
     This is decorated to have the same functionality of python's print
@@ -128,9 +128,10 @@ def error(msg):
 
     Args:
         msg: message to log
+        errorCls: the error class to raise (default: RuntimeError)
     """
     _ngclogger.error(msg)
-    raise RuntimeError(msg)
+    raise errorCls(msg)
 
 
 @_concatArgs

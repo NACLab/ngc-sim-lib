@@ -1,5 +1,8 @@
-import uuid, os, json
+import uuid, os, json, re
 
+def make_safe_filename(name: str, replacement: str = '_') -> str:
+    name = name.replace(' ', replacement)
+    return re.sub(r'[ <>:"/\\|?*\0-\31]', replacement, name).strip()
 
 def make_unique_path(directory, root_name=None):
     """

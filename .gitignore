@@ -5,3 +5,4 @@ build
 ngcsimlib.egg-info
 
 __pycache__
+/ngcsimlib/old/
