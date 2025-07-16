@@ -1,5 +1,4 @@
 from . import utils
-from . import controller
 
 import argparse, os, json
 from types import SimpleNamespace
@@ -7,7 +6,6 @@ from importlib import import_module
 from ngcsimlib.configManager import init_config, get_config
 from ngcsimlib.logger import warn
 from pkg_resources import get_distribution
-from ngcsimlib.compilers.process import Process, transition
 
 __version__ = get_distribution('ngcsimlib').version  ## set software version
 

@@ -6,11 +6,19 @@ from ngcsimlib.operations import BaseOp
 
 
 class Compartment(metaclass=CompartmentMeta):
-    def __init__(self, root_name, name, initial_value):
-        self.name = name
+    def __init__(self, initial_value):
         self._initial_value = initial_value
-        self._root_target = gState.make_key(root_name, name)
+
+        self.name = None
+        self._root_target = None
         self._target = self._root_target
+
+    def _setup(self, objName, compName, path):
+        self.name = compName
+        self._root_target = path + ":" + objName + ":" + self.name
+        # self._root_target = objName + ":" + self.name
+        self._target = self._root_target
+        self.set(self._initial_value)
 
     def set(self, value):
         gState.set_state({self.target: value})

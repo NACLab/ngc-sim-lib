@@ -9,6 +9,8 @@ class __global_state_manager:
     def make_key(path: str, key: str) -> str:
         return path + ":" + key
 
+    def check_key(self, key: str) -> bool:
+        return key in self.__state.keys()
 
     def add_key(self, path: str, key: str, value: any) -> None:
         self.__state[self.make_key(path, key)] = value

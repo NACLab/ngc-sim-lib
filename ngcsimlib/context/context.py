@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING, List, Dict, Union, Tuple
 from ._context_manager import append_path, register_context_local, check_exists, \
     get_context, get_current_path, step_to
 from ngcsimlib.logger import warn
-from ngcsimlib.utils import make_unique_path, make_safe_filename
+from ngcsimlib.utils.io import make_unique_path, make_safe_filename
+from ngcsimlib.parser.utils import compileObject
 
 from enum import Enum
 import os, shutil
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 
 class ContextObjectTypes(Enum):
     component = "component"
+    process = "process"
 
 
 class Context(object):
@@ -28,7 +30,7 @@ class Context(object):
 
         return instance
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         if hasattr(self, "_initialized"):
             return
         else:
@@ -43,8 +45,27 @@ class Context(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.recompile()
         step_to(self.__previous_path)
         self.__previous_path = None
+
+    def recompile(self):
+        priorities = {}
+
+
+        for objectType in self.objects.keys():
+            _objs = self.get_objects_by_type(objectType)
+            for onjName, obj in _objs.items():
+                if getattr(obj, "_is_compilable", False) and hasattr(obj, "_priority"):
+                    p = obj._priority if obj._priority is not None else 0
+                    if p not in priorities:
+                        priorities[p] = []
+                    priorities[p].append(obj)
+
+        keys = sorted(priorities.keys(), reverse=True)
+        for key in keys:
+            for obj in priorities[key]:
+                obj.compile()
 
     def registerObj(self, obj: "ContextObjectMeta"):
         _type = getattr(obj, "_type", None)
@@ -79,7 +100,7 @@ class Context(object):
         return self.objects[_type]
 
     def get_objects(self, *object_names: str,
-                    objectType: ContextObjectTypes | str = None,
+                    objectType: ContextObjectTypes | str,
                     unwrap: bool = True) -> \
         Union[None, "ContextObjectMeta", List[Union["ContextObjectMeta", None]]]:
 
@@ -91,8 +112,8 @@ class Context(object):
         for component_name in object_names:
             _objs.append(_all_objects.get(component_name, None))
 
-        for name, comp in zip(object_names, _objs):
-            if comp is None:
+        for name, obj in zip(object_names, _objs):
+            if obj is None:
                 warn(
                     f"Could not find an {objectType} with the name \"{name}\" in the context")
 
@@ -152,7 +173,6 @@ class Context(object):
                         obj.custom_save(type_path + "/custom")
 
             with open(f"{type_path}/roots.json", "w") as fp:
-                print("writing", data)
                 json.dump(data, fp, indent=4)
 
 

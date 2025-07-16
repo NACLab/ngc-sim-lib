@@ -1,5 +1,6 @@
 from ._context_manager import get_current_path
 from .contextObjectMeta import ContextObjectMeta
+from ngcsimlib.parser.utils import compileObject
 
 class ContextObj(object, metaclass=ContextObjectMeta):
     def __init__(self, name: str):
@@ -16,3 +17,6 @@ class ContextObj(object, metaclass=ContextObjectMeta):
         c_mod = self.__class__.__module__
         return {"cls": cls,
                 "module": c_mod}
+
+    def compile(self):
+        compileObject(self)

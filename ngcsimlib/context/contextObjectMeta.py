@@ -1,5 +1,6 @@
 from ngcsimlib.logger import error, warn
-from ._context_manager import get_current_context
+from ._context_manager import get_current_context, get_current_path
+from collections.abc import Iterable
 
 class ContextObjectMeta(type):
     def __call__(cls, *args, **kwargs):
@@ -20,4 +21,10 @@ class ContextObjectMeta(type):
             return obj
 
         contextRef.registerObj(obj)
+
+        if hasattr(obj, "compartments") and isinstance(obj.compartments, Iterable) and not isinstance(obj.compartments, (str, bytes)):
+            for (comp_name, comp) in obj.compartments:
+                if hasattr(comp, "_setup") and callable(comp._setup):
+                    comp._setup(obj.name, comp_name, get_current_path())
+
         return obj
