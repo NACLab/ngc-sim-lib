@@ -1,0 +1,1 @@
+from ngcsimlib._src.global_state import global_state_manager as stateManager

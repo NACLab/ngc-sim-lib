@@ -1,4 +1,4 @@
-from ngcsimlib._src.parser import (
+from .utils import (
     compilable as compilable,
     parse_method as parse_method,
     compileObject as compileObject,

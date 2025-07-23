@@ -1,7 +1,8 @@
 import operator
-import types
+from typing import Any
 
-def _unwrap(x):
+
+def _unwrap(x: Any) -> Any:
     while hasattr(x, "_get_value"):
         x = x._get_value()
     return x
@@ -16,8 +17,6 @@ _BINARY_OPS = {
     '__floordiv__': operator.floordiv,
     '__mod__': operator.mod,
     '__pow__': operator.pow,
-    '__lshift__': operator.lshift,
-    '__rshift__': operator.rshift,
     '__and__': operator.and_,
     '__xor__': operator.xor,
     '__or__': operator.or_,
@@ -29,9 +28,15 @@ _BINARY_OPS = {
     '__ge__': operator.ge,
 }
 
-_REVERSE_OPS = {f"__r{name[2:]}__": op for name, op in _BINARY_OPS.items()}
+_REVERSE_OPS = {f"__r{name[2:]}": op for name, op in _BINARY_OPS.items()}
 
 class CompartmentMeta(type):
+    """
+    This is the metaclass for compartments. It mostly exists to sit on top of
+    objects that can be used as targets for compartments. It is rare that users
+    of ngclearn will need to interface with this directly. If you are here
+    trying to learn about compartments look at their file directly.
+    """
     def __new__(mcs, name, bases, namespace):
         def make_op(opfunc):
             def method(self, other):
@@ -45,5 +50,4 @@ class CompartmentMeta(type):
         for dunder_name, opfunc in _REVERSE_OPS.items():
             if dunder_name not in namespace:
                 namespace[dunder_name] = make_op(opfunc)
-
         return super().__new__(mcs, name, bases, namespace)

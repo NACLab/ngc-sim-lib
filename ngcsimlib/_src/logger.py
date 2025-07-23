@@ -1,4 +1,4 @@
-from ngcsimlib.configManager import get_config
+from ngcsimlib._src.configManager import get_config
 import logging
 import sys
 from datetime import datetime

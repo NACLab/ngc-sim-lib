@@ -1,4 +1,4 @@
-from ngcsimlib.logger import warn
+from ngcsimlib._src.logger import warn
 
 
 def deprecated(fn):

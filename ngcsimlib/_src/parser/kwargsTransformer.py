@@ -1,10 +1,13 @@
 import ast
 
 class KwargsTransformer(ast.NodeTransformer):
+    """
+    This transformer replaces all instances of kwargs[KEY] with just KEY and
+    tracks which ones it changes.
+    """
     def __init__(self):
         super().__init__()
         self.transformed_kwargs = set()
-
 
     def visit_Subscript(self, node):
         self.generic_visit(node)
@@ -15,6 +18,7 @@ class KwargsTransformer(ast.NodeTransformer):
             and isinstance(node.slice, ast.Constant)
             and isinstance(node.slice.value, str)
         ):
+            print(ast.dump(node))
             self.transformed_kwargs.add(node.slice.value)
             return ast.Name(id=node.slice.value, ctx=ast.Load())
 
