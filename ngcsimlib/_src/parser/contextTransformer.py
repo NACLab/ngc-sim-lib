@@ -113,13 +113,49 @@ class ContextTransformer(ast.NodeTransformer):
 
         return node
 
+    @staticmethod
+    def _resolve_self_attr_chain_and_path(attr_node: ast.Attribute):
+        """
+        Returns (base_is_self, attr_chain: List[str])
+        e.g., self.foo.targeted -> (True, ['foo', 'targeted'])
+        """
+        chain = []
+        node = attr_node
+        while isinstance(node, ast.Attribute):
+            chain.insert(0, node.attr)
+            node = node.value
+
+        is_self = isinstance(node, ast.Name) and node.id == "self"
+        return is_self, chain if is_self else None
+
     def visit_If(self, node):
+        parent_map = {}
+        for parent in ast.walk(node.test):
+            for child in ast.iter_child_nodes(parent):
+                parent_map[child] = parent
+
         for n in ast.walk(node.test):
             if isinstance(n, ast.Attribute):
-                if isinstance(n.value, ast.Name) and n.value.id == "self":
-                    attr = getattr(self.obj, n.attr, None)
-                    if isinstance(attr, Compartment):
-                        raise RuntimeError("Conditionals can not be dependant on model state")
+                if isinstance(parent_map.get(n), ast.Attribute):
+                    continue
+
+                is_self, chain = self._resolve_self_attr_chain_and_path(n)
+                if not is_self or not chain:
+                    continue
+
+                if chain[-1] == "targeted":
+                    continue
+
+                target = self.obj
+                try:
+                    for attr in chain:
+                        target = getattr(target, attr)
+                except AttributeError:
+                    continue
+
+                if isinstance(target, Compartment) and not target.fixed:
+                    raise RuntimeError(f"{self.obj.name}:{self.method.__name__}:[{target.root}], Conditionals can not be dependant on model state")
+
 
         condition_expr = ast.Expression(node.test)
         compiled = compile(ast.fix_missing_locations(condition_expr), "<ast>", "eval")

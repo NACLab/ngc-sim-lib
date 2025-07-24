@@ -44,7 +44,12 @@ class CompiledMethod:
         return self._fn(*args, **kwargs)
 
 def _bind(obj, method, ast_obj, namespace=None, auxiliary_ast=None):
-    code = compile(ast_obj, filename=f"{method.__name__}_compiled", mode='exec')
+    try:
+        code = compile(ast_obj, filename=f"{method.__name__}_compiled", mode='exec')
+    except Exception as e:
+        print(obj)
+        print(method)
+        raise e
     namespace = method.__globals__.copy() if namespace is None else namespace
     exec(code, namespace)
 

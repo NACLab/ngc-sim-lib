@@ -27,13 +27,17 @@ class Compartment(metaclass=CompartmentMeta):
 
         fixed (default=False): sets the flag for if this compartment is fixed.
     """
-    def __init__(self, initial_value: T, fixed: bool = False):
+    def __init__(self, initial_value: T, fixed: bool = False,
+                 display_name=None, units=None):
         self._initial_value = initial_value
 
         self.name = None
         self._root_target = None
         self._target = self._root_target
         self._fixed = fixed
+
+        self.display_name = display_name
+        self.units = units
 
     @property
     def root(self):
@@ -67,7 +71,11 @@ class Compartment(metaclass=CompartmentMeta):
         Args:
             value: The value to set in the global state.
         """
-        if self._fixed:
+        if self.target is None:
+            self._initial_value = value
+            return
+
+        if self._fixed and gState.check_key(self.target):
             warn(f"Attempting to set {self._root_target} which is a fixed compartment. Aborting!")
             return
         if self.target != self._root_target:
@@ -87,6 +95,9 @@ class Compartment(metaclass=CompartmentMeta):
         return set(self.target)
 
     def _get_value(self):
+        if self.target is None:
+            return self._initial_value
+
         if isinstance(self.target, BaseOp):
             return self.target.get()
 
