@@ -16,6 +16,7 @@ class ContextTransformer(ast.NodeTransformer):
         self.needed_keys = set()
         self.needed_methods = {}
         self.subMethod = subMethod
+        self.needed_globals = {}
 
     def visit_Return(self, node):
         if self.subMethod:
@@ -73,9 +74,15 @@ class ContextTransformer(ast.NodeTransformer):
 
                 return ast.fix_missing_locations(new_node)
 
-            method_name = f"{self.obj.name}_{node.attr}"
-            new_node = ast.copy_location(ast.Name(id=method_name, ctx=node.ctx), node)
-            self.needed_methods[method_name] = node.attr
+            if callable(stateVal):
+                method_name = f"{self.obj.name}_{node.attr}"
+                new_node = ast.copy_location(ast.Name(id=method_name, ctx=node.ctx), node)
+                self.needed_methods[method_name] = node.attr
+                return ast.fix_missing_locations(new_node)
+
+            attr_name = f"{self.obj.name}_{node.attr}"
+            new_node = ast.copy_location(ast.Name(id=attr_name, ctx=node.ctx), node)
+            self.needed_globals[attr_name] = stateVal
             return ast.fix_missing_locations(new_node)
 
         return node
@@ -89,6 +96,19 @@ class ContextTransformer(ast.NodeTransformer):
             node.args = [ast.Name(id='ctx', ctx=ast.Load())] + node.args
 
         return node
+
+    # def visit_Assign(self, node):
+    #     for target in node.targets:
+    #         if isinstance(target, ast.Name):
+    #             target.id = f"{self.obj.name}_{target.id}"
+    #             self.local_vars.add(target.id)
+    #     return self.generic_visit(node)
+    #
+    #
+    # def visit_Name(self, node):
+    #     # if node.id in self.local_vars:
+    #     #     node.id = f"{self.obj.name}_{node.id}"
+    #     return node
 
     def visit_Expr(self, node):
         node = self.generic_visit(node)
@@ -163,7 +183,7 @@ class ContextTransformer(ast.NodeTransformer):
         try:
             value = eval(compiled, {}, {"self": self.obj})
         except Exception as e:
-            raise RuntimeError("Can not evaluate conditional")
+            raise RuntimeError(f"On {self.obj.name}:{self.method.__name__} can not evaluate conditional\n{ast.unparse(node)}")
 
         case = (node.body if value else node.orelse)
         new_body = []

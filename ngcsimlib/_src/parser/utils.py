@@ -96,8 +96,9 @@ def parse_method(obj, method):
             values need to be pulled from the global state)
         method: The method to compile
     """
-    transformer, transformed, extra_namespace, auxiliary_ast = _sub_parse(obj, method)
+    transformer, transformed, extra_namespace, auxiliary_ast, extra_globals = _sub_parse(obj, method)
     namespace = method.__globals__.copy()
+    namespace.update(extra_globals)
     for method_name, module in extra_namespace.items():
         code = compile(module, filename=f"{method_name}_compiled", mode='exec')
         exec(code, namespace)
@@ -112,15 +113,18 @@ def _sub_parse(obj, method, sub=False):
     transformed = transformer.visit(tree)
     ast.fix_missing_locations(transformed)
 
+    extra_globals = transformer.needed_globals.copy()
     auxiliary_ast = []
     extra_namespace = {}
+
     for bound_name, method_name in transformer.needed_methods.items():
-        _, method, e, m = _sub_parse(obj, getattr(obj, method_name), sub=True)
+        _, method, e, m, g = _sub_parse(obj, getattr(obj, method_name), sub=True)
         extra_namespace[bound_name] = method
         extra_namespace.update(e)
+        extra_globals.update(g)
         auxiliary_ast.append(method)
         auxiliary_ast.extend(m)
-    return transformer, transformed, extra_namespace, auxiliary_ast
+    return transformer, transformed, extra_namespace, auxiliary_ast, extra_globals
 
 
 def compileObject(obj):
