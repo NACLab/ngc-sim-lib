@@ -41,7 +41,7 @@ $ pip install --editable . # OR pip install -e .
 </pre>
 
 **Version:**<br>
-3.0.0 <!-- -Beta --> <!-- -Alpha -->
+3.1.0 <!-- -Beta --> <!-- -Alpha -->
 
 Authors:
 William Gebhardt, Alexander G. Ororbia II<br>

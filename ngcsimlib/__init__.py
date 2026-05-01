@@ -4,12 +4,22 @@ from ngcsimlib._src.process.jointProcess import JointProcess
 from ngcsimlib._src.deprecators import deprecated, deprecate_args
 from ngcsimlib._src.configManager import init_config
 from ngcsimlib._src.configManager import get_config, provide_namespace
-import argparse, os, json
+import sys, argparse, os, json
 
-import pkg_resources
-from pkg_resources import get_distribution
+########################################################################################################################
+if sys.version_info >= (3, 8): ## for new versions of python/ngc-learn
+    from importlib.metadata import version, distributions, PackageNotFoundError
+else: ## for older versions of python before 3.8
+    from importlib_metadata import version, distributions, PackageNotFoundError
 
-__version__ = get_distribution('ngcsimlib').version
+## Following obtains ngc-learn's version
+from importlib.metadata import version
+__version__ = version("ngcsimlib")
+
+## these two lines below are deprecated if using newer python(s) (had to do this for ngc-learn)
+# from pkg_resources import get_distribution
+# __version__ = get_distribution('ngcsimlib').version
+########################################################################################################################
 
 def configure():
     parser = argparse.ArgumentParser(description='Build and run a model using ngclearn')
